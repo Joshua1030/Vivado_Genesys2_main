@@ -1,0 +1,31 @@
+/dts-v1/;
+#include "pl.dtsi"
+/ {
+	board = "genesys2";
+	compatible = "xlnx,genesys2";
+	device_id = "7k325t";
+	#address-cells = <1>;
+	#size-cells = <1>;
+	slrcount = <1>;
+	microblaze_0_local_memory_dlmb_bram_if_cntlr_memory: memory@0 {
+		compatible = "xlnx,lmb-bram-if-cntlr-4.0";
+		device_type = "memory";
+		reg = <0x00000000 0x4000>;
+	};
+	chosen {
+	};
+	aliases {
+	};
+	amba_pl: amba_pl {
+		cpus_microblaze_0: cpus_microblaze@0 {
+			address-map = <0x00000000 &microblaze_0_local_memory_dlmb_bram_if_cntlr_memory 0x00000000 0x4000>, 
+			      <0x44a00000 &deci_filter_0 0x44a00000 0x10000>, 
+			      <0x44a10000 &deci_filter_1 0x44a10000 0x10000>, 
+			      <0x44a20000 &deci_filter_2 0x44a20000 0x10000>, 
+			      <0x44a30000 &deci_filter_3 0x44a30000 0x10000>, 
+			      <0x44a40000 &deci_filter_4 0x44a40000 0x10000>;
+			#ranges-address-cells = <0x1>;
+			#ranges-size-cells = <0x1>;
+		};
+	};
+};
