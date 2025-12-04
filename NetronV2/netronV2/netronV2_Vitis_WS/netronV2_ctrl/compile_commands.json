@@ -1,0 +1,7 @@
+[
+{
+  "directory": "E:/Vivado_Genesys2_main/NetronV2/netronV2/netronV2_Vitis_WS/netronV2_ctrl/build",
+  "command": "E:\\Xilinx\\2025.2\\Vitis\\gnu\\microblaze\\nt\\bin\\mb-gcc.exe -IE:/Vivado_Genesys2_main/NetronV2/netronV2/netronV2_Vitis_WS/netronV2_ctrl/src -isystem E:/Vivado_Genesys2_main/NetronV2/netronV2/netronV2_Vitis_WS/platform/export/platform/sw/standalone_microblaze_0/include -isystem E:/Xilinx/2025.2/gnu/microblaze/nt/x86_64-oesdk-mingw32/usr/lib/microblaze-xilinx-elf/gcc/microblaze-xilinx-elf/13.3.0/include -isystem E:/Xilinx/2025.2/gnu/microblaze/nt/x86_64-oesdk-mingw32/usr/lib/microblaze-xilinx-elf/gcc/microblaze-xilinx-elf/13.3.0/include-fixed -isystem E:/Xilinx/2025.2/Vitis/gnu/microblaze/nt/microblazeeb-xilinx-elf/usr/include   -mlittle-endian -mxl-soft-mul -mcpu=v11.0 -DSDT  -MMD -MP -specs=E:/Vivado_Genesys2_main/NetronV2/netronV2/netronV2_Vitis_WS/platform/export/platform/sw/standalone_microblaze_0/Xilinx.spec -IE:/Vivado_Genesys2_main/NetronV2/netronV2/netronV2_Vitis_WS/platform/export/platform/sw/standalone_microblaze_0/include -Wall -Wextra      -O0  -g3     -U__clang__ -o CMakeFiles\\netronV2_ctrl.elf.dir\\netronV2_ctrl.c.obj -c E:\\Vivado_Genesys2_main\\NetronV2\\netronV2\\netronV2_Vitis_WS\\netronV2_ctrl\\src\\netronV2_ctrl.c",
+  "file": "E:\\Vivado_Genesys2_main\\NetronV2\\netronV2\\netronV2_Vitis_WS\\netronV2_ctrl\\src\\netronV2_ctrl.c"
+}
+]

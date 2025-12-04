@@ -1,0 +1,21 @@
+DEM_NetronV2_0:
+- DEM_NetronV2
+- None
+UDP_v5_0:
+- UDP
+- None
+amp_clock_gen_0:
+- amp_clock_gen
+- None
+deci_filter_0:
+- deci_filter
+- None
+ds_2nd_clock_gen_0:
+- ds_2nd_clock_gen
+- None
+microblaze_0_local_memory_dlmb_bram_if_cntlr:
+- lmb_bram_if_cntlr
+- bram
+sar_ctl_logic_0:
+- sar_ctl_logic
+- None
