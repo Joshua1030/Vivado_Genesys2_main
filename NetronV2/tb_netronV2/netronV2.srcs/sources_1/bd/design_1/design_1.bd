@@ -7,7 +7,7 @@
       "name": "design_1",
       "rev_ctrl_bd_flag": "RevCtrlBdOff",
       "synth_flow_mode": "Hierarchical",
-      "tool_version": "2023.2",
+      "tool_version": "2025.2",
       "validated": "true"
     },
     "design_tree": {
@@ -245,10 +245,11 @@
     "components": {
       "microblaze_0": {
         "vlnv": "xilinx.com:ip:microblaze:11.0",
-        "ip_revision": "12",
+        "ip_revision": "16",
         "xci_name": "design_1_microblaze_0_0",
         "xci_path": "ip\\design_1_microblaze_0_0\\design_1_microblaze_0_0.xci",
         "inst_hier_path": "microblaze_0",
+        "has_run_ip_tcl": "true",
         "parameters": {
           "C_DEBUG_ENABLED": {
             "value": "1"
@@ -259,12 +260,25 @@
           "C_D_LMB": {
             "value": "1"
           },
+          "C_ENABLE_CONVERSION": {
+            "value": "0"
+          },
           "C_I_LMB": {
             "value": "1"
           }
         },
         "interface_ports": {
           "DLMB": {
+            "bd_attributes": {
+              "FUNCTION": {
+                "value": "CPU",
+                "value_src": "default"
+              },
+              "TYPE": {
+                "value": "END_POINT",
+                "value_src": "auto"
+              }
+            },
             "vlnv": "xilinx.com:interface:lmb_rtl:1.0",
             "mode": "Master",
             "address_space_ref": "Data",
@@ -275,6 +289,16 @@
             }
           },
           "ILMB": {
+            "bd_attributes": {
+              "FUNCTION": {
+                "value": "CPU",
+                "value_src": "default"
+              },
+              "TYPE": {
+                "value": "END_POINT",
+                "value_src": "auto"
+              }
+            },
             "vlnv": "xilinx.com:interface:lmb_rtl:1.0",
             "mode": "Master",
             "address_space_ref": "Instruction",
@@ -285,6 +309,16 @@
             }
           },
           "M_AXI_DP": {
+            "bd_attributes": {
+              "FUNCTION": {
+                "value": "CPU",
+                "value_src": "default"
+              },
+              "TYPE": {
+                "value": "END_POINT",
+                "value_src": "auto"
+              }
+            },
             "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
             "mode": "Master",
             "address_space_ref": "Data",
@@ -344,12 +378,31 @@
         "components": {
           "dlmb_v10": {
             "vlnv": "xilinx.com:ip:lmb_v10:3.0",
-            "ip_revision": "13",
+            "ip_revision": "16",
             "xci_name": "design_1_dlmb_v10_0",
             "xci_path": "ip\\design_1_dlmb_v10_0\\design_1_dlmb_v10_0.xci",
             "inst_hier_path": "microblaze_0_local_memory/dlmb_v10",
+            "has_run_ip_tcl": "true",
             "interface_ports": {
+              "LMB_Sl_0": {
+                "bd_attributes": {
+                  "TYPE": {
+                    "value": "INTERIOR",
+                    "value_src": "auto"
+                  }
+                }
+              },
               "LMB_M": {
+                "bd_attributes": {
+                  "BRIDGES": {
+                    "value": "LMB_Sl_0",
+                    "value_src": "auto"
+                  },
+                  "TYPE": {
+                    "value": "INTERIOR",
+                    "value_src": "auto"
+                  }
+                },
                 "vlnv": "xilinx.com:interface:lmb_rtl:1.0",
                 "mode": "MirroredMaster",
                 "bridges": [
@@ -360,12 +413,31 @@
           },
           "ilmb_v10": {
             "vlnv": "xilinx.com:ip:lmb_v10:3.0",
-            "ip_revision": "13",
+            "ip_revision": "16",
             "xci_name": "design_1_ilmb_v10_0",
             "xci_path": "ip\\design_1_ilmb_v10_0\\design_1_ilmb_v10_0.xci",
             "inst_hier_path": "microblaze_0_local_memory/ilmb_v10",
+            "has_run_ip_tcl": "true",
             "interface_ports": {
+              "LMB_Sl_0": {
+                "bd_attributes": {
+                  "TYPE": {
+                    "value": "INTERIOR",
+                    "value_src": "auto"
+                  }
+                }
+              },
               "LMB_M": {
+                "bd_attributes": {
+                  "BRIDGES": {
+                    "value": "LMB_Sl_0",
+                    "value_src": "auto"
+                  },
+                  "TYPE": {
+                    "value": "INTERIOR",
+                    "value_src": "auto"
+                  }
+                },
                 "vlnv": "xilinx.com:interface:lmb_rtl:1.0",
                 "mode": "MirroredMaster",
                 "bridges": [
@@ -376,13 +448,24 @@
           },
           "dlmb_bram_if_cntlr": {
             "vlnv": "xilinx.com:ip:lmb_bram_if_cntlr:4.0",
-            "ip_revision": "23",
+            "ip_revision": "27",
             "xci_name": "design_1_dlmb_bram_if_cntlr_0",
             "xci_path": "ip\\design_1_dlmb_bram_if_cntlr_0\\design_1_dlmb_bram_if_cntlr_0.xci",
             "inst_hier_path": "microblaze_0_local_memory/dlmb_bram_if_cntlr",
+            "has_run_ip_tcl": "true",
             "parameters": {
               "C_ECC": {
                 "value": "0"
+              }
+            },
+            "interface_ports": {
+              "SLMB": {
+                "bd_attributes": {
+                  "FUNCTION": {
+                    "value": "BRAM_CTRL",
+                    "value_src": "default"
+                  }
+                }
               }
             },
             "hdl_attributes": {
@@ -398,25 +481,52 @@
           },
           "ilmb_bram_if_cntlr": {
             "vlnv": "xilinx.com:ip:lmb_bram_if_cntlr:4.0",
-            "ip_revision": "23",
+            "ip_revision": "27",
             "xci_name": "design_1_ilmb_bram_if_cntlr_0",
             "xci_path": "ip\\design_1_ilmb_bram_if_cntlr_0\\design_1_ilmb_bram_if_cntlr_0.xci",
             "inst_hier_path": "microblaze_0_local_memory/ilmb_bram_if_cntlr",
+            "has_run_ip_tcl": "true",
             "parameters": {
               "C_ECC": {
                 "value": "0"
+              }
+            },
+            "interface_ports": {
+              "SLMB": {
+                "bd_attributes": {
+                  "FUNCTION": {
+                    "value": "BRAM_CTRL",
+                    "value_src": "default"
+                  }
+                }
               }
             }
           },
           "lmb_bram": {
             "vlnv": "xilinx.com:ip:blk_mem_gen:8.4",
-            "ip_revision": "7",
+            "ip_revision": "12",
             "xci_name": "design_1_lmb_bram_0",
             "xci_path": "ip\\design_1_lmb_bram_0\\design_1_lmb_bram_0.xci",
             "inst_hier_path": "microblaze_0_local_memory/lmb_bram",
+            "has_run_ip_tcl": "true",
             "parameters": {
+              "Enable_B": {
+                "value": "Use_ENB_Pin"
+              },
               "Memory_Type": {
                 "value": "True_Dual_Port_RAM"
+              },
+              "Port_B_Clock": {
+                "value": "100"
+              },
+              "Port_B_Enable_Rate": {
+                "value": "100"
+              },
+              "Port_B_Write_Rate": {
+                "value": "50"
+              },
+              "Use_RSTB_Pin": {
+                "value": "true"
               },
               "use_bram_block": {
                 "value": "BRAM_Controller"
@@ -466,161 +576,93 @@
           "SYS_Rst_1": {
             "ports": [
               "SYS_Rst",
-              "dlmb_v10/SYS_Rst",
               "dlmb_bram_if_cntlr/LMB_Rst",
-              "ilmb_v10/SYS_Rst",
-              "ilmb_bram_if_cntlr/LMB_Rst"
+              "dlmb_v10/SYS_Rst",
+              "ilmb_bram_if_cntlr/LMB_Rst",
+              "ilmb_v10/SYS_Rst"
             ]
           },
           "microblaze_0_Clk": {
             "ports": [
               "LMB_Clk",
-              "dlmb_v10/LMB_Clk",
               "dlmb_bram_if_cntlr/LMB_Clk",
-              "ilmb_v10/LMB_Clk",
-              "ilmb_bram_if_cntlr/LMB_Clk"
+              "dlmb_v10/LMB_Clk",
+              "ilmb_bram_if_cntlr/LMB_Clk",
+              "ilmb_v10/LMB_Clk"
             ]
           }
         }
       },
       "mdm_1": {
         "vlnv": "xilinx.com:ip:mdm:3.2",
-        "ip_revision": "25",
+        "ip_revision": "29",
         "xci_name": "design_1_mdm_1_0",
         "xci_path": "ip\\design_1_mdm_1_0\\design_1_mdm_1_0.xci",
-        "inst_hier_path": "mdm_1"
+        "inst_hier_path": "mdm_1",
+        "has_run_ip_tcl": "true"
       },
       "clk_wiz_1": {
         "vlnv": "xilinx.com:ip:clk_wiz:6.0",
-        "ip_revision": "13",
+        "ip_revision": "17",
         "xci_name": "design_1_clk_wiz_1_0",
         "xci_path": "ip\\design_1_clk_wiz_1_0\\design_1_clk_wiz_1_0.xci",
         "inst_hier_path": "clk_wiz_1",
+        "has_run_ip_tcl": "true",
         "parameters": {
-          "CLKIN1_JITTER_PS": {
-            "value": "50.0"
-          },
-          "CLKOUT1_JITTER": {
-            "value": "112.316"
-          },
-          "CLKOUT1_PHASE_ERROR": {
-            "value": "89.971"
-          },
-          "CLKOUT1_REQUESTED_OUT_FREQ": {
-            "value": "100"
-          },
-          "CLKOUT1_USED": {
-            "value": "true"
-          },
           "CLKOUT2_JITTER": {
-            "value": "112.316"
+            "value": "107.523"
           },
           "CLKOUT2_PHASE_ERROR": {
             "value": "89.971"
           },
           "CLKOUT2_REQUESTED_OUT_FREQ": {
-            "value": "100.000"
+            "value": "125"
           },
           "CLKOUT2_USED": {
             "value": "true"
           },
           "CLKOUT3_JITTER": {
-            "value": "107.523"
+            "value": "125.247"
           },
           "CLKOUT3_PHASE_ERROR": {
-            "value": "89.971"
-          },
-          "CLKOUT3_REQUESTED_OUT_FREQ": {
-            "value": "125"
+            "value": "98.575"
           },
           "CLKOUT3_USED": {
-            "value": "true"
-          },
-          "CLKOUT4_JITTER": {
-            "value": "178.053"
-          },
-          "CLKOUT4_PHASE_ERROR": {
-            "value": "89.971"
-          },
-          "CLKOUT4_REQUESTED_OUT_FREQ": {
-            "value": "10"
-          },
-          "CLKOUT4_USED": {
-            "value": "true"
-          },
-          "CLK_IN1_BOARD_INTERFACE": {
-            "value": "sys_diff_clock"
+            "value": "false"
           },
           "CLK_OUT1_PORT": {
-            "value": "clk_100MHz2"
-          },
-          "CLK_OUT2_PORT": {
             "value": "clk_100MHz"
           },
-          "CLK_OUT3_PORT": {
+          "CLK_OUT2_PORT": {
             "value": "clk_125MHz"
           },
-          "CLK_OUT4_PORT": {
-            "value": "clk_10MHz"
-          },
-          "MMCM_CLKFBOUT_MULT_F": {
-            "value": "5.000"
-          },
-          "MMCM_CLKIN1_PERIOD": {
-            "value": "5.000"
-          },
-          "MMCM_CLKIN2_PERIOD": {
-            "value": "10.0"
-          },
-          "MMCM_CLKOUT0_DIVIDE_F": {
-            "value": "10.000"
-          },
           "MMCM_CLKOUT1_DIVIDE": {
-            "value": "10"
-          },
-          "MMCM_CLKOUT2_DIVIDE": {
             "value": "8"
           },
-          "MMCM_CLKOUT3_DIVIDE": {
-            "value": "100"
+          "MMCM_CLKOUT2_DIVIDE": {
+            "value": "1"
           },
           "NUM_OUT_CLKS": {
-            "value": "4"
+            "value": "2"
           },
           "PRIM_SOURCE": {
             "value": "Differential_clock_capable_pin"
-          },
-          "RESET_BOARD_INTERFACE": {
-            "value": "reset"
           },
           "RESET_PORT": {
             "value": "resetn"
           },
           "RESET_TYPE": {
             "value": "ACTIVE_LOW"
-          },
-          "USE_BOARD_FLOW": {
-            "value": "true"
-          },
-          "USE_POWER_DOWN": {
-            "value": "false"
           }
         }
       },
       "rst_clk_wiz_1_100M": {
         "vlnv": "xilinx.com:ip:proc_sys_reset:5.0",
-        "ip_revision": "14",
+        "ip_revision": "17",
         "xci_name": "design_1_rst_clk_wiz_1_100M_0",
         "xci_path": "ip\\design_1_rst_clk_wiz_1_100M_0\\design_1_rst_clk_wiz_1_100M_0.xci",
         "inst_hier_path": "rst_clk_wiz_1_100M",
-        "parameters": {
-          "RESET_BOARD_INTERFACE": {
-            "value": "reset"
-          },
-          "USE_BOARD_FLOW": {
-            "value": "true"
-          }
-        }
+        "has_run_ip_tcl": "true"
       },
       "microblaze_0_axi_periph": {
         "vlnv": "xilinx.com:ip:axi_interconnect:2.1",
@@ -636,32 +678,68 @@
           "S00_AXI": {
             "mode": "Slave",
             "vlnv_bus_definition": "xilinx.com:interface:aximm:1.0",
-            "vlnv": "xilinx.com:interface:aximm_rtl:1.0"
+            "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
+            "hdl_attributes": {
+              "LOCKED": {
+                "value": "FALSE",
+                "value_src": "default"
+              }
+            }
           },
           "M00_AXI": {
             "mode": "Master",
             "vlnv_bus_definition": "xilinx.com:interface:aximm:1.0",
-            "vlnv": "xilinx.com:interface:aximm_rtl:1.0"
+            "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
+            "hdl_attributes": {
+              "LOCKED": {
+                "value": "FALSE",
+                "value_src": "default"
+              }
+            }
           },
           "M01_AXI": {
             "mode": "Master",
             "vlnv_bus_definition": "xilinx.com:interface:aximm:1.0",
-            "vlnv": "xilinx.com:interface:aximm_rtl:1.0"
+            "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
+            "hdl_attributes": {
+              "LOCKED": {
+                "value": "FALSE",
+                "value_src": "default"
+              }
+            }
           },
           "M02_AXI": {
             "mode": "Master",
             "vlnv_bus_definition": "xilinx.com:interface:aximm:1.0",
-            "vlnv": "xilinx.com:interface:aximm_rtl:1.0"
+            "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
+            "hdl_attributes": {
+              "LOCKED": {
+                "value": "FALSE",
+                "value_src": "default"
+              }
+            }
           },
           "M03_AXI": {
             "mode": "Master",
             "vlnv_bus_definition": "xilinx.com:interface:aximm:1.0",
-            "vlnv": "xilinx.com:interface:aximm_rtl:1.0"
+            "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
+            "hdl_attributes": {
+              "LOCKED": {
+                "value": "FALSE",
+                "value_src": "default"
+              }
+            }
           },
           "M04_AXI": {
             "mode": "Master",
             "vlnv_bus_definition": "xilinx.com:interface:aximm:1.0",
-            "vlnv": "xilinx.com:interface:aximm_rtl:1.0"
+            "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
+            "hdl_attributes": {
+              "LOCKED": {
+                "value": "FALSE",
+                "value_src": "default"
+              }
+            }
           }
         },
         "ports": {
@@ -778,10 +856,11 @@
         "components": {
           "xbar": {
             "vlnv": "xilinx.com:ip:axi_crossbar:2.1",
-            "ip_revision": "30",
-            "xci_name": "design_1_xbar_0",
-            "xci_path": "ip\\design_1_xbar_0\\design_1_xbar_0.xci",
+            "ip_revision": "38",
+            "xci_name": "design_1_microblaze_0_axi_periph_upgraded_ipi_imp_xbar_0",
+            "xci_path": "ip\\design_1_microblaze_0_axi_periph_upgraded_ipi_imp_xbar_0\\design_1_microblaze_0_axi_periph_upgraded_ipi_imp_xbar_0.xci",
             "inst_hier_path": "microblaze_0_axi_periph/xbar",
+            "has_run_ip_tcl": "true",
             "parameters": {
               "NUM_MI": {
                 "value": "5"
@@ -795,6 +874,16 @@
             },
             "interface_ports": {
               "S00_AXI": {
+                "bd_attributes": {
+                  "BRIDGES": {
+                    "value": "M00_AXI:M01_AXI:M02_AXI:M03_AXI:M04_AXI",
+                    "value_src": "auto"
+                  },
+                  "TYPE": {
+                    "value": "interior",
+                    "value_src": "default"
+                  }
+                },
                 "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
                 "mode": "Slave",
                 "bridges": [
@@ -804,6 +893,46 @@
                   "M03_AXI",
                   "M04_AXI"
                 ]
+              },
+              "M00_AXI": {
+                "bd_attributes": {
+                  "TYPE": {
+                    "value": "interior",
+                    "value_src": "default"
+                  }
+                }
+              },
+              "M01_AXI": {
+                "bd_attributes": {
+                  "TYPE": {
+                    "value": "interior",
+                    "value_src": "default"
+                  }
+                }
+              },
+              "M02_AXI": {
+                "bd_attributes": {
+                  "TYPE": {
+                    "value": "interior",
+                    "value_src": "default"
+                  }
+                }
+              },
+              "M03_AXI": {
+                "bd_attributes": {
+                  "TYPE": {
+                    "value": "interior",
+                    "value_src": "default"
+                  }
+                }
+              },
+              "M04_AXI": {
+                "bd_attributes": {
+                  "TYPE": {
+                    "value": "interior",
+                    "value_src": "default"
+                  }
+                }
               }
             }
           },
@@ -812,12 +941,24 @@
               "M_AXI": {
                 "mode": "Master",
                 "vlnv_bus_definition": "xilinx.com:interface:aximm:1.0",
-                "vlnv": "xilinx.com:interface:aximm_rtl:1.0"
+                "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
+                "hdl_attributes": {
+                  "LOCKED": {
+                    "value": "FALSE",
+                    "value_src": "default"
+                  }
+                }
               },
               "S_AXI": {
                 "mode": "Slave",
                 "vlnv_bus_definition": "xilinx.com:interface:aximm:1.0",
-                "vlnv": "xilinx.com:interface:aximm_rtl:1.0"
+                "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
+                "hdl_attributes": {
+                  "LOCKED": {
+                    "value": "FALSE",
+                    "value_src": "default"
+                  }
+                }
               }
             },
             "ports": {
@@ -868,12 +1009,24 @@
               "M_AXI": {
                 "mode": "Master",
                 "vlnv_bus_definition": "xilinx.com:interface:aximm:1.0",
-                "vlnv": "xilinx.com:interface:aximm_rtl:1.0"
+                "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
+                "hdl_attributes": {
+                  "LOCKED": {
+                    "value": "FALSE",
+                    "value_src": "default"
+                  }
+                }
               },
               "S_AXI": {
                 "mode": "Slave",
                 "vlnv_bus_definition": "xilinx.com:interface:aximm:1.0",
-                "vlnv": "xilinx.com:interface:aximm_rtl:1.0"
+                "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
+                "hdl_attributes": {
+                  "LOCKED": {
+                    "value": "FALSE",
+                    "value_src": "default"
+                  }
+                }
               }
             },
             "ports": {
@@ -924,12 +1077,24 @@
               "M_AXI": {
                 "mode": "Master",
                 "vlnv_bus_definition": "xilinx.com:interface:aximm:1.0",
-                "vlnv": "xilinx.com:interface:aximm_rtl:1.0"
+                "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
+                "hdl_attributes": {
+                  "LOCKED": {
+                    "value": "FALSE",
+                    "value_src": "default"
+                  }
+                }
               },
               "S_AXI": {
                 "mode": "Slave",
                 "vlnv_bus_definition": "xilinx.com:interface:aximm:1.0",
-                "vlnv": "xilinx.com:interface:aximm_rtl:1.0"
+                "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
+                "hdl_attributes": {
+                  "LOCKED": {
+                    "value": "FALSE",
+                    "value_src": "default"
+                  }
+                }
               }
             },
             "ports": {
@@ -980,12 +1145,24 @@
               "M_AXI": {
                 "mode": "Master",
                 "vlnv_bus_definition": "xilinx.com:interface:aximm:1.0",
-                "vlnv": "xilinx.com:interface:aximm_rtl:1.0"
+                "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
+                "hdl_attributes": {
+                  "LOCKED": {
+                    "value": "FALSE",
+                    "value_src": "default"
+                  }
+                }
               },
               "S_AXI": {
                 "mode": "Slave",
                 "vlnv_bus_definition": "xilinx.com:interface:aximm:1.0",
-                "vlnv": "xilinx.com:interface:aximm_rtl:1.0"
+                "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
+                "hdl_attributes": {
+                  "LOCKED": {
+                    "value": "FALSE",
+                    "value_src": "default"
+                  }
+                }
               }
             },
             "ports": {
@@ -1036,12 +1213,24 @@
               "M_AXI": {
                 "mode": "Master",
                 "vlnv_bus_definition": "xilinx.com:interface:aximm:1.0",
-                "vlnv": "xilinx.com:interface:aximm_rtl:1.0"
+                "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
+                "hdl_attributes": {
+                  "LOCKED": {
+                    "value": "FALSE",
+                    "value_src": "default"
+                  }
+                }
               },
               "S_AXI": {
                 "mode": "Slave",
                 "vlnv_bus_definition": "xilinx.com:interface:aximm:1.0",
-                "vlnv": "xilinx.com:interface:aximm_rtl:1.0"
+                "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
+                "hdl_attributes": {
+                  "LOCKED": {
+                    "value": "FALSE",
+                    "value_src": "default"
+                  }
+                }
               }
             },
             "ports": {
@@ -1092,12 +1281,24 @@
               "M_AXI": {
                 "mode": "Master",
                 "vlnv_bus_definition": "xilinx.com:interface:aximm:1.0",
-                "vlnv": "xilinx.com:interface:aximm_rtl:1.0"
+                "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
+                "hdl_attributes": {
+                  "LOCKED": {
+                    "value": "FALSE",
+                    "value_src": "default"
+                  }
+                }
               },
               "S_AXI": {
                 "mode": "Slave",
                 "vlnv_bus_definition": "xilinx.com:interface:aximm:1.0",
-                "vlnv": "xilinx.com:interface:aximm_rtl:1.0"
+                "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
+                "hdl_attributes": {
+                  "LOCKED": {
+                    "value": "FALSE",
+                    "value_src": "default"
+                  }
+                }
               }
             },
             "ports": {
@@ -1262,42 +1463,48 @@
         "ip_revision": "4",
         "xci_name": "design_1_ds_2nd_clock_gen_0_0",
         "xci_path": "ip\\design_1_ds_2nd_clock_gen_0_0\\design_1_ds_2nd_clock_gen_0_0.xci",
-        "inst_hier_path": "ds_2nd_clock_gen_0"
+        "inst_hier_path": "ds_2nd_clock_gen_0",
+        "has_run_ip_tcl": "true"
       },
       "amp_clock_gen_0": {
         "vlnv": "xilinx.com:user:amp_clock_gen:1.0",
-        "ip_revision": "6",
+        "ip_revision": "7",
         "xci_name": "design_1_amp_clock_gen_0_1",
         "xci_path": "ip\\design_1_amp_clock_gen_0_1\\design_1_amp_clock_gen_0_1.xci",
-        "inst_hier_path": "amp_clock_gen_0"
+        "inst_hier_path": "amp_clock_gen_0",
+        "has_run_ip_tcl": "true"
       },
       "sar_ctl_logic_0": {
         "vlnv": "xilinx.com:user:sar_ctl_logic:1.0",
-        "ip_revision": "19",
+        "ip_revision": "20",
         "xci_name": "design_1_sar_ctl_logic_0_2",
         "xci_path": "ip\\design_1_sar_ctl_logic_0_2\\design_1_sar_ctl_logic_0_2.xci",
-        "inst_hier_path": "sar_ctl_logic_0"
+        "inst_hier_path": "sar_ctl_logic_0",
+        "has_run_ip_tcl": "true"
       },
       "DEM_NetronV2_0": {
         "vlnv": "xilinx.com:user:DEM_NetronV2:1.0",
         "ip_revision": "12",
         "xci_name": "design_1_DEM_NetronV2_0_0",
         "xci_path": "ip\\design_1_DEM_NetronV2_0_0\\design_1_DEM_NetronV2_0_0.xci",
-        "inst_hier_path": "DEM_NetronV2_0"
+        "inst_hier_path": "DEM_NetronV2_0",
+        "has_run_ip_tcl": "true"
       },
       "UDP_v5_0": {
         "vlnv": "xilinx.com:user:UDP:5.3",
         "ip_revision": "1",
         "xci_name": "design_1_UDP_v5_0_0",
         "xci_path": "ip\\design_1_UDP_v5_0_0\\design_1_UDP_v5_0_0.xci",
-        "inst_hier_path": "UDP_v5_0"
+        "inst_hier_path": "UDP_v5_0",
+        "has_run_ip_tcl": "true"
       },
       "dist_mem_gen_0": {
         "vlnv": "xilinx.com:ip:dist_mem_gen:8.0",
-        "ip_revision": "14",
+        "ip_revision": "17",
         "xci_name": "design_1_dist_mem_gen_0_0",
         "xci_path": "ip\\design_1_dist_mem_gen_0_0\\design_1_dist_mem_gen_0_0.xci",
         "inst_hier_path": "dist_mem_gen_0",
+        "has_run_ip_tcl": "true",
         "parameters": {
           "data_width": {
             "value": "8"
@@ -1315,14 +1522,16 @@
         "ip_revision": "7",
         "xci_name": "design_1_sar_sim_0_0",
         "xci_path": "ip\\design_1_sar_sim_0_0\\design_1_sar_sim_0_0.xci",
-        "inst_hier_path": "sar_sim_0"
+        "inst_hier_path": "sar_sim_0",
+        "has_run_ip_tcl": "true"
       },
       "ila_0": {
         "vlnv": "xilinx.com:ip:ila:6.2",
-        "ip_revision": "14",
+        "ip_revision": "19",
         "xci_name": "design_1_ila_0_0",
         "xci_path": "ip\\design_1_ila_0_0\\design_1_ila_0_0.xci",
         "inst_hier_path": "ila_0",
+        "has_run_ip_tcl": "true",
         "parameters": {
           "C_DATA_DEPTH": {
             "value": "65536"
@@ -1370,7 +1579,8 @@
         "ip_revision": "2",
         "xci_name": "design_1_mux_0_0",
         "xci_path": "ip\\design_1_mux_0_0\\design_1_mux_0_0.xci",
-        "inst_hier_path": "mux_0"
+        "inst_hier_path": "mux_0",
+        "has_run_ip_tcl": "true"
       }
     },
     "interface_nets": {
@@ -1546,23 +1756,23 @@
           "clk_wiz_1/clk_100MHz",
           "UDP_v5_0/clk100MHz",
           "UDP_v5_0/clk_lock",
-          "microblaze_0/Clk",
           "microblaze_0_local_memory/LMB_Clk",
-          "rst_clk_wiz_1_100M/slowest_sync_clk",
-          "microblaze_0_axi_periph/S00_ACLK",
-          "microblaze_0_axi_periph/M00_ACLK",
-          "microblaze_0_axi_periph/ACLK",
-          "microblaze_0_axi_periph/M01_ACLK",
-          "microblaze_0_axi_periph/M02_ACLK",
-          "amp_clock_gen_0/main_clock",
-          "amp_clock_gen_0/s00_axi_aclk",
-          "microblaze_0_axi_periph/M03_ACLK",
-          "microblaze_0_axi_periph/M04_ACLK",
           "UDP_v5_0/s00_axi_aclk",
-          "ila_0/clk",
           "DEM_NetronV2_0/s00_axi_aclk",
           "ds_2nd_clock_gen_0/main_clock",
           "ds_2nd_clock_gen_0/s00_axi_aclk",
+          "amp_clock_gen_0/main_clock",
+          "amp_clock_gen_0/s00_axi_aclk",
+          "ila_0/clk",
+          "microblaze_0/Clk",
+          "microblaze_0_axi_periph/ACLK",
+          "microblaze_0_axi_periph/S00_ACLK",
+          "microblaze_0_axi_periph/M00_ACLK",
+          "microblaze_0_axi_periph/M01_ACLK",
+          "microblaze_0_axi_periph/M02_ACLK",
+          "microblaze_0_axi_periph/M03_ACLK",
+          "microblaze_0_axi_periph/M04_ACLK",
+          "rst_clk_wiz_1_100M/slowest_sync_clk",
           "sar_ctl_logic_0/main_clock",
           "sar_ctl_logic_0/s00_axi_aclk"
         ]
@@ -1570,8 +1780,8 @@
       "clk_wiz_1_clk_125MHz": {
         "ports": [
           "clk_wiz_1/clk_125MHz",
-          "dist_mem_gen_0/clk",
-          "UDP_v5_0/clk_125MHz"
+          "UDP_v5_0/clk_125MHz",
+          "dist_mem_gen_0/clk"
         ]
       },
       "clk_wiz_1_locked": {
@@ -1590,13 +1800,15 @@
       "ds_2nd_clock_gen_0_DS_2ND_CLK": {
         "ports": [
           "ds_2nd_clock_gen_0/DS_2ND_CLK",
-          "DS_2ND_CLK"
+          "DS_2ND_CLK",
+          "mux_0/clk1"
         ]
       },
       "ds_2nd_clock_gen_0_DS_BIT_TO_UDP": {
         "ports": [
           "ds_2nd_clock_gen_0/DS_BIT_TO_UDP",
-          "DS_BIT_TO_UDP"
+          "DS_BIT_TO_UDP",
+          "mux_0/data1"
         ]
       },
       "eth_int_b_1": {
@@ -1652,10 +1864,12 @@
       "reset_1": {
         "ports": [
           "reset",
-          "clk_wiz_1/resetn",
-          "rst_clk_wiz_1_100M/ext_reset_in",
           "sar_sim_0/reset_n",
-          "DEM_NetronV2_0/RSTB"
+          "DEM_NetronV2_0/RSTB",
+          "rst_clk_wiz_1_100M/ext_reset_in",
+          "clk_wiz_1/resetn",
+          "amp_clock_gen_0/resetb",
+          "ds_2nd_clock_gen_0/resetb"
         ]
       },
       "rst_clk_wiz_1_100M_bus_struct_reset": {
@@ -1673,17 +1887,17 @@
       "rst_clk_wiz_1_100M_peripheral_aresetn": {
         "ports": [
           "rst_clk_wiz_1_100M/peripheral_aresetn",
-          "microblaze_0_axi_periph/S00_ARESETN",
-          "microblaze_0_axi_periph/M00_ARESETN",
-          "microblaze_0_axi_periph/ARESETN",
-          "microblaze_0_axi_periph/M01_ARESETN",
-          "microblaze_0_axi_periph/M02_ARESETN",
-          "amp_clock_gen_0/s00_axi_aresetn",
-          "microblaze_0_axi_periph/M03_ARESETN",
-          "microblaze_0_axi_periph/M04_ARESETN",
           "UDP_v5_0/s00_axi_aresetn",
           "DEM_NetronV2_0/s00_axi_aresetn",
           "ds_2nd_clock_gen_0/s00_axi_aresetn",
+          "amp_clock_gen_0/s00_axi_aresetn",
+          "microblaze_0_axi_periph/ARESETN",
+          "microblaze_0_axi_periph/S00_ARESETN",
+          "microblaze_0_axi_periph/M00_ARESETN",
+          "microblaze_0_axi_periph/M01_ARESETN",
+          "microblaze_0_axi_periph/M02_ARESETN",
+          "microblaze_0_axi_periph/M03_ARESETN",
+          "microblaze_0_axi_periph/M04_ARESETN",
           "sar_ctl_logic_0/s00_axi_aresetn"
         ]
       },
@@ -1691,40 +1905,40 @@
         "ports": [
           "sar_ctl_logic_0/CLK_OUT",
           "CLK_OUT",
-          "ila_0/probe4",
-          "DEM_NetronV2_0/CLK_IN"
+          "DEM_NetronV2_0/CLK_IN",
+          "ila_0/probe4"
         ]
       },
       "sar_ctl_logic_0_D": {
         "ports": [
           "sar_ctl_logic_0/D",
           "D",
-          "ila_0/probe7",
-          "DEM_NetronV2_0/D"
+          "DEM_NetronV2_0/D",
+          "ila_0/probe7"
         ]
       },
       "sar_ctl_logic_0_DATA": {
         "ports": [
           "sar_ctl_logic_0/DATA",
           "Data",
-          "ila_0/probe6",
-          "mux_0/data2"
+          "mux_0/data2",
+          "ila_0/probe6"
         ]
       },
       "sar_ctl_logic_0_DATA_VALID": {
         "ports": [
           "sar_ctl_logic_0/DATA_VALID",
           "DATA_VALID",
-          "ila_0/probe5",
-          "mux_0/clk2"
+          "mux_0/clk2",
+          "ila_0/probe5"
         ]
       },
       "sar_ctl_logic_0_NS_SAR_ADC_CLKS": {
         "ports": [
           "sar_ctl_logic_0/NS_SAR_ADC_CLKS",
           "NS_SAR_ADC_CLKS",
-          "ila_0/probe8",
-          "sar_sim_0/NS_ADC_CLKS"
+          "sar_sim_0/NS_ADC_CLKS",
+          "ila_0/probe8"
         ]
       },
       "sar_ctl_logic_0_NS_SAR_ADC_DINCHOP": {
@@ -1738,8 +1952,8 @@
         "ports": [
           "sar_ctl_logic_0/NS_SAR_ADC_DIN_CLK",
           "NS_SAR_ADC_DIN_CLK",
-          "ila_0/probe10",
-          "sar_sim_0/NS_ADC_CLK"
+          "sar_sim_0/NS_ADC_CLK",
+          "ila_0/probe10"
         ]
       },
       "sar_sim_0_NS_ADC_OUT": {

@@ -18,7 +18,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>1ba3cf54</spirit:value>
+            <spirit:value>7a71340f</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -34,7 +34,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>1ba3cf54</spirit:value>
+            <spirit:value>7a71340f</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -49,7 +49,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>fe46851d</spirit:value>
+            <spirit:value>49eb068b</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -103,7 +103,7 @@
       <spirit:file>
         <spirit:name>sources_1/new/Inverter.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>CHECKSUM_1ba3cf54</spirit:userFileType>
+        <spirit:userFileType>CHECKSUM_7a71340f</spirit:userFileType>
       </spirit:file>
     </spirit:fileSet>
     <spirit:fileSet>
@@ -118,9 +118,8 @@
       <spirit:file>
         <spirit:name>sim_1/new/sim.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_implementation</spirit:userFileType>
         <spirit:userFileType>USED_IN_simulation</spirit:userFileType>
-        <spirit:userFileType>USED_IN_synthesis</spirit:userFileType>
+        <spirit:userFileType>USED_IN_testbench</spirit:userFileType>
       </spirit:file>
     </spirit:fileSet>
     <spirit:fileSet>
@@ -174,13 +173,13 @@
       </xilinx:taxonomies>
       <xilinx:displayName>Inverter_v1_0</xilinx:displayName>
       <xilinx:definitionSource>package_project</xilinx:definitionSource>
-      <xilinx:coreRevision>4</xilinx:coreRevision>
-      <xilinx:coreCreationDateTime>2023-07-23T12:18:06Z</xilinx:coreCreationDateTime>
+      <xilinx:coreRevision>5</xilinx:coreRevision>
+      <xilinx:coreCreationDateTime>2025-12-04T05:18:56Z</xilinx:coreCreationDateTime>
     </xilinx:coreExtensions>
     <xilinx:packagingInfo>
-      <xilinx:xilinxVersion>2022.2</xilinx:xilinxVersion>
-      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="00e280d7"/>
-      <xilinx:checksum xilinx:scope="ports" xilinx:value="083f5ec5"/>
+      <xilinx:xilinxVersion>2025.2</xilinx:xilinxVersion>
+      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="50991f02"/>
+      <xilinx:checksum xilinx:scope="ports" xilinx:value="0f3ee5b8"/>
       <xilinx:checksum xilinx:scope="parameters" xilinx:value="8025362e"/>
       <xilinx:targetDRCs>
         <xilinx:targetDRC xilinx:tool="ipi">
