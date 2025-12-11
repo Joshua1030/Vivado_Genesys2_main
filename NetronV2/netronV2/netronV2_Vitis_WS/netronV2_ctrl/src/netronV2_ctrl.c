@@ -55,9 +55,9 @@ int main()
     //DEM config
     volatile unsigned int* DEM_enable = addr_base_DEM_NetronV2;    
     //enable DEM
-    *DEM_enable = 0b1;       
+    // *DEM_enable = 0b0;       
     //disable DEM
-    // *DEM_enable = 0b0;  
+    *DEM_enable = 0b1;  
 
 
     //SAR control logic config
@@ -67,11 +67,15 @@ int main()
     *counter_step_size = 1;
     //slv_reg1: CLKS fall
     volatile unsigned int* CLKS_fall = addr_base_sar_ctl_logic+1;
-    *CLKS_fall = 30;    
-    // * = 8;  
+    // *CLKS_fall = 50; 
+    *CLKS_fall = 25; 
+    // *CLKS_fall = 12;    
+    //*CLKS_fall = 8;  
     //slv_reg2: conuter reset
     volatile unsigned int* counter_reset = addr_base_sar_ctl_logic+2;
+    // *counter_reset = 199;
     *counter_reset = 99;
+    // *counter_reset = 49;
     // *counter_reset = 32;
     //slv_reg3, 4, 5, 6, 7, 8 for three rises and falls of CLK
     volatile unsigned int* SAR_CLK_rise1 = addr_base_sar_ctl_logic+3;
@@ -81,37 +85,59 @@ int main()
     volatile unsigned int* SAR_CLK_rise3 = addr_base_sar_ctl_logic+7;
     volatile unsigned int* SAR_CLK_fall3 = addr_base_sar_ctl_logic+8;
     
-    *(addr_base_sar_ctl_logic+3) = (unsigned) 40;
+    // 0.5MHz sampling
+    // *(addr_base_sar_ctl_logic+3) = (unsigned) 70;
+    // *(addr_base_sar_ctl_logic+4) = (unsigned) 90;
+    // *(addr_base_sar_ctl_logic+5) = (unsigned) 110;
+    // *(addr_base_sar_ctl_logic+6) = (unsigned) 130;
+    // *(addr_base_sar_ctl_logic+7) = (unsigned) 150;
+    // *(addr_base_sar_ctl_logic+8) = (unsigned) 170; 
+    
+    // 1MHz sampling
+    *(addr_base_sar_ctl_logic+3) = (unsigned) 35;
     *(addr_base_sar_ctl_logic+4) = (unsigned) 50;
     *(addr_base_sar_ctl_logic+5) = (unsigned) 60;
     *(addr_base_sar_ctl_logic+6) = (unsigned) 70;
     *(addr_base_sar_ctl_logic+7) = (unsigned) 80;
-    *(addr_base_sar_ctl_logic+8) = (unsigned) 89; 
+    *(addr_base_sar_ctl_logic+8) = (unsigned) 90; 
     
+    //2MHz sampling
+    // *(addr_base_sar_ctl_logic+3) = (unsigned) 18;
+    // *(addr_base_sar_ctl_logic+4) = (unsigned) 25;
+    // *(addr_base_sar_ctl_logic+5) = (unsigned) 30;
+    // *(addr_base_sar_ctl_logic+6) = (unsigned) 35;
+    // *(addr_base_sar_ctl_logic+7) = (unsigned) 40;
+    // *(addr_base_sar_ctl_logic+8) = (unsigned) 45; 
+
+    //3MHz sampling
     // *(addr_base_sar_ctl_logic+3) = (unsigned) 12;
     // *(addr_base_sar_ctl_logic+4) = (unsigned) 15;
-    // *(addr_base_sar_ctl_logic+5) = (unsigned) 18;
-    // *(addr_base_sar_ctl_logic+6) = (unsigned) 21;
-    // *(addr_base_sar_ctl_logic+7) = (unsigned) 24;
-    // *(addr_base_sar_ctl_logic+8) = (unsigned) 27; 
+    // *(addr_base_sar_ctl_logic+5) = (unsigned) 19;
+    // *(addr_base_sar_ctl_logic+6) = (unsigned) 22;
+    // *(addr_base_sar_ctl_logic+7) = (unsigned) 26;
+    // *(addr_base_sar_ctl_logic+8) = (unsigned) 29; 
     
     volatile unsigned int* data_valid_rise = addr_base_sar_ctl_logic+11;//also used for data_valid start
-    *data_valid_rise = (unsigned) 90; //data_valid fall after this
-    // *data_valid_rise = (unsigned) 29; //data_valid fall after this
+    // *data_valid_rise = (unsigned) 190; //data_valid fall after this
+    *data_valid_rise = (unsigned) 95; //data_valid fall after this
+    // *data_valid_rise = (unsigned) 46; //data_valid fall after this
+    // *data_valid_rise = (unsigned) 30; //data_valid fall after this
     volatile unsigned int* data_valid_fall = addr_base_sar_ctl_logic+12;
+    // *data_valid_fall = (unsigned) 198; //data_valid fall after this
     *data_valid_fall = (unsigned) 98; //data_valid fall after this
+    // *data_valid_fall = (unsigned) 48; //data_valid fall after this
     // *data_valid_fall = (unsigned) 32; //data_valid fall after this
 
     //slv_reg10: chopper switch, should be half of slv_reg1; high when counter >= slv_reg10
     volatile unsigned int* slv_reg10 = addr_base_sar_ctl_logic+10;
     // *slv_reg10 = slv_reg10/3;
-    *slv_reg10 = 15;
-    // *slv_reg10 = 40000;
+    *slv_reg10 = 1200;
+    //   *slv_reg10 = 1000;
 
     //slv_reg9: chopper_counter counts up at rising edge of chopper switch, this specifies the upper limit
     //chopper clk invert itself when chopper_counter counts to this number
     volatile unsigned int* slv_reg9 = addr_base_sar_ctl_logic+9;
-    *slv_reg9 = 0;
+    *slv_reg9 = 4;
 
 
 
@@ -135,14 +161,14 @@ int main()
 
 
     *amp_reg0 = 1;
-    // *amp_reg1 = 500;
+    //*amp_reg1 = 100;
     *amp_reg1 = 10000;
-    *amp_reg2 = 999;
+    *amp_reg2 = 198;
 
     *amp_reg3 = 1;
     // *amp_reg4 = 25000;
-    *amp_reg4 = 100000;
-    *amp_reg5 = 49999;
+    *amp_reg4 = 10;
+    *amp_reg5 = 99;
 
 
     print("Hello World\n\r");

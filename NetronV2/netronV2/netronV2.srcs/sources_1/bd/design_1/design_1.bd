@@ -1569,7 +1569,7 @@
       },
       "amp_clock_gen_0": {
         "vlnv": "xilinx.com:user:amp_clock_gen:1.0",
-        "ip_revision": "7",
+        "ip_revision": "8",
         "xci_name": "design_1_amp_clock_gen_0_1",
         "xci_path": "ip\\design_1_amp_clock_gen_0_1\\design_1_amp_clock_gen_0_1.xci",
         "inst_hier_path": "amp_clock_gen_0",
@@ -1585,7 +1585,7 @@
       },
       "DEM_NetronV2_0": {
         "vlnv": "xilinx.com:user:DEM_NetronV2:1.0",
-        "ip_revision": "12",
+        "ip_revision": "13",
         "xci_name": "design_1_DEM_NetronV2_0_0",
         "xci_path": "ip\\design_1_DEM_NetronV2_0_0\\design_1_DEM_NetronV2_0_0.xci",
         "inst_hier_path": "DEM_NetronV2_0",
@@ -1800,7 +1800,6 @@
         "ports": [
           "Inverter_1/inverter_out",
           "mux_0/clk1",
-          "deci_filter_0/clk",
           "ila_0/probe24"
         ]
       },
@@ -2027,11 +2026,8 @@
           "deci_filter_0/s00_axi_aclk",
           "ds_2nd_clock_gen_0/main_clock",
           "ds_2nd_clock_gen_0/s00_axi_aclk",
-          "DEM_NetronV2_0/s00_axi_aclk",
           "sar_ctl_logic_0/main_clock",
           "sar_ctl_logic_0/s00_axi_aclk",
-          "amp_clock_gen_0/main_clock",
-          "amp_clock_gen_0/s00_axi_aclk",
           "ila_0/clk",
           "microblaze_0/Clk",
           "microblaze_0_axi_periph/ACLK",
@@ -2044,7 +2040,11 @@
           "microblaze_0_axi_periph/M05_ACLK",
           "rst_clk_wiz_1_100M/slowest_sync_clk",
           "UDP_v5_0/clk100MHz",
-          "UDP_v5_0/clk_lock"
+          "UDP_v5_0/clk_lock",
+          "deci_filter_0/clk",
+          "amp_clock_gen_0/main_clock",
+          "amp_clock_gen_0/s00_axi_aclk",
+          "DEM_NetronV2_0/s00_axi_aclk"
         ]
       },
       "mux_0_outclk": {
@@ -2088,9 +2088,7 @@
           "UDP_v5_0/s00_axi_aresetn",
           "deci_filter_0/s00_axi_aresetn",
           "ds_2nd_clock_gen_0/s00_axi_aresetn",
-          "DEM_NetronV2_0/s00_axi_aresetn",
           "sar_ctl_logic_0/s00_axi_aresetn",
-          "amp_clock_gen_0/s00_axi_aresetn",
           "microblaze_0_axi_periph/ARESETN",
           "microblaze_0_axi_periph/S00_ARESETN",
           "microblaze_0_axi_periph/M00_ARESETN",
@@ -2098,22 +2096,24 @@
           "microblaze_0_axi_periph/M02_ARESETN",
           "microblaze_0_axi_periph/M03_ARESETN",
           "microblaze_0_axi_periph/M04_ARESETN",
-          "microblaze_0_axi_periph/M05_ARESETN"
+          "microblaze_0_axi_periph/M05_ARESETN",
+          "amp_clock_gen_0/s00_axi_aresetn",
+          "DEM_NetronV2_0/s00_axi_aresetn"
         ]
       },
       "sar_ctl_logic_0_CLK_OUT": {
         "ports": [
           "sar_ctl_logic_0/CLK_OUT",
-          "DEM_NetronV2_0/CLK_IN",
-          "ila_0/probe4"
+          "ila_0/probe4",
+          "DEM_NetronV2_0/CLK_IN"
         ]
       },
       "sar_ctl_logic_0_D": {
         "ports": [
           "sar_ctl_logic_0/D",
           "D",
-          "DEM_NetronV2_0/D",
-          "ila_0/probe7"
+          "ila_0/probe7",
+          "DEM_NetronV2_0/D"
         ]
       },
       "sar_ctl_logic_0_DATA": {

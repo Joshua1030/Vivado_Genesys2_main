@@ -1,45 +1,45 @@
 {
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "type": "tcf-debug",
-      "request": "launch",
-      "name": "netronV2_ctrl_app_hw_1",
-      "debugType": "baremetal-fpga",
-      "attachToRunningTargetOptions": {
-        "targetSetupMode": "standalone",
-        "executeScript": true,
-        "scriptPath": ""
-      },
-      "autoAttachProcessChildren": false,
-      "target": {
-        "targetConnectionId": "Local",
-        "peersIniPath": "../../_ide/.peers.ini",
-        "context": "fpga"
-      },
-      "pathMap": [],
-      "targetSetup": {
-        "resetSystem": true,
-        "programDevice": true,
-        "partialBitstream": false,
-        "skipRevisionCheck": false,
-        "device": {
-          "plDevice": "Auto Detect",
-          "psDevice": "Auto Detect"
-        },
-        "bitstreamFile": "${workspaceFolder}\\netronV2_ctrl\\_ide\\bitstream\\design_1_wrapper.bit",
-        "downloadElf": [
-          {
-            "core": "microblaze_0",
-            "resetProcessor": true,
-            "elfFile": "${workspaceFolder}\\netronV2_ctrl\\build\\netronV2_ctrl.elf",
-            "stopAtEntry": false,
-            "isSelfRelocatingApp": false,
-            "relativeAddress": ""
-          }
-        ]
-      },
-      "internalConsoleOptions": "openOnSessionStart"
-    }
-  ]
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "tcf-debug",
+			"request": "launch",
+			"name": "netronV2_ctrl_app_hw_1",
+			"debugType": "baremetal-fpga",
+			"attachToRunningTargetOptions": {
+				"targetSetupMode": "standalone",
+				"executeScript": true,
+				"scriptPath": ""
+			},
+			"autoAttachProcessChildren": false,
+			"target": {
+				"targetConnectionId": "Local",
+				"peersIniPath": "../../_ide/.peers.ini",
+				"context": "fpga"
+			},
+			"pathMap": [],
+			"targetSetup": {
+				"resetSystem": false,
+				"programDevice": false,
+				"partialBitstream": false,
+				"skipRevisionCheck": false,
+				"device": {
+					"plDevice": "Auto Detect",
+					"psDevice": "Auto Detect"
+				},
+				"bitstreamFile": "${workspaceFolder}\\netronV2_ctrl\\_ide\\bitstream\\design_1_wrapper.bit",
+				"downloadElf": [
+					{
+						"core": "microblaze_0",
+						"resetProcessor": true,
+						"elfFile": "${workspaceFolder}\\netronV2_ctrl\\build\\netronV2_ctrl.elf",
+						"stopAtEntry": false,
+						"isSelfRelocatingApp": false,
+						"relativeAddress": ""
+					}
+				]
+			},
+			"internalConsoleOptions": "openOnSessionStart"
+		}
+	]
 }

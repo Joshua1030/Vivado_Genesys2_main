@@ -1,5 +1,5 @@
 -- (c) Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
--- (c) Copyright 2022-2024 Advanced Micro Devices, Inc. All rights reserved.
+-- (c) Copyright 2022-2025 Advanced Micro Devices, Inc. All rights reserved.
 -- 
 -- This file contains confidential and proprietary information
 -- of AMD and is protected under U.S. and international copyright
@@ -46,13 +46,19 @@
 -- 
 -- DO NOT MODIFY THIS FILE.
 -- IP VLNV: xilinx.com:user:DEM_NetronV2:1.0
--- IP Revision: 1
+-- IP Revision: 13
 
 -- The following code must appear in the VHDL architecture header.
 
 ------------- Begin Cut here for COMPONENT Declaration ------ COMP_TAG
 COMPONENT DEM_NetronV2_0
   PORT (
+    D : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+    CLK_IN : IN STD_LOGIC;
+    RSTB : IN STD_LOGIC;
+    NS_SAR_ADC_FEEDBACK : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
+    s00_axi_aclk : IN STD_LOGIC;
+    s00_axi_aresetn : IN STD_LOGIC;
     s00_axi_awaddr : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
     s00_axi_awprot : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
     s00_axi_awvalid : IN STD_LOGIC;
@@ -71,9 +77,7 @@ COMPONENT DEM_NetronV2_0
     s00_axi_rdata : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
     s00_axi_rresp : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
     s00_axi_rvalid : OUT STD_LOGIC;
-    s00_axi_rready : IN STD_LOGIC;
-    s00_axi_aclk : IN STD_LOGIC;
-    s00_axi_aresetn : IN STD_LOGIC 
+    s00_axi_rready : IN STD_LOGIC 
   );
 END COMPONENT;
 -- COMP_TAG_END ------ End COMPONENT Declaration ------------
@@ -84,6 +88,12 @@ END COMPONENT;
 ------------- Begin Cut here for INSTANTIATION Template ----- INST_TAG
 your_instance_name : DEM_NetronV2_0
   PORT MAP (
+    D => D,
+    CLK_IN => CLK_IN,
+    RSTB => RSTB,
+    NS_SAR_ADC_FEEDBACK => NS_SAR_ADC_FEEDBACK,
+    s00_axi_aclk => s00_axi_aclk,
+    s00_axi_aresetn => s00_axi_aresetn,
     s00_axi_awaddr => s00_axi_awaddr,
     s00_axi_awprot => s00_axi_awprot,
     s00_axi_awvalid => s00_axi_awvalid,
@@ -102,9 +112,7 @@ your_instance_name : DEM_NetronV2_0
     s00_axi_rdata => s00_axi_rdata,
     s00_axi_rresp => s00_axi_rresp,
     s00_axi_rvalid => s00_axi_rvalid,
-    s00_axi_rready => s00_axi_rready,
-    s00_axi_aclk => s00_axi_aclk,
-    s00_axi_aresetn => s00_axi_aresetn
+    s00_axi_rready => s00_axi_rready
   );
 -- INST_TAG_END ------ End INSTANTIATION Template ---------
 

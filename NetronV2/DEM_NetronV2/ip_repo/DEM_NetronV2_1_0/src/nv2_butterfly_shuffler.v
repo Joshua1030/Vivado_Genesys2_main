@@ -37,10 +37,13 @@ module nv2_butterfly_shuffler(
     nv2_four_swapper layer2(.bits_in(arranged_internal1), .clk(clk), .rstb(rstb), .swapped_bits(internal2));
     nv2_four_swapper layer3(.bits_in(arranged_internal2), .clk(clk), .rstb(rstb), .swapped_bits(data_out));
     
-    assign arranged_internal1 = {internal1[7], internal1[5], internal1[6], internal1[4], 
-                                    internal1[3], internal1[1], internal1[2], internal1[0]};
+    // assign arranged_internal1 = {internal1[7], internal1[5], internal1[6], internal1[4], 
+    //                                internal1[3], internal1[1], internal1[2], internal1[0]};
+    assign arranged_internal1 = {internal1[7], internal1[3], internal1[5], internal1[1], 
+                                    internal1[6], internal1[2], internal1[4], internal1[0]};
     
-    assign arranged_internal2 = {internal2[7], internal2[3], internal2[5], internal2[1], 
-                                    internal2[6], internal2[2], internal2[4], internal2[0]};
-    
+    // assign arranged_internal2 = {internal2[7], internal2[3], internal2[5], internal2[1], 
+    //                                internal2[6], internal2[2], internal2[4], internal2[0]};
+    assign arranged_internal2 = {internal2[7], internal2[5], internal2[6], internal2[4], 
+                                    internal2[3], internal2[1], internal2[2], internal2[0]}; 
 endmodule

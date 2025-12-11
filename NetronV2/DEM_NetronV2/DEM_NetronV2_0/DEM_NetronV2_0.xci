@@ -3,7 +3,7 @@
   "ip_inst": {
     "xci_name": "DEM_NetronV2_0",
     "component_reference": "xilinx.com:user:DEM_NetronV2:1.0",
-    "ip_revision": "1",
+    "ip_revision": "13",
     "gen_directory": ".",
     "parameters": {
       "component_parameters": {
@@ -18,31 +18,37 @@
         "C_S00_AXI_ADDR_WIDTH": [ { "value": "4", "resolve_type": "generated", "format": "long", "usage": "all" } ]
       },
       "project_parameters": {
-        "ARCHITECTURE": [ { "value": "kintex7" } ],
-        "BASE_BOARD_PART": [ { "value": "digilentinc.com:genesys2:part0:1.1" } ],
-        "BOARD_CONNECTIONS": [ { "value": "" } ],
-        "DEVICE": [ { "value": "xc7k325t" } ],
-        "PACKAGE": [ { "value": "ffg900" } ],
-        "PREFHDL": [ { "value": "VERILOG" } ],
-        "SILICON_REVISION": [ { "value": "" } ],
-        "SIMULATOR_LANGUAGE": [ { "value": "VERILOG" } ],
-        "SPEEDGRADE": [ { "value": "-2" } ],
-        "STATIC_POWER": [ { "value": "" } ],
-        "TEMPERATURE_GRADE": [ { "value": "" } ]
+        "ARCHITECTURE": [ { "value": "kintex7", "resolve_type": "generated", "usage": "all" } ],
+        "BASE_BOARD_PART": [ { "value": "", "resolve_type": "generated", "usage": "all" } ],
+        "BOARD_CONNECTIONS": [ { "value": "", "resolve_type": "generated", "usage": "all" } ],
+        "DEVICE": [ { "value": "xc7k325t", "resolve_type": "generated", "usage": "all" } ],
+        "PACKAGE": [ { "value": "ffg900", "resolve_type": "generated", "usage": "all" } ],
+        "PREFHDL": [ { "value": "VERILOG", "resolve_type": "generated", "usage": "all" } ],
+        "SILICON_REVISION": [ { "value": "", "resolve_type": "generated", "usage": "all" } ],
+        "SIMULATOR_LANGUAGE": [ { "value": "VERILOG", "resolve_type": "generated", "usage": "all" } ],
+        "SPEEDGRADE": [ { "value": "-2", "resolve_type": "generated", "usage": "all" } ],
+        "STATIC_POWER": [ { "value": "", "resolve_type": "generated", "usage": "all" } ],
+        "TEMPERATURE_GRADE": [ { "value": "", "resolve_type": "generated", "usage": "all" } ]
       },
       "runtime_parameters": {
         "IPCONTEXT": [ { "value": "IP_Flow" } ],
-        "IPREVISION": [ { "value": "1" } ],
+        "IPREVISION": [ { "value": "13" } ],
         "MANAGED": [ { "value": "TRUE" } ],
         "OUTPUTDIR": [ { "value": "." } ],
         "SELECTEDSIMMODEL": [ { "value": "" } ],
         "SHAREDDIR": [ { "value": "." } ],
-        "SWVERSION": [ { "value": "2023.2" } ],
+        "SWVERSION": [ { "value": "2025.2" } ],
         "SYNTHESISFLOW": [ { "value": "OUT_OF_CONTEXT" } ]
       }
     },
     "boundary": {
       "ports": {
+        "D": [ { "direction": "in", "size_left": "2", "size_right": "0" } ],
+        "CLK_IN": [ { "direction": "in" } ],
+        "RSTB": [ { "direction": "in" } ],
+        "NS_SAR_ADC_FEEDBACK": [ { "direction": "out", "size_left": "6", "size_right": "0" } ],
+        "s00_axi_aclk": [ { "direction": "in" } ],
+        "s00_axi_aresetn": [ { "direction": "in" } ],
         "s00_axi_awaddr": [ { "direction": "in", "size_left": "3", "size_right": "0" } ],
         "s00_axi_awprot": [ { "direction": "in", "size_left": "2", "size_right": "0" } ],
         "s00_axi_awvalid": [ { "direction": "in" } ],
@@ -61,9 +67,7 @@
         "s00_axi_rdata": [ { "direction": "out", "size_left": "31", "size_right": "0" } ],
         "s00_axi_rresp": [ { "direction": "out", "size_left": "1", "size_right": "0" } ],
         "s00_axi_rvalid": [ { "direction": "out" } ],
-        "s00_axi_rready": [ { "direction": "in" } ],
-        "s00_axi_aclk": [ { "direction": "in" } ],
-        "s00_axi_aresetn": [ { "direction": "in" } ]
+        "s00_axi_rready": [ { "direction": "in" } ]
       },
       "interfaces": {
         "S00_AXI": {
@@ -175,5 +179,6 @@
         }
       }
     }
-  }
+  },
+  "checksum": "30b9e64c"
 }
