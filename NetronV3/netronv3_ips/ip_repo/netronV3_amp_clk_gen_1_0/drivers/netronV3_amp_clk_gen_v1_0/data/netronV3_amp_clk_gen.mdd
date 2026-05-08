@@ -1,0 +1,10 @@
+
+
+OPTION psf_version = 2.1;
+
+BEGIN DRIVER netronV3_amp_clk_gen
+	OPTION supported_peripherals = (netronV3_amp_clk_gen);
+	OPTION copyfiles = all;
+	OPTION VERSION = 1.0;
+	OPTION NAME = netronV3_amp_clk_gen;
+END DRIVER

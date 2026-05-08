@@ -129,6 +129,12 @@
                 "for": "node"
             },
             {
+                "abrv": "PT",
+                "name": "peripheral_type",
+                "type": "string",
+                "for": "node"
+            },
+            {
                 "abrv": "EH",
                 "name": "edge_hid",
                 "type": "int",
@@ -274,7 +280,7 @@
                 "SX": "/UDP_v5_0",
                 "SI": "S00_AXI",
                 "SS": "S00_AXI_reg",
-                "SV": "xilinx.com:user:UDP_v5:1.0",
+                "SV": "xilinx.com:user:UDP:5.3",
                 "TM": "data",
                 "TU": "register"
             }

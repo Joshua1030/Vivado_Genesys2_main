@@ -161,14 +161,14 @@ int main()
 
 
     *amp_reg0 = 1;
-    //*amp_reg1 = 100;
-    *amp_reg1 = 10000;
-    *amp_reg2 = 198;
+    // *amp_reg1 = 100;
+    *amp_reg1 = 1000;
+    *amp_reg2 = 99;
 
     *amp_reg3 = 1;
     // *amp_reg4 = 25000;
-    *amp_reg4 = 10;
-    *amp_reg5 = 99;
+    *amp_reg4 = 100;
+    *amp_reg5 = 99999;
 
 
     print("Hello World\n\r");
