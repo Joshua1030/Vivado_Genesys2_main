@@ -1,0 +1,10 @@
+
+
+OPTION psf_version = 2.1;
+
+BEGIN DRIVER UDP_v5
+	OPTION supported_peripherals = (UDP_v5);
+	OPTION copyfiles = all;
+	OPTION VERSION = 1.0;
+	OPTION NAME = UDP_v5;
+END DRIVER
