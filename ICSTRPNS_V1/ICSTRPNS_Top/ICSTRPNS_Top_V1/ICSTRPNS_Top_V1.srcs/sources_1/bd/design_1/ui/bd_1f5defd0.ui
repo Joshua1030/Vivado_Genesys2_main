@@ -1,33 +1,111 @@
 {
    "ActiveEmotionalView":"Default View",
-   "Default View_ScaleFactor":"0.725854",
-   "Default View_TopLeft":"230,-118",
+   "Default View_ScaleFactor":"0.65993",
+   "Default View_TopLeft":"503,205",
    "ExpandedHierarchyInLayout":"",
-   "guistr":"# # String gsaved with Nlview 7.8.0 2024-04-26 e1825d835c VDI=44 GEI=38 GUI=JA:21.0
+   "guistr":"# # String gsaved with Nlview 7.8.0 2024-04-26 e1825d835c VDI=44 GEI=38 GUI=JA:21.0 threadsafe
 #  -string -flagsOSRD
-preplace port sys_diff_clock -pg 1 -lvl 0 -x 0 -y 310 -defaultsOSRD
-preplace port port-id_reset -pg 1 -lvl 0 -x 0 -y 330 -defaultsOSRD
-preplace inst microblaze_0 -pg 1 -lvl 3 -x 870 -y 90 -defaultsOSRD
-preplace inst microblaze_0_local_memory -pg 1 -lvl 4 -x 1220 -y 100 -defaultsOSRD
-preplace inst mdm_1 -pg 1 -lvl 2 -x 440 -y 90 -defaultsOSRD
-preplace inst clk_wiz_1 -pg 1 -lvl 1 -x 140 -y 320 -defaultsOSRD
-preplace inst rst_clk_wiz_1_100M -pg 1 -lvl 2 -x 440 -y 270 -defaultsOSRD
-preplace netloc microblaze_0_Clk 1 1 3 260 170 620 180 1110J
-preplace netloc clk_wiz_1_locked 1 1 1 N 310
-preplace netloc rst_clk_wiz_1_100M_mb_reset 1 2 1 630 120n
-preplace netloc rst_clk_wiz_1_100M_bus_struct_reset 1 2 2 N 250 1120J
-preplace netloc mdm_1_debug_sys_rst 1 1 2 270 160 610
-preplace netloc reset_1 1 0 2 20 250 NJ
-preplace netloc microblaze_0_dlmb_1 1 3 1 N 70
-preplace netloc microblaze_0_ilmb_1 1 3 1 N 90
-preplace netloc microblaze_0_debug 1 2 1 N 80
-preplace netloc sys_diff_clock_1 1 0 1 NJ 310
-levelinfo -pg 1 0 140 440 870 1220 1320
-pagesize -pg 1 -db -bbox -sgen -140 0 1320 390
+preplace port sys_diff_clock -pg 1 -lvl 0 -x 0 -y 1050 -defaultsOSRD
+preplace port usb_uart -pg 1 -lvl 7 -x 2280 -y 1020 -defaultsOSRD
+preplace port port-id_reset -pg 1 -lvl 0 -x 0 -y 1070 -defaultsOSRD
+preplace port port-id_A4_0 -pg 1 -lvl 7 -x 2280 -y 400 -defaultsOSRD
+preplace port port-id_A3_0 -pg 1 -lvl 7 -x 2280 -y 420 -defaultsOSRD
+preplace port port-id_A2_0 -pg 1 -lvl 7 -x 2280 -y 440 -defaultsOSRD
+preplace port port-id_M0_0 -pg 1 -lvl 7 -x 2280 -y 460 -defaultsOSRD
+preplace port port-id_M1_0 -pg 1 -lvl 7 -x 2280 -y 480 -defaultsOSRD
+preplace port port-id_DEM_EN_0 -pg 1 -lvl 7 -x 2280 -y 520 -defaultsOSRD
+preplace port port-id_CLK_S_0 -pg 1 -lvl 7 -x 2280 -y 540 -defaultsOSRD
+preplace port port-id_PINT1_0 -pg 1 -lvl 7 -x 2280 -y 560 -defaultsOSRD
+preplace port port-id_PINT2_0 -pg 1 -lvl 7 -x 2280 -y 580 -defaultsOSRD
+preplace port port-id_CLK_0 -pg 1 -lvl 7 -x 2280 -y 600 -defaultsOSRD
+preplace port port-id_CLK_CHOP_0 -pg 1 -lvl 7 -x 2280 -y 620 -defaultsOSRD
+preplace port port-id_DEM_CLK_0 -pg 1 -lvl 7 -x 2280 -y 640 -defaultsOSRD
+preplace port port-id_eth_int_b -pg 1 -lvl 0 -x 0 -y 500 -defaultsOSRD
+preplace port port-id_eth_pme_b -pg 1 -lvl 0 -x 0 -y 730 -defaultsOSRD
+preplace port port-id_eth_rxck -pg 1 -lvl 0 -x 0 -y 750 -defaultsOSRD
+preplace port port-id_eth_rxctl -pg 1 -lvl 0 -x 0 -y 770 -defaultsOSRD
+preplace port port-id_eth_rst_b -pg 1 -lvl 7 -x 2280 -y 660 -defaultsOSRD
+preplace port port-id_eth_mdc -pg 1 -lvl 7 -x 2280 -y 680 -defaultsOSRD
+preplace port port-id_eth_mdio -pg 1 -lvl 7 -x 2280 -y 700 -defaultsOSRD
+preplace port port-id_eth_txck -pg 1 -lvl 7 -x 2280 -y 720 -defaultsOSRD
+preplace port port-id_eth_txctl -pg 1 -lvl 7 -x 2280 -y 740 -defaultsOSRD
+preplace port port-id_sw0_UDP_Reset -pg 1 -lvl 0 -x 0 -y 790 -defaultsOSRD
+preplace portBus DATA_0 -pg 1 -lvl 0 -x 0 -y 20 -defaultsOSRD
+preplace portBus sampled_data_0 -pg 1 -lvl 7 -x 2280 -y 380 -defaultsOSRD
+preplace portBus OUT_SEL_0 -pg 1 -lvl 7 -x 2280 -y 500 -defaultsOSRD
+preplace portBus eth_rxd -pg 1 -lvl 0 -x 0 -y 480 -defaultsOSRD
+preplace portBus eth_txd -pg 1 -lvl 7 -x 2280 -y 760 -defaultsOSRD
+preplace inst microblaze_0 -pg 1 -lvl 3 -x 910 -y 1040 -defaultsOSRD
+preplace inst microblaze_0_local_memory -pg 1 -lvl 4 -x 1340 -y 1050 -defaultsOSRD
+preplace inst mdm_1 -pg 1 -lvl 2 -x 460 -y 980 -defaultsOSRD
+preplace inst clk_wiz_1 -pg 1 -lvl 1 -x 140 -y 1060 -defaultsOSRD
+preplace inst rst_clk_wiz_1_100M -pg 1 -lvl 2 -x 460 -y 1160 -defaultsOSRD
+preplace inst Multi_Mode_NS_SAR_Co_0 -pg 1 -lvl 5 -x 1760 -y 340 -defaultsOSRD
+preplace inst axi_smc -pg 1 -lvl 4 -x 1340 -y 870 -defaultsOSRD
+preplace inst ila_0 -pg 1 -lvl 6 -x 2140 -y 210 -defaultsOSRD
+preplace inst c_counter_binary_0 -pg 1 -lvl 4 -x 1340 -y 430 -defaultsOSRD
+preplace inst axi_uartlite_0 -pg 1 -lvl 5 -x 1760 -y 1030 -defaultsOSRD
+preplace inst dist_mem_gen_0 -pg 1 -lvl 4 -x 1340 -y 630 -defaultsOSRD
+preplace inst UDP_0 -pg 1 -lvl 5 -x 1760 -y 760 -defaultsOSRD
+preplace inst xlconcat_0 -pg 1 -lvl 3 -x 910 -y 610 -defaultsOSRD
+preplace inst xlconstant_0 -pg 1 -lvl 2 -x 460 -y 620 -defaultsOSRD
+preplace netloc Multi_Mode_NS_SAR_Co_0_A2 1 5 2 2000 450 2260J
+preplace netloc Multi_Mode_NS_SAR_Co_0_A3 1 5 2 1990 440 2250J
+preplace netloc Multi_Mode_NS_SAR_Co_0_A4 1 5 2 1980 430 2240J
+preplace netloc Multi_Mode_NS_SAR_Co_0_CLK 1 5 2 1940 600 NJ
+preplace netloc Multi_Mode_NS_SAR_Co_0_CLK_CHOP 1 5 2 1960 620 NJ
+preplace netloc Multi_Mode_NS_SAR_Co_0_CLK_S 1 3 4 1200 530 1530 540 1950 540 NJ
+preplace netloc Multi_Mode_NS_SAR_Co_0_DEM_CLK 1 5 2 2050 640 NJ
+preplace netloc Multi_Mode_NS_SAR_Co_0_DEM_EN 1 5 2 1970 520 NJ
+preplace netloc Multi_Mode_NS_SAR_Co_0_M0 1 5 2 2010 460 NJ
+preplace netloc Multi_Mode_NS_SAR_Co_0_M1 1 5 2 2020 480 NJ
+preplace netloc Multi_Mode_NS_SAR_Co_0_OUT_SEL 1 5 2 1930 500 NJ
+preplace netloc Multi_Mode_NS_SAR_Co_0_PINT1 1 5 2 2030 560 NJ
+preplace netloc Multi_Mode_NS_SAR_Co_0_PINT2 1 5 2 2040 580 NJ
+preplace netloc Multi_Mode_NS_SAR_Co_0_sampled_data 1 2 5 670 510 NJ 510 1600J 550 1920 420 2230J
+preplace netloc c_counter_binary_0_Q 1 4 2 1610 530 1910
+preplace netloc clk_wiz_1_locked 1 1 1 260 1060n
+preplace netloc mdm_1_debug_sys_rst 1 1 2 290 1060 630
+preplace netloc microblaze_0_Clk 1 1 5 280 1050 670 950 1180 950 1490 60 N
+preplace netloc reset_1 1 0 2 20 1140 NJ
+preplace netloc rst_clk_wiz_1_100M_bus_struct_reset 1 2 2 640J 930 1150
+preplace netloc rst_clk_wiz_1_100M_mb_reset 1 2 1 670 1070n
+preplace netloc rst_clk_wiz_1_100M_peripheral_aresetn 1 2 3 660J 940 1190 960 1560
+preplace netloc clk_wiz_1_clk_125MHz 1 1 4 270J 910 NJ 910 1160 780 1510J
+preplace netloc eth_int_b_0_1 1 0 5 NJ 500 NJ 500 NJ 500 NJ 500 1580J
+preplace netloc eth_pme_b_0_1 1 0 5 NJ 730 NJ 730 NJ 730 1180J 740 1550J
+preplace netloc eth_rxck_0_1 1 0 5 NJ 750 NJ 750 NJ 750 NJ 750 1570J
+preplace netloc eth_rxctl_0_1 1 0 5 NJ 770 NJ 770 NJ 770 1150J 760 1580J
+preplace netloc eth_rxd_0_1 1 0 5 NJ 480 NJ 480 NJ 480 1160J 490 1590J
+preplace netloc UDP_0_eth_rst_b 1 5 2 NJ 660 NJ
+preplace netloc UDP_0_eth_mdc 1 5 2 NJ 680 NJ
+preplace netloc Net 1 5 2 NJ 700 NJ
+preplace netloc UDP_0_eth_txck 1 5 2 NJ 720 NJ
+preplace netloc UDP_0_eth_txctl 1 5 2 NJ 740 NJ
+preplace netloc UDP_0_eth_txd 1 5 2 NJ 760 NJ
+preplace netloc UDP_0_addr 1 3 3 1190 520 1570J 560 1910
+preplace netloc UDP_0_read_addr 1 3 3 1190 730 1500J 570 1920
+preplace netloc UDP_0_write_en 1 3 3 1200 790 1500J 950 1910
+preplace netloc dist_mem_gen_0_dpo 1 4 1 1520 630n
+preplace netloc xlconcat_0_dout 1 3 1 N 610
+preplace netloc xlconstant_0_dout 1 2 1 NJ 620
+preplace netloc sw0_UDP_Reset_1 1 0 5 NJ 790 NJ 790 NJ 790 1180J 770 NJ
+preplace netloc axi_smc_M00_AXI 1 4 1 1480 300n
+preplace netloc microblaze_0_M_AXI_DP 1 3 1 1170 850n
+preplace netloc microblaze_0_debug 1 2 1 650 970n
+preplace netloc microblaze_0_dlmb_1 1 3 1 N 1020
+preplace netloc microblaze_0_ilmb_1 1 3 1 N 1040
+preplace netloc sys_diff_clock_1 1 0 1 NJ 1050
+preplace netloc axi_uartlite_0_UART 1 5 2 NJ 1020 NJ
+preplace netloc axi_smc_M01_AXI 1 4 1 1480 870n
+preplace netloc axi_smc_M02_AXI 1 4 1 1540 630n
+levelinfo -pg 1 0 140 460 910 1340 1760 2140 2280
+pagesize -pg 1 -db -bbox -sgen -160 0 2470 1260
 "
 }
 {
-   "da_board_cnt":"3",
-   "da_clkrst_cnt":"1",
+   "da_axi4_cnt":"3",
+   "da_board_cnt":"4",
+   "da_clkrst_cnt":"2",
    "da_mb_cnt":"2"
 }
