@@ -28,9 +28,7 @@
       "c_counter_binary_0": "",
       "axi_uartlite_0": "",
       "dist_mem_gen_0": "",
-      "UDP_0": "",
-      "xlconcat_0": "",
-      "xlconstant_0": ""
+      "UDP_0": ""
     },
     "interface_ports": {
       "sys_diff_clock": {
@@ -720,7 +718,7 @@
       },
       "Multi_Mode_NS_SAR_Co_0": {
         "vlnv": "xilinx.com:user:Multi_Mode_NS_SAR_Control:1.0",
-        "ip_revision": "3",
+        "ip_revision": "5",
         "xci_name": "design_1_Multi_Mode_NS_SAR_Co_0_0",
         "xci_path": "ip\\design_1_Multi_Mode_NS_SAR_Co_0_0\\design_1_Multi_Mode_NS_SAR_Co_0_0.xci",
         "inst_hier_path": "Multi_Mode_NS_SAR_Co_0",
@@ -886,7 +884,7 @@
             "value": "4"
           },
           "C_PROBE1_WIDTH": {
-            "value": "4"
+            "value": "8"
           },
           "C_PROBE2_WIDTH": {
             "value": "2"
@@ -948,38 +946,6 @@
         "xci_path": "ip\\design_1_UDP_0_0\\design_1_UDP_0_0.xci",
         "inst_hier_path": "UDP_0",
         "has_run_ip_tcl": "true"
-      },
-      "xlconcat_0": {
-        "vlnv": "xilinx.com:ip:xlconcat:2.1",
-        "ip_revision": "7",
-        "xci_name": "design_1_xlconcat_0_0",
-        "xci_path": "ip\\design_1_xlconcat_0_0\\design_1_xlconcat_0_0.xci",
-        "inst_hier_path": "xlconcat_0",
-        "has_run_ip_tcl": "true",
-        "parameters": {
-          "IN0_WIDTH": {
-            "value": "4"
-          },
-          "IN1_WIDTH": {
-            "value": "4"
-          }
-        }
-      },
-      "xlconstant_0": {
-        "vlnv": "xilinx.com:ip:xlconstant:1.1",
-        "ip_revision": "10",
-        "xci_name": "design_1_xlconstant_0_0",
-        "xci_path": "ip\\design_1_xlconstant_0_0\\design_1_xlconstant_0_0.xci",
-        "inst_hier_path": "xlconstant_0",
-        "has_run_ip_tcl": "true",
-        "parameters": {
-          "CONST_VAL": {
-            "value": "0000"
-          },
-          "CONST_WIDTH": {
-            "value": "4"
-          }
-        }
       }
     },
     "interface_nets": {
@@ -1137,7 +1103,7 @@
           "Multi_Mode_NS_SAR_Co_0/sampled_data",
           "sampled_data_0",
           "ila_0/probe1",
-          "xlconcat_0/In0"
+          "dist_mem_gen_0/d"
         ]
       },
       "Net": {
@@ -1197,8 +1163,8 @@
       "c_counter_binary_0_Q": {
         "ports": [
           "c_counter_binary_0/Q",
-          "Multi_Mode_NS_SAR_Co_0/DATA",
-          "ila_0/probe0"
+          "ila_0/probe0",
+          "Multi_Mode_NS_SAR_Co_0/DATA"
         ]
       },
       "clk_wiz_1_clk_125MHz": {
@@ -1264,12 +1230,12 @@
           "rst_clk_wiz_1_100M/slowest_sync_clk",
           "axi_smc/aclk",
           "ila_0/clk",
-          "Multi_Mode_NS_SAR_Co_0/main_clock",
-          "Multi_Mode_NS_SAR_Co_0/s00_axi_aclk",
           "axi_uartlite_0/s_axi_aclk",
           "UDP_0/s00_axi_aclk",
           "UDP_0/clk100MHz",
-          "UDP_0/clk_lock"
+          "UDP_0/clk_lock",
+          "Multi_Mode_NS_SAR_Co_0/main_clock",
+          "Multi_Mode_NS_SAR_Co_0/s00_axi_aclk"
         ]
       },
       "reset_1": {
@@ -1295,27 +1261,15 @@
         "ports": [
           "rst_clk_wiz_1_100M/peripheral_aresetn",
           "axi_smc/aresetn",
-          "Multi_Mode_NS_SAR_Co_0/s00_axi_aresetn",
           "axi_uartlite_0/s_axi_aresetn",
-          "UDP_0/s00_axi_aresetn"
+          "UDP_0/s00_axi_aresetn",
+          "Multi_Mode_NS_SAR_Co_0/s00_axi_aresetn"
         ]
       },
       "sw0_UDP_Reset_1": {
         "ports": [
           "sw0_UDP_Reset",
           "UDP_0/reset"
-        ]
-      },
-      "xlconcat_0_dout": {
-        "ports": [
-          "xlconcat_0/dout",
-          "dist_mem_gen_0/d"
-        ]
-      },
-      "xlconstant_0_dout": {
-        "ports": [
-          "xlconstant_0/dout",
-          "xlconcat_0/In1"
         ]
       }
     },

@@ -924,6 +924,7 @@
     Multi_Mode_NS_SAR_ADC_Control core_inst (
         .main_clock (main_clock),
         .DATA       (DATA),
+		.sampled_data       (sampled_data),
         .slv_reg0   (slv_reg0),  .slv_reg1   (slv_reg1),
         .slv_reg2   (slv_reg2),  .slv_reg3   (slv_reg3),
         .slv_reg4   (slv_reg4),  .slv_reg5   (slv_reg5),
