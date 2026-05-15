@@ -22,12 +22,14 @@
 
 module Multi_Mode_NS_SAR_ADC_Control(
     input  wire        main_clock,
+    input  wire        sw,            // NEW: External switch input
+    output wire        reset,         // NEW: Reset output driven by 'sw'
     input  wire [3:0]  DATA,
     output reg  [3:0]  sampled_data,
     
     // Counter control registers (slv_reg0 - slv_reg20)
     input  wire [31:0] slv_reg0,  // Step size
-    input  wire [31:0] slv_reg1,  // Currently unused (formerly CLK toggle threshold)
+    input  wire [31:0] slv_reg1,  // Currently unused
     input  wire [31:0] slv_reg2,  // Counter period
     input  wire [31:0] slv_reg3,  input  wire [31:0] slv_reg4,  // CMP1 window
     input  wire [31:0] slv_reg5,  input  wire [31:0] slv_reg6,  // CMP2 window
@@ -43,6 +45,12 @@ module Multi_Mode_NS_SAR_ADC_Control(
     // Static control register (slv_reg21)
     input  wire [31:0] slv_reg21,
 
+    // Control registers for AMP clocks (slv_reg22 - slv_reg27)
+    input  wire [31:0] slv_reg22, input  wire [31:0] slv_reg23, // AMP_CLK_Sample window
+    input  wire [31:0] slv_reg24, input  wire [31:0] slv_reg25, // AMP_CLK_Push window
+    input  wire [31:0] slv_reg26, // AMP_CLK_Chop frequency division count
+    input  wire [31:0] slv_reg27, // AMP_CLK_Chop toggle trigger point
+
     // Output ports
     output reg         A4,
     output reg         A3,
@@ -56,8 +64,20 @@ module Multi_Mode_NS_SAR_ADC_Control(
     output wire        PINT2,
     output wire        CLK,         // Acts as NS_SAR_ADC_DIN_CLK
     output wire        CLK_CHOP,
-    output wire        DEM_CLK
+    output wire        DEM_CLK,
+    
+    // Output ports for AMP
+    output wire        AMP_CLK_Sample,
+    output wire        AMP_CLK_Push,
+    output wire        AMP_CLK_Chop
 );
+
+    // --------------------------------------------------------
+    // 0. Reset Routing
+    // --------------------------------------------------------
+    // Assign the external switch input to the reset output.
+    // The internal logic will also use this 'reset' signal.
+    assign reset = sw;
 
     // --------------------------------------------------------
     // 1. Static Control Signal Mapping (Extracted from slv_reg21)
@@ -75,13 +95,17 @@ module Multi_Mode_NS_SAR_ADC_Control(
     // --------------------------------------------------------
     // 2. Data Sampling (Sample DATA on CLK_S rising edge)
     // --------------------------------------------------------
-        
     reg clk_s_d;
     always @(posedge main_clock) begin
-        clk_s_d <= CLK_S;
-        // check CLK_S rising edge
-        if (CLK_S && !clk_s_d) begin
-            sampled_data <= DATA;
+        if (reset) begin
+            clk_s_d      <= 1'b0;
+            sampled_data <= 4'b0;
+        end else begin
+            clk_s_d <= CLK_S;
+            // check CLK_S rising edge
+            if (CLK_S && !clk_s_d) begin
+                sampled_data <= DATA;
+            end
         end
     end
 
@@ -90,8 +114,10 @@ module Multi_Mode_NS_SAR_ADC_Control(
     // --------------------------------------------------------
     reg [31:0] clk_counter = 0;
     always @(posedge main_clock) begin
-        if (clk_counter >= slv_reg2) begin
-            clk_counter <= 0; 
+        if (reset) begin
+            clk_counter <= 32'd0;
+        end else if (clk_counter >= slv_reg2) begin
+            clk_counter <= 32'd0; 
         end else begin
             clk_counter <= clk_counter + slv_reg0;
         end
@@ -109,31 +135,69 @@ module Multi_Mode_NS_SAR_ADC_Control(
     assign CLK      = first_cmp || second_cmp || third_cmp || fourth_cmp;
 
     // CLK_S (Data Valid) and other control windows
-    assign CLK_S    = (clk_counter >= slv_reg14) && (clk_counter <= slv_reg13);
-    assign PINT1    = (clk_counter >= slv_reg16) && (clk_counter <= slv_reg15);
-    assign PINT2    = (clk_counter >= slv_reg18) && (clk_counter <= slv_reg17);
-    assign DEM_CLK  = (clk_counter >= slv_reg20) && (clk_counter <= slv_reg19);
+    assign CLK_S          = (clk_counter >= slv_reg14) && (clk_counter <= slv_reg13);
+    assign PINT1          = (clk_counter >= slv_reg16) && (clk_counter <= slv_reg15);
+    assign PINT2          = (clk_counter >= slv_reg18) && (clk_counter <= slv_reg17);
+    assign DEM_CLK        = (clk_counter >= slv_reg20) && (clk_counter <= slv_reg19);
+
+    // AMP Clock windows (behavior like CLK_S)
+    assign AMP_CLK_Sample = (clk_counter >= slv_reg23) && (clk_counter <= slv_reg22);
+    assign AMP_CLK_Push   = (clk_counter >= slv_reg25) && (clk_counter <= slv_reg24);
 
     // --------------------------------------------------------
-    // 5. Chopper Logic
+    // 5. Standard Chopper Logic
     // --------------------------------------------------------
     wire switch_chopper = (clk_counter >= slv_reg12);
-    reg [3:0] chopper_counter = 0;
-    reg       din_chop_buf    = 0;
+    reg [31:0] chopper_counter = 0; 
+    reg        din_chop_buf    = 0;
+    reg        switch_chopper_d;
 
-    reg switch_chopper_d;
     always @(posedge main_clock) begin
-        switch_chopper_d <= switch_chopper;
-        // check switch_chopper rising edge
-        if (switch_chopper && !switch_chopper_d) begin
-            if (chopper_counter >= slv_reg11) begin
-                din_chop_buf <= ~din_chop_buf;
-                chopper_counter <= 0;
-            end else begin
-                chopper_counter <= chopper_counter + 1;
+        if (reset) begin
+            switch_chopper_d <= 1'b0;
+            chopper_counter  <= 32'd0;
+            din_chop_buf     <= 1'b0;
+        end else begin
+            switch_chopper_d <= switch_chopper;
+            // check switch_chopper rising edge
+            if (switch_chopper && !switch_chopper_d) begin
+                if (chopper_counter >= slv_reg11) begin
+                    din_chop_buf    <= ~din_chop_buf;
+                    chopper_counter <= 32'd0;
+                end else begin
+                    chopper_counter <= chopper_counter + 1;
+                end
             end
         end
     end
     assign CLK_CHOP = din_chop_buf;
+
+    // --------------------------------------------------------
+    // 6. AMP Chopper Logic (Behavior like CLK_CHOP)
+    // --------------------------------------------------------
+    wire switch_amp_chopper = (clk_counter >= slv_reg27);
+    reg [31:0] amp_chopper_counter = 0;
+    reg        amp_chop_buf        = 0;
+    reg        switch_amp_chopper_d;
+
+    always @(posedge main_clock) begin
+        if (reset) begin
+            switch_amp_chopper_d <= 1'b0;
+            amp_chopper_counter  <= 32'd0;
+            amp_chop_buf         <= 1'b0;
+        end else begin
+            switch_amp_chopper_d <= switch_amp_chopper;
+            // check switch_amp_chopper rising edge
+            if (switch_amp_chopper && !switch_amp_chopper_d) begin
+                if (amp_chopper_counter >= slv_reg26) begin
+                    amp_chop_buf        <= ~amp_chop_buf;
+                    amp_chopper_counter <= 32'd0;
+                end else begin
+                    amp_chopper_counter <= amp_chopper_counter + 1;
+                end
+            end
+        end
+    end
+    assign AMP_CLK_Chop = amp_chop_buf;
 
 endmodule

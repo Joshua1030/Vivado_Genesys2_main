@@ -16,6 +16,8 @@
 	(
 		// Users to add ports here
         input  wire        main_clock,
+        input  wire        sw,             // NEW: External switch input
+        output wire        reset,          // NEW: Reset output driven by 'sw'
         input  wire [3:0]  DATA,
         output wire [3:0]  sampled_data,
     
@@ -33,7 +35,12 @@
         output wire        CLK,
         output wire        CLK_CHOP,
         output wire        DEM_CLK,
-		// User ports ends
+        
+        // Output ports for AMP (NEW)
+        output wire        AMP_CLK_Sample,
+        output wire        AMP_CLK_Push,
+        output wire        AMP_CLK_Chop,
+        // User ports ends
 		// Do not modify the ports beyond this line
 
 
@@ -86,22 +93,28 @@
 		.S_AXI_RRESP(s00_axi_rresp),
 		.S_AXI_RVALID(s00_axi_rvalid),
 		.S_AXI_RREADY(s00_axi_rready),
-		.main_clock (main_clock),
-        .DATA       (DATA),
-        .sampled_data       (sampled_data),
-        .A4         (A4),
-        .A3         (A3),
-        .A2         (A2),
-        .M0         (M0),
-        .M1         (M1),
-        .OUT_SEL    (OUT_SEL),
-        .DEM_EN     (DEM_EN),
-        .CLK_S      (CLK_S),
-        .PINT1      (PINT1),
-        .PINT2      (PINT2),
-        .CLK        (CLK),
-        .CLK_CHOP   (CLK_CHOP),
-        .DEM_CLK    (DEM_CLK)
+		// User ports mapping
+        .main_clock     (main_clock),
+        .sw             (sw),
+        .reset          (reset),
+        .DATA           (DATA),
+        .sampled_data   (sampled_data),
+        .A4             (A4),
+        .A3             (A3),
+        .A2             (A2),
+        .M0             (M0),
+        .M1             (M1),
+        .OUT_SEL        (OUT_SEL),
+        .DEM_EN         (DEM_EN),
+        .CLK_S          (CLK_S),
+        .PINT1          (PINT1),
+        .PINT2          (PINT2),
+        .CLK            (CLK),
+        .CLK_CHOP       (CLK_CHOP),
+        .DEM_CLK        (DEM_CLK),
+        .AMP_CLK_Sample (AMP_CLK_Sample),
+        .AMP_CLK_Push   (AMP_CLK_Push),
+        .AMP_CLK_Chop   (AMP_CLK_Chop)
 	);
 
 	// Add user logic here

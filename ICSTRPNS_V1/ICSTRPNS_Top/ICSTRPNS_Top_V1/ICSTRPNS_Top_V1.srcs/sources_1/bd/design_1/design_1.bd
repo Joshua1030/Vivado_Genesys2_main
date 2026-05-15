@@ -1,7 +1,7 @@
 {
   "design": {
     "design_info": {
-      "boundary_crc": "0xCCAA5B562765342D",
+      "boundary_crc": "0x7B797B39313507C3",
       "device": "xc7k325tffg900-2",
       "gen_directory": "../../../../ICSTRPNS_Top_V1.gen/sources_1/bd/design_1",
       "name": "design_1",
@@ -233,6 +233,32 @@
       },
       "sw0_UDP_Reset": {
         "direction": "I"
+      },
+      "sw1_AMP_Reset": {
+        "direction": "I"
+      },
+      "AMP_CLK_Sample_0": {
+        "direction": "O"
+      },
+      "AMP_CLK_Push_0": {
+        "direction": "O"
+      },
+      "AMP_CLK_Chop_0": {
+        "direction": "O"
+      },
+      "reset_AMP": {
+        "type": "rst",
+        "direction": "O",
+        "parameters": {
+          "INSERT_VIP": {
+            "value": "0",
+            "value_src": "default"
+          },
+          "POLARITY": {
+            "value": "ACTIVE_LOW",
+            "value_src": "default"
+          }
+        }
       }
     },
     "components": {
@@ -718,7 +744,7 @@
       },
       "Multi_Mode_NS_SAR_Co_0": {
         "vlnv": "xilinx.com:user:Multi_Mode_NS_SAR_Control:1.0",
-        "ip_revision": "5",
+        "ip_revision": "7",
         "xci_name": "design_1_Multi_Mode_NS_SAR_Co_0_0",
         "xci_path": "ip\\design_1_Multi_Mode_NS_SAR_Co_0_0\\design_1_Multi_Mode_NS_SAR_Co_0_0.xci",
         "inst_hier_path": "Multi_Mode_NS_SAR_Co_0",
@@ -878,7 +904,7 @@
             "value": "Native"
           },
           "C_NUM_OF_PROBES": {
-            "value": "15"
+            "value": "19"
           },
           "C_PROBE0_WIDTH": {
             "value": "4"
@@ -1026,6 +1052,27 @@
           "ila_0/probe3"
         ]
       },
+      "Multi_Mode_NS_SAR_Co_0_AMP_CLK_Chop": {
+        "ports": [
+          "Multi_Mode_NS_SAR_Co_0/AMP_CLK_Chop",
+          "AMP_CLK_Chop_0",
+          "ila_0/probe17"
+        ]
+      },
+      "Multi_Mode_NS_SAR_Co_0_AMP_CLK_Push": {
+        "ports": [
+          "Multi_Mode_NS_SAR_Co_0/AMP_CLK_Push",
+          "AMP_CLK_Push_0",
+          "ila_0/probe16"
+        ]
+      },
+      "Multi_Mode_NS_SAR_Co_0_AMP_CLK_Sample": {
+        "ports": [
+          "Multi_Mode_NS_SAR_Co_0/AMP_CLK_Sample",
+          "AMP_CLK_Sample_0",
+          "ila_0/probe15"
+        ]
+      },
       "Multi_Mode_NS_SAR_Co_0_CLK": {
         "ports": [
           "Multi_Mode_NS_SAR_Co_0/CLK",
@@ -1096,6 +1143,13 @@
           "Multi_Mode_NS_SAR_Co_0/PINT2",
           "PINT2_0",
           "ila_0/probe11"
+        ]
+      },
+      "Multi_Mode_NS_SAR_Co_0_reset": {
+        "ports": [
+          "Multi_Mode_NS_SAR_Co_0/reset",
+          "reset_AMP",
+          "ila_0/probe18"
         ]
       },
       "Multi_Mode_NS_SAR_Co_0_sampled_data": {
@@ -1270,6 +1324,12 @@
         "ports": [
           "sw0_UDP_Reset",
           "UDP_0/reset"
+        ]
+      },
+      "sw1_AMP_Reset_1": {
+        "ports": [
+          "sw1_AMP_Reset",
+          "Multi_Mode_NS_SAR_Co_0/sw"
         ]
       }
     },

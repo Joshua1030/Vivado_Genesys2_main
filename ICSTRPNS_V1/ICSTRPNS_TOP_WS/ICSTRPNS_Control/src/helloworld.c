@@ -30,7 +30,8 @@ int main()
     xil_printf("Initializing Multi_Mode_NS_SAR_ADC_Control IP...\n\r");
 
     // 1. Initialize all registers to 0 safely (matching the TB INIT_REGS loop)
-    for (int i = 0; i <= 21; i++) {
+    // Expanded to 27 to cover the new AMP clock registers
+    for (int i = 0; i <= 27; i++) {
         Xil_Out32(NS_SAR_BASE_ADDR + (i * 4), 0);
     }
 
@@ -49,11 +50,11 @@ int main()
     Xil_Out32(NS_SAR_BASE_ADDR + (10 * 4), 50); // slv_reg[10] = Pulse 4 End
 
     // 4. Configure CLK_S (Data Valid & Sampling Trigger)
-    Xil_Out32(NS_SAR_BASE_ADDR + (14 * 4), 0);  // slv_reg[14]
-    Xil_Out32(NS_SAR_BASE_ADDR + (13 * 4), 9);  // slv_reg[13]
+    Xil_Out32(NS_SAR_BASE_ADDR + (14 * 4), 0);  // slv_reg[14] = CLK_S Start
+    Xil_Out32(NS_SAR_BASE_ADDR + (13 * 4), 9);  // slv_reg[13] = CLK_S End
 
     // 5. Configure Chopper parameters
-    Xil_Out32(NS_SAR_BASE_ADDR + (12 * 4), 5);  // slv_reg[12] = Trigger evaluate
+    Xil_Out32(NS_SAR_BASE_ADDR + (12 * 4), 1);  // slv_reg[12] = Trigger evaluate (updated to 1)
     Xil_Out32(NS_SAR_BASE_ADDR + (11 * 4), 1);  // slv_reg[11] = Chopper counter threshold
 
     // 6. Provide dummy windows for the other clocks
@@ -64,7 +65,15 @@ int main()
     Xil_Out32(NS_SAR_BASE_ADDR + (20 * 4), 0);  // slv_reg[20] = DEM_CLK Start
     Xil_Out32(NS_SAR_BASE_ADDR + (19 * 4), 9);  // slv_reg[19] = DEM_CLK End
 
-    // 7. Static control register
+    // 7. Configure NEW AMP Clocks and Chopper
+    Xil_Out32(NS_SAR_BASE_ADDR + (23 * 4), 0);  // slv_reg[23] = AMP_CLK_Sample Start
+    Xil_Out32(NS_SAR_BASE_ADDR + (22 * 4), 9);  // slv_reg[22] = AMP_CLK_Sample End
+    Xil_Out32(NS_SAR_BASE_ADDR + (25 * 4), 11); // slv_reg[25] = AMP_CLK_Push Start
+    Xil_Out32(NS_SAR_BASE_ADDR + (24 * 4), 98); // slv_reg[24] = AMP_CLK_Push End
+    Xil_Out32(NS_SAR_BASE_ADDR + (27 * 4), 1);  // slv_reg[27] = AMP_CLK_Chop trigger point
+    Xil_Out32(NS_SAR_BASE_ADDR + (26 * 4), 1);  // slv_reg[26] = AMP_CLK_Chop division threshold
+
+    // 8. Static control register
     // Set A4=1, A3=1, DEM_EN=0 (Bits 0, 1, 7) -> 0x1B
     Xil_Out32(NS_SAR_BASE_ADDR + (21 * 4), 0x0000001B); 
 

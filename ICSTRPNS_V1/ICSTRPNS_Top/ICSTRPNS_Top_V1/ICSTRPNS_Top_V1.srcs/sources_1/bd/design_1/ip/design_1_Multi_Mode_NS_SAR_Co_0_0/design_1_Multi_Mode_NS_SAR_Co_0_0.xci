@@ -4,7 +4,7 @@
     "xci_name": "design_1_Multi_Mode_NS_SAR_Co_0_0",
     "cell_name": "Multi_Mode_NS_SAR_Co_0",
     "component_reference": "xilinx.com:user:Multi_Mode_NS_SAR_Control:1.0",
-    "ip_revision": "5",
+    "ip_revision": "7",
     "gen_directory": "../../../../../../ICSTRPNS_Top_V1.gen/sources_1/bd/design_1/ip/design_1_Multi_Mode_NS_SAR_Co_0_0",
     "parameters": {
       "component_parameters": {
@@ -33,7 +33,7 @@
       },
       "runtime_parameters": {
         "IPCONTEXT": [ { "value": "IP_Integrator" } ],
-        "IPREVISION": [ { "value": "5" } ],
+        "IPREVISION": [ { "value": "7" } ],
         "MANAGED": [ { "value": "TRUE" } ],
         "OUTPUTDIR": [ { "value": "../../../../../../ICSTRPNS_Top_V1.gen/sources_1/bd/design_1/ip/design_1_Multi_Mode_NS_SAR_Co_0_0" } ],
         "SELECTEDSIMMODEL": [ { "value": "" } ],
@@ -45,6 +45,8 @@
     "boundary": {
       "ports": {
         "main_clock": [ { "direction": "in" } ],
+        "sw": [ { "direction": "in" } ],
+        "reset": [ { "direction": "out" } ],
         "DATA": [ { "direction": "in", "size_left": "3", "size_right": "0" } ],
         "sampled_data": [ { "direction": "out", "size_left": "3", "size_right": "0" } ],
         "A4": [ { "direction": "out" } ],
@@ -60,6 +62,9 @@
         "CLK": [ { "direction": "out" } ],
         "CLK_CHOP": [ { "direction": "out" } ],
         "DEM_CLK": [ { "direction": "out" } ],
+        "AMP_CLK_Sample": [ { "direction": "out" } ],
+        "AMP_CLK_Push": [ { "direction": "out" } ],
+        "AMP_CLK_Chop": [ { "direction": "out" } ],
         "s00_axi_aclk": [ { "direction": "in" } ],
         "s00_axi_aresetn": [ { "direction": "in" } ],
         "s00_axi_awaddr": [ { "direction": "in", "size_left": "7", "size_right": "0" } ],
@@ -228,6 +233,18 @@
           "port_maps": {
             "CLK": [ { "physical_name": "main_clock" } ]
           }
+        },
+        "reset": {
+          "vlnv": "xilinx.com:signal:reset:1.0",
+          "abstraction_type": "xilinx.com:signal:reset_rtl:1.0",
+          "mode": "master",
+          "parameters": {
+            "POLARITY": [ { "value": "ACTIVE_LOW", "value_permission": "bd", "resolve_type": "generated", "is_ips_inferred": true, "is_static_object": false } ],
+            "INSERT_VIP": [ { "value": "0", "resolve_type": "user", "format": "long", "usage": "simulation.rtl", "is_ips_inferred": true, "is_static_object": false } ]
+          },
+          "port_maps": {
+            "RST": [ { "physical_name": "reset" } ]
+          }
         }
       },
       "memory_maps": {
@@ -247,5 +264,5 @@
       }
     }
   },
-  "checksum": "63d6c5f7"
+  "checksum": "c485179a"
 }

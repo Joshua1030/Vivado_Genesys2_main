@@ -16,6 +16,8 @@
 	(
 		// Users to add ports here
         input  wire        main_clock,
+        input  wire        sw,             // NEW: External switch input
+        output wire        reset,          // NEW: Reset output driven by 'sw'
         input  wire [3:0]  DATA,
         output wire [3:0]  sampled_data,
     
@@ -33,6 +35,11 @@
         output wire        CLK,
         output wire        CLK_CHOP,
         output wire        DEM_CLK,
+        
+        // Output ports for AMP (NEW)
+        output wire        AMP_CLK_Sample,
+        output wire        AMP_CLK_Push,
+        output wire        AMP_CLK_Chop,
 		// User ports ends
 		// Do not modify the ports beyond this line
 
@@ -922,33 +929,49 @@
 	
 	// Add user logic here
     Multi_Mode_NS_SAR_ADC_Control core_inst (
-        .main_clock (main_clock),
-        .DATA       (DATA),
-		.sampled_data       (sampled_data),
-        .slv_reg0   (slv_reg0),  .slv_reg1   (slv_reg1),
-        .slv_reg2   (slv_reg2),  .slv_reg3   (slv_reg3),
-        .slv_reg4   (slv_reg4),  .slv_reg5   (slv_reg5),
-        .slv_reg6   (slv_reg6),  .slv_reg7   (slv_reg7),
-        .slv_reg8   (slv_reg8),  .slv_reg9   (slv_reg9),
-        .slv_reg10  (slv_reg10), .slv_reg11  (slv_reg11),
-        .slv_reg12  (slv_reg12), .slv_reg13  (slv_reg13),
-        .slv_reg14  (slv_reg14), .slv_reg15  (slv_reg15),
-        .slv_reg16  (slv_reg16), .slv_reg17  (slv_reg17),
-        .slv_reg18  (slv_reg18), .slv_reg19  (slv_reg19),
-        .slv_reg20  (slv_reg20), .slv_reg21  (slv_reg21),
-        .A4         (A4),
-        .A3         (A3),
-        .A2         (A2),
-        .M0         (M0),
-        .M1         (M1),
-        .OUT_SEL    (OUT_SEL),
-        .DEM_EN     (DEM_EN),
-        .CLK_S      (CLK_S),
-        .PINT1      (PINT1),
-        .PINT2      (PINT2),
-        .CLK        (CLK),
-        .CLK_CHOP   (CLK_CHOP),
-        .DEM_CLK    (DEM_CLK)
+        .main_clock     (main_clock),
+        .sw             (sw),             // Connected new external switch input
+        .reset          (reset),          // Connected new reset output
+        .DATA           (DATA),
+        .sampled_data   (sampled_data),
+        
+        // Counter control registers
+        .slv_reg0       (slv_reg0),   .slv_reg1       (slv_reg1),
+        .slv_reg2       (slv_reg2),   .slv_reg3       (slv_reg3),
+        .slv_reg4       (slv_reg4),   .slv_reg5       (slv_reg5),
+        .slv_reg6       (slv_reg6),   .slv_reg7       (slv_reg7),
+        .slv_reg8       (slv_reg8),   .slv_reg9       (slv_reg9),
+        .slv_reg10      (slv_reg10),  .slv_reg11      (slv_reg11),
+        .slv_reg12      (slv_reg12),  .slv_reg13      (slv_reg13),
+        .slv_reg14      (slv_reg14),  .slv_reg15      (slv_reg15),
+        .slv_reg16      (slv_reg16),  .slv_reg17      (slv_reg17),
+        .slv_reg18      (slv_reg18),  .slv_reg19      (slv_reg19),
+        .slv_reg20      (slv_reg20),  .slv_reg21      (slv_reg21),
+        
+        // Connected new AMP control registers
+        .slv_reg22      (slv_reg22),  .slv_reg23      (slv_reg23),
+        .slv_reg24      (slv_reg24),  .slv_reg25      (slv_reg25),
+        .slv_reg26      (slv_reg26),  .slv_reg27      (slv_reg27),
+        
+        // Standard Output ports
+        .A4             (A4),
+        .A3             (A3),
+        .A2             (A2),
+        .M0             (M0),
+        .M1             (M1),
+        .OUT_SEL        (OUT_SEL),
+        .DEM_EN         (DEM_EN),
+        .CLK_S          (CLK_S),
+        .PINT1          (PINT1),
+        .PINT2          (PINT2),
+        .CLK            (CLK),
+        .CLK_CHOP       (CLK_CHOP),
+        .DEM_CLK        (DEM_CLK),
+        
+        // Connected new AMP Clock outputs
+        .AMP_CLK_Sample (AMP_CLK_Sample),
+        .AMP_CLK_Push   (AMP_CLK_Push),
+        .AMP_CLK_Chop   (AMP_CLK_Chop)
     );
 	// User logic ends
 

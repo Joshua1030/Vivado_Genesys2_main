@@ -25,12 +25,13 @@ module tb_NS_SAR_SAR();
     // Testbench Signals
     // --------------------------------------------------------
     reg         main_clock;
+    reg         sw;             // NEW: External switch input
     reg  [3:0]  DATA;
-    reg  [31:0] slv_reg [0:21]; // Array to easily initialize all 22 registers
+    reg  [31:0] slv_reg [0:27]; // UPDATED: Array expanded to easily initialize all 28 registers
     
-
     // Outputs from DUT
-    wire  [3:0] sampled_data;
+    wire        reset;          // NEW: Reset output
+    wire [3:0]  sampled_data;
     
     wire        A4;
     wire        A3;
@@ -46,35 +47,55 @@ module tb_NS_SAR_SAR();
     wire        CLK_CHOP;
     wire        DEM_CLK;
 
+    // NEW: Outputs from DUT for AMP Clocks
+    wire        AMP_CLK_Sample;
+    wire        AMP_CLK_Push;
+    wire        AMP_CLK_Chop;
+
     // --------------------------------------------------------
     // Device Under Test (DUT) Instantiation
     // --------------------------------------------------------
     Multi_Mode_NS_SAR_ADC_Control uut (
-        .main_clock (main_clock),
-        .DATA       (DATA),
-        .sampled_data (sampled_data),
-        .slv_reg0   (slv_reg[0]),  .slv_reg1   (slv_reg[1]),  .slv_reg2   (slv_reg[2]),
-        .slv_reg3   (slv_reg[3]),  .slv_reg4   (slv_reg[4]),  .slv_reg5   (slv_reg[5]),
-        .slv_reg6   (slv_reg[6]),  .slv_reg7   (slv_reg[7]),  .slv_reg8   (slv_reg[8]),
-        .slv_reg9   (slv_reg[9]),  .slv_reg10  (slv_reg[10]), .slv_reg11  (slv_reg[11]),
-        .slv_reg12  (slv_reg[12]), .slv_reg13  (slv_reg[13]), .slv_reg14  (slv_reg[14]),
-        .slv_reg15  (slv_reg[15]), .slv_reg16  (slv_reg[16]), .slv_reg17  (slv_reg[17]),
-        .slv_reg18  (slv_reg[18]), .slv_reg19  (slv_reg[19]), .slv_reg20  (slv_reg[20]),
-        .slv_reg21  (slv_reg[21]), // Static control register
+        .main_clock     (main_clock),
+        .sw             (sw),             // Map new sw input
+        .reset          (reset),          // Map new reset output
+        .DATA           (DATA),
+        .sampled_data   (sampled_data),
         
-        .A4         (A4), 
-        .A3         (A3), 
-        .A2         (A2), 
-        .M0         (M0), 
-        .M1         (M1), 
-        .OUT_SEL    (OUT_SEL), 
-        .DEM_EN     (DEM_EN), 
-        .CLK_S      (CLK_S), 
-        .PINT1      (PINT1), 
-        .PINT2      (PINT2), 
-        .CLK        (CLK), 
-        .CLK_CHOP   (CLK_CHOP), 
-        .DEM_CLK    (DEM_CLK)
+        // Counter control registers
+        .slv_reg0       (slv_reg[0]),  .slv_reg1       (slv_reg[1]),  .slv_reg2       (slv_reg[2]),
+        .slv_reg3       (slv_reg[3]),  .slv_reg4       (slv_reg[4]),  .slv_reg5       (slv_reg[5]),
+        .slv_reg6       (slv_reg[6]),  .slv_reg7       (slv_reg[7]),  .slv_reg8       (slv_reg[8]),
+        .slv_reg9       (slv_reg[9]),  .slv_reg10      (slv_reg[10]), .slv_reg11      (slv_reg[11]),
+        .slv_reg12      (slv_reg[12]), .slv_reg13      (slv_reg[13]), .slv_reg14      (slv_reg[14]),
+        .slv_reg15      (slv_reg[15]), .slv_reg16      (slv_reg[16]), .slv_reg17      (slv_reg[17]),
+        .slv_reg18      (slv_reg[18]), .slv_reg19      (slv_reg[19]), .slv_reg20      (slv_reg[20]),
+        .slv_reg21      (slv_reg[21]), // Static control register
+        
+        // NEW: AMP Clock control registers
+        .slv_reg22      (slv_reg[22]), .slv_reg23      (slv_reg[23]),
+        .slv_reg24      (slv_reg[24]), .slv_reg25      (slv_reg[25]),
+        .slv_reg26      (slv_reg[26]), .slv_reg27      (slv_reg[27]),
+        
+        // Output Mappings
+        .A4             (A4), 
+        .A3             (A3), 
+        .A2             (A2), 
+        .M0             (M0), 
+        .M1             (M1), 
+        .OUT_SEL        (OUT_SEL), 
+        .DEM_EN         (DEM_EN), 
+        .CLK_S          (CLK_S), 
+        .PINT1          (PINT1), 
+        .PINT2          (PINT2), 
+        .CLK            (CLK), 
+        .CLK_CHOP       (CLK_CHOP), 
+        .DEM_CLK        (DEM_CLK),
+        
+        // NEW: AMP Clock outputs
+        .AMP_CLK_Sample (AMP_CLK_Sample),
+        .AMP_CLK_Push   (AMP_CLK_Push),
+        .AMP_CLK_Chop   (AMP_CLK_Chop)
     );
 
     // --------------------------------------------------------
@@ -92,12 +113,14 @@ module tb_NS_SAR_SAR();
     initial begin
         // Setup for EDA Playground / waveform viewers
         //$dumpfile("dump.vcd");
-        //$dumpvars(0, tb_Multi_Mode_NS_SAR_ADC_Control);
+        //$dumpvars(0, tb_NS_SAR_SAR);
+        
+        sw = 0; // Initialize switch (reset inactive)
         
         // 1. Initialize all registers to 0 safely
         begin : INIT_REGS
             integer i;
-            for (i = 0; i <= 21; i = i + 1) begin
+            for (i = 0; i <= 27; i = i + 1) begin
                 slv_reg[i] = 0;
             end
         end
@@ -118,18 +141,29 @@ module tb_NS_SAR_SAR();
         // Happens after the last comparator pulse
         slv_reg[14] = 32'd0; slv_reg[13] = 32'd9; // CLK_S goes high between count 70 and 75
         
-        // 5. Configure Chopper parameters
-        slv_reg[12] = 32'd5; // Trigger evaluate at half count
-        slv_reg[11] = 32'd1;  // Chopper counter threshold
+        // 5. Configure Standard Chopper parameters
+        slv_reg[12] = 32'd1; // Trigger evaluate at count 5
+        slv_reg[11] = 32'd1; // Chopper counter threshold
         
         // 6. Provide dummy windows for the other clocks so they aren't floating
-        slv_reg[16] = 32'd62;  slv_reg[15] = 32'd84;  // PINT1
+        slv_reg[16] = 32'd62; slv_reg[15] = 32'd84; // PINT1
         slv_reg[18] = 32'd86; slv_reg[17] = 32'd98; // PINT2
-        slv_reg[20] = 32'd0; slv_reg[19] = 32'd9; // DEM_CLK
+        slv_reg[20] = 32'd0;  slv_reg[19] = 32'd9;  // DEM_CLK
         
+        // 7. Configure NEW AMP Clocks and Chopper
+        slv_reg[23] = 32'd0; slv_reg[22] = 32'd9; // AMP_CLK_Sample
+        slv_reg[25] = 32'd11; slv_reg[24] = 32'd98; // AMP_CLK_Push
+        slv_reg[27] = 32'd1;                       // AMP_CLK_Chop trigger point
+        slv_reg[26] = 32'd1;                        // AMP_CLK_Chop division threshold
+
         // ----------------------------------------------------
         // Apply Test Vectors over time
         // ----------------------------------------------------
+        
+        // Toggle the 'sw' to test the reset functionality early on
+        #15  sw = 1; 
+        #20  sw = 0; 
+        
         #100;
         
         // Modify slv_reg21 to control static output signals
