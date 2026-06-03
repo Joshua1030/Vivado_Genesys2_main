@@ -1,7 +1,7 @@
 {
   "design": {
     "design_info": {
-      "boundary_crc": "0x7B797B39313507C3",
+      "boundary_crc": "0xB8AB5B5DA4F9262",
       "device": "xc7k325tffg900-2",
       "gen_directory": "../../../../ICSTRPNS_Top_V1.gen/sources_1/bd/design_1",
       "name": "design_1",
@@ -25,7 +25,6 @@
       "Multi_Mode_NS_SAR_Co_0": "",
       "axi_smc": "",
       "ila_0": "",
-      "c_counter_binary_0": "",
       "axi_uartlite_0": "",
       "dist_mem_gen_0": "",
       "UDP_0": ""
@@ -235,7 +234,13 @@
         "direction": "I"
       },
       "sw1_AMP_Reset": {
-        "direction": "I"
+        "direction": "I",
+        "parameters": {
+          "POLARITY": {
+            "value": "ACTIVE_LOW",
+            "value_src": "default_prop"
+          }
+        }
       },
       "AMP_CLK_Sample_0": {
         "direction": "O"
@@ -256,9 +261,18 @@
           },
           "POLARITY": {
             "value": "ACTIVE_LOW",
-            "value_src": "default"
+            "value_src": "default_prop"
           }
         }
+      },
+      "NS_SAR_CLKS_OUT": {
+        "direction": "I"
+      },
+      "NS_SAR_CLK_S_OUT": {
+        "direction": "O"
+      },
+      "sw2": {
+        "direction": "I"
       }
     },
     "components": {
@@ -744,7 +758,7 @@
       },
       "Multi_Mode_NS_SAR_Co_0": {
         "vlnv": "xilinx.com:user:Multi_Mode_NS_SAR_Control:1.0",
-        "ip_revision": "7",
+        "ip_revision": "8",
         "xci_name": "design_1_Multi_Mode_NS_SAR_Co_0_0",
         "xci_path": "ip\\design_1_Multi_Mode_NS_SAR_Co_0_0\\design_1_Multi_Mode_NS_SAR_Co_0_0.xci",
         "inst_hier_path": "Multi_Mode_NS_SAR_Co_0",
@@ -917,19 +931,6 @@
           }
         }
       },
-      "c_counter_binary_0": {
-        "vlnv": "xilinx.com:ip:c_counter_binary:12.0",
-        "ip_revision": "22",
-        "xci_name": "design_1_c_counter_binary_0_0",
-        "xci_path": "ip\\design_1_c_counter_binary_0_0\\design_1_c_counter_binary_0_0.xci",
-        "inst_hier_path": "c_counter_binary_0",
-        "has_run_ip_tcl": "true",
-        "parameters": {
-          "Output_Width": {
-            "value": "4"
-          }
-        }
-      },
       "axi_uartlite_0": {
         "vlnv": "xilinx.com:ip:axi_uartlite:2.0",
         "ip_revision": "39",
@@ -1092,7 +1093,6 @@
           "Multi_Mode_NS_SAR_Co_0/CLK_S",
           "CLK_S_0",
           "ila_0/probe9",
-          "c_counter_binary_0/CLK",
           "UDP_0/clk_trg"
         ]
       },
@@ -1147,7 +1147,7 @@
       },
       "Multi_Mode_NS_SAR_Co_0_reset": {
         "ports": [
-          "Multi_Mode_NS_SAR_Co_0/reset",
+          "sw1_AMP_Reset",
           "reset_AMP",
           "ila_0/probe18"
         ]
@@ -1158,6 +1158,12 @@
           "sampled_data_0",
           "ila_0/probe1",
           "dist_mem_gen_0/d"
+        ]
+      },
+      "NS_SAR_CLKS_OUT_1": {
+        "ports": [
+          "NS_SAR_CLKS_OUT",
+          "NS_SAR_CLK_S_OUT"
         ]
       },
       "Net": {
@@ -1216,7 +1222,7 @@
       },
       "c_counter_binary_0_Q": {
         "ports": [
-          "c_counter_binary_0/Q",
+          "DATA_0",
           "ila_0/probe0",
           "Multi_Mode_NS_SAR_Co_0/DATA"
         ]
@@ -1326,9 +1332,9 @@
           "UDP_0/reset"
         ]
       },
-      "sw1_AMP_Reset_1": {
+      "sw2_1": {
         "ports": [
-          "sw1_AMP_Reset",
+          "sw2",
           "Multi_Mode_NS_SAR_Co_0/sw"
         ]
       }

@@ -40,7 +40,7 @@ module Multi_Mode_NS_SAR_ADC_Control(
     input  wire [31:0] slv_reg13, input  wire [31:0] slv_reg14, // CLK_S window (Data Valid)
     input  wire [31:0] slv_reg15, input  wire [31:0] slv_reg16, // PINT1 window
     input  wire [31:0] slv_reg17, input  wire [31:0] slv_reg18, // PINT2 window
-    input  wire [31:0] slv_reg19, input  wire [31:0] slv_reg20, // DEM_CLK window
+    input  wire [31:0] slv_reg19, input  wire [31:0] slv_reg20, // DEM_CLK window 1
     
     // Static control register (slv_reg21)
     input  wire [31:0] slv_reg21,
@@ -50,6 +50,11 @@ module Multi_Mode_NS_SAR_ADC_Control(
     input  wire [31:0] slv_reg24, input  wire [31:0] slv_reg25, // AMP_CLK_Push window
     input  wire [31:0] slv_reg26, // AMP_CLK_Chop frequency division count
     input  wire [31:0] slv_reg27, // AMP_CLK_Chop toggle trigger point
+
+    // NEW: Additional DEM_CLK windows (slv_reg28 - slv_reg33) to support 4 total pulses
+    input  wire [31:0] slv_reg28, input  wire [31:0] slv_reg29, // DEM_CLK window 2
+    input  wire [31:0] slv_reg30, input  wire [31:0] slv_reg31, // DEM_CLK window 3
+    input  wire [31:0] slv_reg32, input  wire [31:0] slv_reg33, // DEM_CLK window 4
 
     // Output ports
     output reg         A4,
@@ -134,15 +139,21 @@ module Multi_Mode_NS_SAR_ADC_Control(
     wire fourth_cmp = (clk_counter <= slv_reg10) && (clk_counter >= slv_reg9);
     assign CLK      = first_cmp || second_cmp || third_cmp || fourth_cmp;
 
+    // DEM_CLK driven by 4 independent windows (8 registers total)
+    wire dem_first_cmp  = (clk_counter <= slv_reg19) && (clk_counter >= slv_reg20);
+    wire dem_second_cmp = (clk_counter <= slv_reg28) && (clk_counter >= slv_reg29);
+    wire dem_third_cmp  = (clk_counter <= slv_reg30) && (clk_counter >= slv_reg31);
+    wire dem_fourth_cmp = (clk_counter <= slv_reg32) && (clk_counter >= slv_reg33);
+    assign DEM_CLK      = dem_first_cmp || dem_second_cmp || dem_third_cmp || dem_fourth_cmp;
+
     // CLK_S (Data Valid) and other control windows
-    assign CLK_S          = (clk_counter >= slv_reg14) && (clk_counter <= slv_reg13);
-    assign PINT1          = (clk_counter >= slv_reg16) && (clk_counter <= slv_reg15);
-    assign PINT2          = (clk_counter >= slv_reg18) && (clk_counter <= slv_reg17);
-    assign DEM_CLK        = (clk_counter >= slv_reg20) && (clk_counter <= slv_reg19);
+    assign CLK_S          = (clk_counter <= slv_reg13) && (clk_counter >= slv_reg14);
+    assign PINT1          = (clk_counter <= slv_reg15) && (clk_counter >= slv_reg16);
+    assign PINT2          = (clk_counter <= slv_reg17) && (clk_counter >= slv_reg18);
 
     // AMP Clock windows (behavior like CLK_S)
-    assign AMP_CLK_Sample = (clk_counter >= slv_reg23) && (clk_counter <= slv_reg22);
-    assign AMP_CLK_Push   = (clk_counter >= slv_reg25) && (clk_counter <= slv_reg24);
+    assign AMP_CLK_Sample = (clk_counter <= slv_reg22) && (clk_counter >= slv_reg23);
+    assign AMP_CLK_Push   = (clk_counter <= slv_reg24) && (clk_counter >= slv_reg25);
 
     // --------------------------------------------------------
     // 5. Standard Chopper Logic

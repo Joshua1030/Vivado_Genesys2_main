@@ -19,7 +19,7 @@
 			},
 			"pathMap": [],
 			"targetSetup": {
-				"resetSystem": true,
+				"resetSystem": false,
 				"programDevice": false,
 				"partialBitstream": false,
 				"skipRevisionCheck": false,
