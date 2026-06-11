@@ -29,47 +29,48 @@ int main()
 {
     xil_printf("Initializing Multi_Mode_NS_SAR_ADC_Control IP...\n\r");
 
-// 2. Configure main counter parameters
-    Xil_Out32(NS_SAR_BASE_ADDR + (0 * 4), 6);   // slv_reg[0]  = Step increment
-    Xil_Out32(NS_SAR_BASE_ADDR + (2 * 4), 999);  // slv_reg[2]  = Wrap around
+    // 2. Configure main counter parameters
+    Xil_Out32(NS_SAR_BASE_ADDR + (0 * 4), 1);   // slv_reg[0]  = Step increment
+    Xil_Out32(NS_SAR_BASE_ADDR + (1 * 4), 0);   // slv_reg[1]  = Main clock divider (0 = full speed, N = div by N+1)
+    Xil_Out32(NS_SAR_BASE_ADDR + (2 * 4), 99);  // slv_reg[2]  = Wrap around
 
     // 3. Configure CMP windows to generate 4 pulses on CLK
-    Xil_Out32(NS_SAR_BASE_ADDR + (3 * 4), 400);  // slv_reg[3]  = Pulse 1 Start
-    Xil_Out32(NS_SAR_BASE_ADDR + (4 * 4), 460);  // slv_reg[4]  = Pulse 1 End
-    Xil_Out32(NS_SAR_BASE_ADDR + (5 * 4), 520);  // slv_reg[5]  = Pulse 2 Start
-    Xil_Out32(NS_SAR_BASE_ADDR + (6 * 4), 580);  // slv_reg[6]  = Pulse 2 End
-    Xil_Out32(NS_SAR_BASE_ADDR + (7 * 4), 640);  // slv_reg[7]  = Pulse 3 Start
-    Xil_Out32(NS_SAR_BASE_ADDR + (8 * 4), 700);  // slv_reg[8]  = Pulse 3 End
-    Xil_Out32(NS_SAR_BASE_ADDR + (9 * 4), 760);  // slv_reg[9]  = Pulse 4 Start
-    Xil_Out32(NS_SAR_BASE_ADDR + (10 * 4),820);  // slv_reg[10] = Pulse 4 End
+    Xil_Out32(NS_SAR_BASE_ADDR + (3 * 4), 35);  // slv_reg[3]  = Pulse 1 Start
+    Xil_Out32(NS_SAR_BASE_ADDR + (4 * 4), 40);  // slv_reg[4]  = Pulse 1 End
+    Xil_Out32(NS_SAR_BASE_ADDR + (5 * 4), 50);  // slv_reg[5]  = Pulse 2 Start
+    Xil_Out32(NS_SAR_BASE_ADDR + (6 * 4), 55);  // slv_reg[6]  = Pulse 2 End
+    Xil_Out32(NS_SAR_BASE_ADDR + (7 * 4), 65);  // slv_reg[7]  = Pulse 3 Start
+    Xil_Out32(NS_SAR_BASE_ADDR + (8 * 4), 70);  // slv_reg[8]  = Pulse 3 End
+    Xil_Out32(NS_SAR_BASE_ADDR + (9 * 4), 80);  // slv_reg[9]  = Pulse 4 Start
+    Xil_Out32(NS_SAR_BASE_ADDR + (10 * 4),85);  // slv_reg[10] = Pulse 4 End
 
     // 4. Configure CLK_S (Data Valid & Sampling Trigger)
-    Xil_Out32(NS_SAR_BASE_ADDR + (14 * 4), 20);   // slv_reg[14] = CLK_S Start
-    Xil_Out32(NS_SAR_BASE_ADDR + (13 * 4), 200); // slv_reg[13] = CLK_S End
+    Xil_Out32(NS_SAR_BASE_ADDR + (14 * 4), 0);   // slv_reg[14] = CLK_S Start
+    Xil_Out32(NS_SAR_BASE_ADDR + (13 * 4), 18); // slv_reg[13] = CLK_S End
 
     // 5. Configure Chopper parameters
-    Xil_Out32(NS_SAR_BASE_ADDR + (12 * 4), 10000); // slv_reg[12] = Trigger evaluate (updated to 1)
-    Xil_Out32(NS_SAR_BASE_ADDR + (11 * 4), 8);    // slv_reg[11] = Chopper counter threshold
+    Xil_Out32(NS_SAR_BASE_ADDR + (12 * 4), 1); // slv_reg[12] = Trigger evaluate (updated to 1)
+    Xil_Out32(NS_SAR_BASE_ADDR + (11 * 4), 4);    // slv_reg[11] = Chopper counter threshold
 
     // 6. Provide dummy windows for the other clocks
     // Xil_Out32(NS_SAR_BASE_ADDR + (16 * 4), 750); // slv_reg[16] = PINT1 Start
     // Xil_Out32(NS_SAR_BASE_ADDR + (15 * 4), 860); // slv_reg[15] = PINT1 End
     // Xil_Out32(NS_SAR_BASE_ADDR + (18 * 4), 880); // slv_reg[18] = PINT2 Start
     // Xil_Out32(NS_SAR_BASE_ADDR + (17 * 4), 990); // slv_reg[17] = PINT2 End
-    Xil_Out32(NS_SAR_BASE_ADDR + (16 * 4), 30); // slv_reg[16] = PINT1 Start
-    Xil_Out32(NS_SAR_BASE_ADDR + (15 * 4), 195); // slv_reg[15] = PINT1 End
-    Xil_Out32(NS_SAR_BASE_ADDR + (18 * 4), 230); // slv_reg[18] = PINT2 Start
-    Xil_Out32(NS_SAR_BASE_ADDR + (17 * 4), 380); // slv_reg[17] = PINT2 End
+    Xil_Out32(NS_SAR_BASE_ADDR + (16 * 4), 01); // slv_reg[16] = PINT1 Start
+    Xil_Out32(NS_SAR_BASE_ADDR + (15 * 4), 17); // slv_reg[15] = PINT1 End
+    Xil_Out32(NS_SAR_BASE_ADDR + (18 * 4), 21); // slv_reg[18] = PINT2 Start
+    Xil_Out32(NS_SAR_BASE_ADDR + (17 * 4), 30); // slv_reg[17] = PINT2 End
     
     // Configure DEM_CLK to generate 4 pulses
-    Xil_Out32(NS_SAR_BASE_ADDR + (20 * 4), 350);   // slv_reg[20] = DEM_CLK Pulse 1 Start
-    Xil_Out32(NS_SAR_BASE_ADDR + (19 * 4), 400);  // slv_reg[19] = DEM_CLK Pulse 1 End
-    Xil_Out32(NS_SAR_BASE_ADDR + (29 * 4), 450);  // slv_reg[29] = DEM_CLK Pulse 2 Start
-    Xil_Out32(NS_SAR_BASE_ADDR + (28 * 4), 500);  // slv_reg[28] = DEM_CLK Pulse 2 End
-    Xil_Out32(NS_SAR_BASE_ADDR + (31 * 4), 550);  // slv_reg[31] = DEM_CLK Pulse 3 Start
-    Xil_Out32(NS_SAR_BASE_ADDR + (30 * 4), 600);  // slv_reg[30] = DEM_CLK Pulse 3 End
-    Xil_Out32(NS_SAR_BASE_ADDR + (33 * 4), 650);  // slv_reg[33] = DEM_CLK Pulse 4 Start
-    Xil_Out32(NS_SAR_BASE_ADDR + (32 * 4), 700); // slv_reg[32] = DEM_CLK Pulse 4 End
+    Xil_Out32(NS_SAR_BASE_ADDR + (20 * 4), 25);   // slv_reg[20] = DEM_CLK Pulse 1 Start
+    Xil_Out32(NS_SAR_BASE_ADDR + (19 * 4), 35);  // slv_reg[19] = DEM_CLK Pulse 1 End
+    Xil_Out32(NS_SAR_BASE_ADDR + (29 * 4), 45);  // slv_reg[29] = DEM_CLK Pulse 2 Start
+    Xil_Out32(NS_SAR_BASE_ADDR + (28 * 4), 55);  // slv_reg[28] = DEM_CLK Pulse 2 End
+    Xil_Out32(NS_SAR_BASE_ADDR + (31 * 4), 65);  // slv_reg[31] = DEM_CLK Pulse 3 Start
+    Xil_Out32(NS_SAR_BASE_ADDR + (30 * 4), 75);  // slv_reg[30] = DEM_CLK Pulse 3 End
+    Xil_Out32(NS_SAR_BASE_ADDR + (33 * 4), 85);  // slv_reg[33] = DEM_CLK Pulse 4 Start
+    Xil_Out32(NS_SAR_BASE_ADDR + (32 * 4), 95); // slv_reg[32] = DEM_CLK Pulse 4 End
 
     // 7. Configure NEW AMP Clocks and Chopper
     Xil_Out32(NS_SAR_BASE_ADDR + (23 * 4), 2);   // slv_reg[23] = AMP_CLK_Sample Start
@@ -94,8 +95,9 @@ int main()
     //0 01 1 0 0 0 0
     // Xil_Out32(NS_SAR_BASE_ADDR + (21 * 4), 0b00110000); 
     // Xil_Out32(NS_SAR_BASE_ADDR + (21 * 4), 0b00000000); //0th order
-    Xil_Out32(NS_SAR_BASE_ADDR + (21 * 4), 0b00110000); //2nd order
-    // Xil_Out32(NS_SAR_BASE_ADDR + (21 * 4), 0b10001000); //1st order
+    // Xil_Out32(NS_SAR_BASE_ADDR + (21 * 4), 0b00110000); //2nd order DEM OFF
+    // Xil_Out32(NS_SAR_BASE_ADDR + (21 * 4), 0b10101000); //1st order DEM OFF
+    Xil_Out32(NS_SAR_BASE_ADDR + (21 * 4), 0b01111000); //4th order DEM OFF
 
     xil_printf("Configuration Complete. IP is now running.\n\r");
 

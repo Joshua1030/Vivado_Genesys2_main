@@ -4,7 +4,7 @@
     "xci_name": "design_1_Multi_Mode_NS_SAR_Co_0_0",
     "cell_name": "Multi_Mode_NS_SAR_Co_0",
     "component_reference": "xilinx.com:user:Multi_Mode_NS_SAR_Control:1.0",
-    "ip_revision": "8",
+    "ip_revision": "10",
     "gen_directory": "../../../../../../ICSTRPNS_Top_V1.gen/sources_1/bd/design_1/ip/design_1_Multi_Mode_NS_SAR_Co_0_0",
     "parameters": {
       "component_parameters": {
@@ -33,7 +33,7 @@
       },
       "runtime_parameters": {
         "IPCONTEXT": [ { "value": "IP_Integrator" } ],
-        "IPREVISION": [ { "value": "8" } ],
+        "IPREVISION": [ { "value": "10" } ],
         "MANAGED": [ { "value": "TRUE" } ],
         "OUTPUTDIR": [ { "value": "../../../../../../ICSTRPNS_Top_V1.gen/sources_1/bd/design_1/ip/design_1_Multi_Mode_NS_SAR_Co_0_0" } ],
         "SELECTEDSIMMODEL": [ { "value": "" } ],
@@ -264,5 +264,5 @@
       }
     }
   },
-  "checksum": "443790cc"
+  "checksum": "6d8837f7"
 }
