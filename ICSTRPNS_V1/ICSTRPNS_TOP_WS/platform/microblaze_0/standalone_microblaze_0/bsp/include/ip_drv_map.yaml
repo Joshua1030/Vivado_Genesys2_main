@@ -1,0 +1,9 @@
+Multi_Mode_NS_SAR_Co_0:
+- Multi_Mode_NS_SAR_Control
+- None
+axi_uartlite_0:
+- axi_uartlite
+- uartlite
+microblaze_0_local_memory_dlmb_bram_if_cntlr:
+- lmb_bram_if_cntlr
+- bram

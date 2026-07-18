@@ -1,0 +1,4 @@
+domain_path: E:\Vivado_Genesys2_main\ICSTRPNS_V1\ICSTRPNS_TOP_WS\platform\export\platform\sw\standalone_microblaze_0
+app_src_dir: E:\Xilinx\2025.2\Vitis\data\embeddedsw\lib\sw_apps\hello_world
+template: hello_world
+lang: c
