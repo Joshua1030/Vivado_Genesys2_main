@@ -1,0 +1,4 @@
+domain_path: D:\ISML\LTC2500_new\LTC2500_new\LTC2500\vitis_workspace\ltc2500_adc0_platform\export\ltc2500_adc0_platform\sw\standalone_microblaze_0
+app_src_dir: E:\Vivado\2025.2\Vitis\data\embeddedsw\lib\sw_apps\empty_application
+template: empty_application
+lang: c
