@@ -1,0 +1,13 @@
+# Generated Vivado project + build outputs — rebuild with scripts/recreate_project.tcl
+work/
+
+# Vivado runtime litter
+*.jou
+*.log
+.Xil/
+dfx_runtime.txt
+
+# Vitis / clangd local state
+.cache/
+.clangd
+compile_commands.json
