@@ -1,4 +1,4 @@
-# TIS_EIT_V1 — LTC2500 EIT Acquisition System (Genesys2)
+# TIS_EIT_V2 — LTC2500 EIT Acquisition System (Genesys2)
 
 FPGA design for an electrical impedance tomography (EIT) acquisition system on the
 Digilent **Genesys2** board (Kintex-7 `xc7k325tffg900-2`). A MicroBlaze soft CPU
@@ -21,7 +21,8 @@ into `work/` (gitignored) by a Tcl script and is fully disposable. Never commit
 [Quick start](#quick-start-hardware) · [Program the board](#program-the-board) ·
 [Software](#software-vitis-unified-20252) · [IP inventory](#ip-inventory-all-xilinxcomuser-sources-in-ip_repo) ·
 [Design notes](#design-notes) · [Making changes](#making-changes) ·
-[Maintainer reference](#maintainer--ai-assistant-reference)
+[Maintainer reference](#maintainer--ai-assistant-reference) ·
+[System architecture](#system-architecture--what-it-does-and-how)
 
 ## Directory layout
 
@@ -142,7 +143,7 @@ Xil_Out32(XPAR_FSM_0_S00_AXI_BASEADDR + 0x04, 1000);  // update period = 1000 cl
 |---|---|---|---|
 | `addr_gen:1.0` | `addr_gen_1_0` | Verilog | AXI-Lite; sweeps addresses into the 4 sine-LUT BRAMs (excitation waveform generator) |
 | `FSM:1.0` | `FSM_1_0` | Verilog | AXI-Lite; AD5686R quad-DAC SPI driver with programmable SCLK / update rate ([README](ip_repo/FSM_1_0/README.md)) |
-| `IP_1:1.0` | `IP_1_1_0` | Verilog | AXI-Lite; drives DAC serial interface (`dac_sclk/sync/sdo/ldac`) + `gain`, `EIT_IN_EN` |
+| `IP_1:1.0` | `IP_1_1_0` | Verilog | AXI-Lite; sine-period / electrode-cycle sequencer — watches DDS wraparound, emits `done_tick`/`total_tick`/`chanel_cnt`, `sync` + `EIT_IN_EN` gate |
 | `IP_Two:1.0` | `IP_Two_1_0` | Verilog | AXI-Lite; electrode/analog mux control (`mux_dac1`, `mux_dac2`) |
 | `IP_Three:1.0` | `IP_Three_1_0` | Verilog | AXI-Lite; electrode/analog mux control (`mux_0`) |
 | `ethernet_debug:1.0` | `ethernet_debug_1_0` | Verilog | AXI-Lite; Ethernet-visible debug/control registers |
@@ -463,3 +464,96 @@ local backup; ~1.1 GB of duplicated Vivado projects). Canonical sources used:
 9. Before pushing: run the clean-clone test (delete `work/`, batch-run
    `scripts/recreate_project.tcl`, confirm `validate_bd_design` passes) and
    check `git status` shows only intended sources.
+
+## System architecture — what it does and how
+
+TIS_EIT_V2 is a real-time **EIT (electrical impedance tomography) acquisition
+front-end**. It injects a DDS-generated sine current into a ring of electrodes
+through a rotating injection pair, measures the body's response with an LTC2500
+32-bit ADC through a second rotating sense mux, and streams every sample to a host
+PC over raw-UDP gigabit Ethernet. A full frame is 8 injection positions × 8 sense
+positions; image reconstruction happens on the host, not the FPGA. The MicroBlaze
+only configures registers and starts the ADC — every real-time loop is pure
+hardware.
+
+```
+ EXCITATION (loop)                          ACQUISITION                 STREAMING
+ ┌────────────────────────────────────┐
+ │ addr_gen ──lut_addr──▶ 4× sine BRAM│    electrodes ─▶ sense mux     host PC (UDP)
+ │    ▲                       │       │         │      (IP_Three)          ▲
+ │ clk_A..D             sine_data_A..D│         ▼           │              │ RGMII
+ │    │                       ▼       │      LTC2500 ◀──mux_0              │ 125 MHz
+ │  FSM (AD5686R quad DAC driver) ────┼──▶ ltc_driver_fsm ──o_eth_data──▶ UDP block
+ └────│───────────────────────────────┘      ▲ (32-bit, DF=64)  (byte)     ▲
+      │ done_tick per sine period            │                  via        │
+      ▼                                      │              ethernet_debug │
+   IP_1 (cycle sequencer) ──▶ IP_Two      axi_gpio_0 ch2      pacer + dist_mem_gen
+   sync / EIT_IN_EN gate      mux_dac1/2  (i_start, from SW)  4×2KB ping-pong banks
+                              (injection pair)
+```
+
+### Excitation (all in the 100 MHz domain, DAC loop self-timed)
+
+- **`addr_gen_1_0`** — four independent 32-bit DDS phase accumulators (A–D).
+  Software sets `phase_step` (frequency) in slv_reg0–3 and `phase_offset` (phase)
+  in slv_reg4–7. Each accumulator advances once per `clk_A..D` strobe from the
+  FSM; `acc[15:0] + offset` addresses its 64k×16 sine BRAM (`coe/`).
+- **`FSM_1_0`** — AD5686R quad-DAC SPI driver ([full README](ip_repo/FSM_1_0/README.md)):
+  serializes the four sine samples each update, latches all channels at once via
+  LDAC, and emits the `clk_A..D` strobes — so the DAC update rate *is* the DDS
+  sample rate. SCLK divider and update period are software-programmable.
+- **`IP_1_1_0`** — sine-period / electrode-cycle sequencer. On `negedge CLK_A` it
+  detects the channel-A accumulator wrapping (`address + phase_step ≥ 0x10000`),
+  i.e. one complete sine period: pulses `done_tick`, counts 8 periods in
+  `chanel_cnt`, pulses `total_tick` after all 8, and briefly drops
+  `enable`/`EIT_IN_EN_0` + raises `sync` (DDS phase reset) at each boundary as a
+  switch guard.
+- **`IP_Two_1_0`** — injection mux rotation: on each `done_tick` it steps
+  `mux_dac1`/`mux_dac2` through 8 hardcoded 3-bit code pairs (adjacent-pair
+  current injection). Software bits: `EIT_IN_EN` (reg0), `gain` (reg1),
+  `reset` (reg2).
+
+### Acquisition
+
+- **`ltc_driver_fsm_1_1`** (SystemVerilog, 11-state FSM, 100 MHz) — LTC2500
+  driver: generates `o_mclk` conversion strobes with a built-in ×64 down-sampling
+  factor, waits on `i_busy`/`i_drl` (CDC-synchronized), shifts the 32-bit result
+  in over SPI (`o_sckb`/`i_sdob`), and streams it out as 4 bytes on
+  `o_eth_data`/`o_eth_valid`. Started by software via `axi_gpio_0` channel 2 →
+  `i_start` (so nothing runs until the MicroBlaze app raises it).
+- **`IP_Three_1_0`** — sense-side mux: 2-FF-synchronizes `o_mclk`, counts its
+  falling edges, and rotates `mux_0` through 8 codes; `enable` from slv_reg0.
+
+### Streaming
+
+- **`ethernet_debug_1_0`** — pacer/repacker between ADC and packet buffer:
+  collects 4 bytes into a 32-bit latch, then re-emits each byte with a `clk_trg`
+  strobe (5-high-of-25 clocks at 100 MHz) alongside `data_out`.
+- **`UDP_v5_3`** — raw-UDP TX-only MAC. `addr_sel`/`wirte_en_gen` write the paced
+  bytes into `dist_mem_gen_0` (8192×8, treated as 4×2KB ping-pong banks); after
+  ~1040 bytes a bank closes and `start_sending` fires; `byte_data` + `data.vhd`
+  wrap the bank in UDP/IP headers, `add_crc32` and `add_preamble` finish the
+  frame, and RGMII ODDRs ship it at 125 MHz (generated by the block's *internal*
+  PLL from 100 MHz; `eth_txck` is the 90°-shifted copy).
+
+### Measurement cycle timeline
+
+1. Each DAC update = one DDS sample (4 channels, LDAC-synchronized).
+2. Channel-A phase wrap = one sine period → `done_tick` → injection pair rotates.
+3. 8 periods → `total_tick` → injection pattern complete.
+4. In parallel, every `o_mclk` group = one LTC2500 sample → 4 bytes → packet
+   buffer; sense mux rotates on `o_mclk`.
+5. Every full buffer bank → one UDP frame on the wire.
+
+### Caveats (inherited design traits, not new bugs)
+
+- `IP_1`/`IP_Two`/`addr_gen` clock logic on gated strobes (`negedge clk_A`,
+  `negedge done_tick`) instead of a synchronous enable — fine at these rates but
+  not CDC-clean; ILA/timing analysis around those paths deserves skepticism.
+- `FSM`'s `rst_n`/`update_tick` and `addr_gen`'s tie-offs are constant-1
+  (`xlconstant`), so the DAC loop free-runs unless the FSM's update-period
+  register is programmed.
+- The UDP block receives `clk_wiz_1`'s 125 MHz on its `clk_125MHz` port for the
+  packet pipeline but drives its ODDRs from its own internal PLL's 125 MHz — two
+  unrelated-phase 125 MHz domains cross at the `dout`/`doutctl` handoff. It
+  works, but treat it as fragile when editing `interface.vhd`.

@@ -1,11 +1,11 @@
 sdt: hw_artifacts/microblaze_0_baremetal.dts
 family: kintex7
-path: E:\Vivado_Genesys2_main\TIS_EIT_V2\vitis\ltc2500_adc0_platform\microblaze_0\standalone_microblaze_0\bsp
-config: default
+path: E:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp
+config: None
 os: standalone
 os_info:
   standalone:
-    path: E:\Xilinx\2025.2\Vitis\data\embeddedsw\lib\bsp\standalone_v9_4
+    path: D:\AMDDesignTools\2025.2\Vitis\data\embeddedsw\lib\bsp\standalone_v9_4
 os_config:
   standalone:
     standalone_enable_sw_intrusive_profiling:
@@ -150,24 +150,18 @@ include_folder: include
 lib_folder: lib
 libsrc_folder: libsrc
 drv_info:
-  FSM_0: None
-  IP_1_0: None
-  IP_Three_0: None
-  IP_Two_0: None
   UDP_0: None
-  addr_gen_0: None
   axi_gpio_0:
     driver: gpio
     ip_name: axi_gpio
-    path: E:\Xilinx\2025.2\Vitis\data\embeddedsw\XilinxProcessorIPLib\drivers\gpio_v4_12
-  ethernet_debug_0: None
+    path: D:\AMDDesignTools\2025.2\Vitis\data\embeddedsw\XilinxProcessorIPLib\drivers\gpio_v4_12
   microblaze_0_local_memory_dlmb_bram_if_cntlr:
     driver: bram
     ip_name: lmb_bram_if_cntlr
-    path: E:\Xilinx\2025.2\Vitis\data\embeddedsw\XilinxProcessorIPLib\drivers\bram_v4_13
+    path: D:\AMDDesignTools\2025.2\Vitis\data\embeddedsw\XilinxProcessorIPLib\drivers\bram_v4_13
 lib_info:
   xiltimer:
-    path: E:\Xilinx\2025.2\Vitis\data\embeddedsw\lib\sw_services\xiltimer_v2_3
+    path: D:\AMDDesignTools\2025.2\Vitis\data\embeddedsw\lib\sw_services\xiltimer_v2_3
     examples: {}
 lib_config:
   xiltimer:

@@ -1,0 +1,4 @@
+domain_path: E:\Vivado_Genesys2_main\TIS_EIT_V2\vitis\ltc2500_adc0_platform\export\ltc2500_adc0_platform\sw\standalone_microblaze_0
+app_src_dir: E:\Vivado\2025.2\Vitis\data\embeddedsw\lib\sw_apps\empty_application
+template: empty_application
+lang: c

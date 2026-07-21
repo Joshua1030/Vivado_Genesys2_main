@@ -41,6 +41,7 @@ vivado_pid*.zip
 # 4. VITIS UNIFIED IDE (2025.2+)
 # -----------------------------------------------------------------------------
 # Ignore the disposable workspace wrapper
+TIS_EIT_V0/
 NetronV2/NetronV2WS_old/
 vitis_workspace/
 .metadata/

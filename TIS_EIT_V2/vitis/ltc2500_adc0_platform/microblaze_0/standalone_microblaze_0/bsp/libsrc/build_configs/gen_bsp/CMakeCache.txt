@@ -294,6 +294,15 @@ XILTIMER_tick_timer:STRING=None
 YOCTO:BOOL=OFF
 
 //Value Computed by CMake
+bram_BINARY_DIR:STATIC=E:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/libsrc/build_configs/gen_bsp/libsrc/bram/src
+
+//Value Computed by CMake
+bram_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+bram_SOURCE_DIR:STATIC=E:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/libsrc/bram/src
+
+//Value Computed by CMake
 bsp_BINARY_DIR:STATIC=E:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/libsrc/build_configs/gen_bsp
 
 //Value Computed by CMake
@@ -301,6 +310,33 @@ bsp_IS_TOP_LEVEL:STATIC=ON
 
 //Value Computed by CMake
 bsp_SOURCE_DIR:STATIC=E:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp
+
+//Value Computed by CMake
+common_BINARY_DIR:STATIC=E:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/libsrc/build_configs/gen_bsp/libsrc/common/src
+
+//Value Computed by CMake
+common_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+common_SOURCE_DIR:STATIC=E:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/libsrc/common/src
+
+//Value Computed by CMake
+gpio_BINARY_DIR:STATIC=E:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/libsrc/build_configs/gen_bsp/libsrc/gpio/src
+
+//Value Computed by CMake
+gpio_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+gpio_SOURCE_DIR:STATIC=E:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/libsrc/gpio/src
+
+//Value Computed by CMake
+libxil_BINARY_DIR:STATIC=E:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/libsrc/build_configs/gen_bsp/libsrc
+
+//Value Computed by CMake
+libxil_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+libxil_SOURCE_DIR:STATIC=E:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/libsrc
 
 //Archiver used to archive libraries for both BSP generation as
 // well as applications.
@@ -479,7 +515,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=8
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=12
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP

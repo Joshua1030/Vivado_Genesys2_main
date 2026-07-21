@@ -175,46 +175,6 @@
 		compatible = "simple-bus";
 		#address-cells = <1>;
 		#size-cells = <1>;
-		FSM_0: FSM@44a20000 {
-			xlnx,s00-axi-data-width = <32>;
-			compatible = "xlnx,FSM-1.0";
-			status = "okay";
-			xlnx,s00-axi-addr-width = <6>;
-			xlnx,ip-name = "FSM";
-			xlnx,edk-iptype = "PERIPHERAL";
-			reg = <0x44a20000 0x10000>;
-			xlnx,name = "FSM_0";
-		};
-		IP_1_0: IP_1@44a30000 {
-			xlnx,s00-axi-data-width = <32>;
-			compatible = "xlnx,IP-1-1.0";
-			status = "okay";
-			xlnx,s00-axi-addr-width = <7>;
-			xlnx,ip-name = "IP_1";
-			xlnx,edk-iptype = "PERIPHERAL";
-			reg = <0x44a30000 0x10000>;
-			xlnx,name = "IP_1_0";
-		};
-		IP_Three_0: IP_Three@44a40000 {
-			xlnx,s00-axi-data-width = <32>;
-			compatible = "xlnx,IP-Three-1.0";
-			status = "okay";
-			xlnx,s00-axi-addr-width = <4>;
-			xlnx,ip-name = "IP_Three";
-			xlnx,edk-iptype = "PERIPHERAL";
-			reg = <0x44a40000 0x10000>;
-			xlnx,name = "IP_Three_0";
-		};
-		IP_Two_0: IP_Two@44a50000 {
-			xlnx,s00-axi-data-width = <32>;
-			compatible = "xlnx,IP-Two-1.0";
-			status = "okay";
-			xlnx,s00-axi-addr-width = <7>;
-			xlnx,ip-name = "IP_Two";
-			xlnx,edk-iptype = "PERIPHERAL";
-			reg = <0x44a50000 0x10000>;
-			xlnx,name = "IP_Two_0";
-		};
 		UDP_0: UDP@44a00000 {
 			xlnx,s00-axi-data-width = <32>;
 			compatible = "xlnx,UDP-5.3";
@@ -224,16 +184,6 @@
 			xlnx,edk-iptype = "PERIPHERAL";
 			reg = <0x44a00000 0x10000>;
 			xlnx,name = "UDP_0";
-		};
-		addr_gen_0: addr_gen@44a10000 {
-			xlnx,s00-axi-data-width = <32>;
-			compatible = "xlnx,addr-gen-1.0";
-			status = "okay";
-			xlnx,s00-axi-addr-width = <6>;
-			xlnx,ip-name = "addr_gen";
-			xlnx,edk-iptype = "PERIPHERAL";
-			reg = <0x44a10000 0x10000>;
-			xlnx,name = "addr_gen_0";
 		};
 		axi_gpio_0: gpio@40000000 {
 			xlnx,gpio-board-interface = "Custom";
@@ -262,16 +212,6 @@
 			xlnx,tri-default = <0xffffffff>;
 			xlnx,name = "axi_gpio_0";
 			xlnx,all-inputs = <1>;
-		};
-		ethernet_debug_0: ethernet_debug@44a60000 {
-			xlnx,s00-axi-data-width = <32>;
-			compatible = "xlnx,ethernet-debug-1.0";
-			status = "okay";
-			xlnx,s00-axi-addr-width = <4>;
-			xlnx,ip-name = "ethernet_debug";
-			xlnx,edk-iptype = "PERIPHERAL";
-			reg = <0x44a60000 0x10000>;
-			xlnx,name = "ethernet_debug_0";
 		};
 		microblaze_0_local_memory_dlmb_bram_if_cntlr: lmb_bram_if_cntlr@0 {
 			xlnx,edk-special = "BRAM_CTRL";

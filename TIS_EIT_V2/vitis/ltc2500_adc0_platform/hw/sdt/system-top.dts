@@ -24,13 +24,7 @@
 		address-map = <0x00000000 &microblaze_0_local_memory_dlmb_bram_if_cntlr_memory 0x00000000 0x4000>, 
 			      <0x00000000 &microblaze_0_local_memory_dlmb_bram_if_cntlr 0x00000000 0x4000>, 
 			      <0x40000000 &axi_gpio_0 0x40000000 0x10000>, 
-			      <0x44a00000 &UDP_0 0x44a00000 0x10000>, 
-			      <0x44a10000 &addr_gen_0 0x44a10000 0x10000>, 
-			      <0x44a20000 &FSM_0 0x44a20000 0x10000>, 
-			      <0x44a30000 &IP_1_0 0x44a30000 0x10000>, 
-			      <0x44a40000 &IP_Three_0 0x44a40000 0x10000>, 
-			      <0x44a50000 &IP_Two_0 0x44a50000 0x10000>, 
-			      <0x44a60000 &ethernet_debug_0 0x44a60000 0x10000>;
+			      <0x44a00000 &UDP_0 0x44a00000 0x10000>;
 		#ranges-address-cells = <0x1>;
 		#ranges-size-cells = <0x1>;
 	};

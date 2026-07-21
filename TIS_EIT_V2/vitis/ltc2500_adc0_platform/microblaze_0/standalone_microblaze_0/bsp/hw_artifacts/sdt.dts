@@ -10,7 +10,7 @@
         speed_grade = "2";
 
         cpus_microblaze_0: cpus_microblaze@0 {
-                phandle = <0xd>;
+                phandle = <0x7>;
                 #cpu-mask-cells = <0x1>;
                 compatible = "cpus,cluster";
                 #address-cells = <0x1>;
@@ -18,18 +18,12 @@
                 address-map = <0x0 &microblaze_0_local_memory_dlmb_bram_if_cntlr_memory 0x0 0x4000>,
                  <0x0 &microblaze_0_local_memory_dlmb_bram_if_cntlr 0x0 0x4000>,
                  <0x40000000 &axi_gpio_0 0x40000000 0x10000>,
-                 <0x44a00000 &UDP_0 0x44a00000 0x10000>,
-                 <0x44a10000 &addr_gen_0 0x44a10000 0x10000>,
-                 <0x44a20000 &FSM_0 0x44a20000 0x10000>,
-                 <0x44a30000 &IP_1_0 0x44a30000 0x10000>,
-                 <0x44a40000 &IP_Three_0 0x44a40000 0x10000>,
-                 <0x44a50000 &IP_Two_0 0x44a50000 0x10000>,
-                 <0x44a60000 &ethernet_debug_0 0x44a60000 0x10000>;
+                 <0x44a00000 &UDP_0 0x44a00000 0x10000>;
                 #ranges-address-cells = <0x1>;
                 #ranges-size-cells = <0x1>;
 
                 microblaze_0: cpu@0 {
-                        phandle = <0xe>;
+                        phandle = <0x8>;
                         xlnx,reset-msr-dce = <0x0>;
                         model = "microblaze,11.0";
                         xlnx,addr-tag-bits = <0x0>;
@@ -179,12 +173,12 @@
         };
 
         clock: clocks {
-                phandle = <0xf>;
+                phandle = <0x9>;
                 #address-cells = <0x1>;
                 #size-cells = <0x0>;
 
                 clk_cpu_0: clk_cpu@0 {
-                        phandle = <0x10>;
+                        phandle = <0xa>;
                         compatible = "fixed-clock";
                         reg = <0x0>;
                         clock-frequency = <0x5f5e100>;
@@ -193,7 +187,7 @@
                 };
 
                 clk_bus_0: clk_bus_0@1 {
-                        phandle = <0xc>;
+                        phandle = <0x6>;
                         compatible = "fixed-clock";
                         reg = <0x1>;
                         clock-frequency = <0x5f5e100>;
@@ -203,59 +197,11 @@
         };
 
         amba_pl: amba_pl {
-                phandle = <0xb>;
+                phandle = <0x5>;
                 ranges;
                 compatible = "simple-bus";
                 #address-cells = <0x1>;
                 #size-cells = <0x1>;
-
-                FSM_0: FSM@44a20000 {
-                        phandle = <0x6>;
-                        xlnx,s00-axi-data-width = <0x20>;
-                        compatible = "xlnx,FSM-1.0";
-                        status = "okay";
-                        xlnx,s00-axi-addr-width = <0x6>;
-                        xlnx,ip-name = "FSM";
-                        xlnx,edk-iptype = "PERIPHERAL";
-                        reg = <0x44a20000 0x10000>;
-                        xlnx,name = "FSM_0";
-                };
-
-                IP_1_0: IP_1@44a30000 {
-                        phandle = <0x7>;
-                        xlnx,s00-axi-data-width = <0x20>;
-                        compatible = "xlnx,IP-1-1.0";
-                        status = "okay";
-                        xlnx,s00-axi-addr-width = <0x7>;
-                        xlnx,ip-name = "IP_1";
-                        xlnx,edk-iptype = "PERIPHERAL";
-                        reg = <0x44a30000 0x10000>;
-                        xlnx,name = "IP_1_0";
-                };
-
-                IP_Three_0: IP_Three@44a40000 {
-                        phandle = <0x8>;
-                        xlnx,s00-axi-data-width = <0x20>;
-                        compatible = "xlnx,IP-Three-1.0";
-                        status = "okay";
-                        xlnx,s00-axi-addr-width = <0x4>;
-                        xlnx,ip-name = "IP_Three";
-                        xlnx,edk-iptype = "PERIPHERAL";
-                        reg = <0x44a40000 0x10000>;
-                        xlnx,name = "IP_Three_0";
-                };
-
-                IP_Two_0: IP_Two@44a50000 {
-                        phandle = <0x9>;
-                        xlnx,s00-axi-data-width = <0x20>;
-                        compatible = "xlnx,IP-Two-1.0";
-                        status = "okay";
-                        xlnx,s00-axi-addr-width = <0x7>;
-                        xlnx,ip-name = "IP_Two";
-                        xlnx,edk-iptype = "PERIPHERAL";
-                        reg = <0x44a50000 0x10000>;
-                        xlnx,name = "IP_Two_0";
-                };
 
                 UDP_0: UDP@44a00000 {
                         phandle = <0x4>;
@@ -267,18 +213,6 @@
                         xlnx,edk-iptype = "PERIPHERAL";
                         reg = <0x44a00000 0x10000>;
                         xlnx,name = "UDP_0";
-                };
-
-                addr_gen_0: addr_gen@44a10000 {
-                        phandle = <0x5>;
-                        xlnx,s00-axi-data-width = <0x20>;
-                        compatible = "xlnx,addr-gen-1.0";
-                        status = "okay";
-                        xlnx,s00-axi-addr-width = <0x6>;
-                        xlnx,ip-name = "addr_gen";
-                        xlnx,edk-iptype = "PERIPHERAL";
-                        reg = <0x44a10000 0x10000>;
-                        xlnx,name = "addr_gen_0";
                 };
 
                 axi_gpio_0: gpio@40000000 {
@@ -309,18 +243,6 @@
                         xlnx,tri-default = <0xffffffff>;
                         xlnx,name = "axi_gpio_0";
                         xlnx,all-inputs = <0x1>;
-                };
-
-                ethernet_debug_0: ethernet_debug@44a60000 {
-                        phandle = <0xa>;
-                        xlnx,s00-axi-data-width = <0x20>;
-                        compatible = "xlnx,ethernet-debug-1.0";
-                        status = "okay";
-                        xlnx,s00-axi-addr-width = <0x4>;
-                        xlnx,ip-name = "ethernet_debug";
-                        xlnx,edk-iptype = "PERIPHERAL";
-                        reg = <0x44a60000 0x10000>;
-                        xlnx,name = "ethernet_debug_0";
                 };
 
                 microblaze_0_local_memory_dlmb_bram_if_cntlr: lmb_bram_if_cntlr@0 {
@@ -372,7 +294,7 @@
                 };
 
                 microblaze_0_local_memory_ilmb_bram_if_cntlr: microblaze_0_local_memory_ilmb_bram_if_cntlr@0 {
-                        phandle = <0x11>;
+                        phandle = <0xb>;
                         xlnx,edk-special = "BRAM_CTRL";
                         xlnx,write-access = <0x2>;
                         compatible = "xlnx,lmb-bram-if-cntlr-4.0", "xlnx,axi-bram-ctrl";
@@ -441,14 +363,8 @@
                 clk_cpu_0 = "/clocks/clk_cpu@0";
                 clk_bus_0 = "/clocks/clk_bus_0@1";
                 amba_pl = "/amba_pl";
-                FSM_0 = "/amba_pl/FSM@44a20000";
-                IP_1_0 = "/amba_pl/IP_1@44a30000";
-                IP_Three_0 = "/amba_pl/IP_Three@44a40000";
-                IP_Two_0 = "/amba_pl/IP_Two@44a50000";
                 UDP_0 = "/amba_pl/UDP@44a00000";
-                addr_gen_0 = "/amba_pl/addr_gen@44a10000";
                 axi_gpio_0 = "/amba_pl/gpio@40000000";
-                ethernet_debug_0 = "/amba_pl/ethernet_debug@44a60000";
                 microblaze_0_local_memory_dlmb_bram_if_cntlr = "/amba_pl/lmb_bram_if_cntlr@0";
                 microblaze_0_local_memory_ilmb_bram_if_cntlr = "/amba_pl/microblaze_0_local_memory_ilmb_bram_if_cntlr@0";
                 microblaze_0_local_memory_dlmb_bram_if_cntlr_memory = "/memory@0";
