@@ -1,9 +1,27 @@
+FSM_0:
+- FSM
+- None
+IP_1_0:
+- IP_1
+- None
+IP_Three_0:
+- IP_Three
+- None
+IP_Two_0:
+- IP_Two
+- None
 UDP_0:
 - UDP
+- None
+addr_gen_0:
+- addr_gen
 - None
 axi_gpio_0:
 - axi_gpio
 - gpio
+ethernet_debug_0:
+- ethernet_debug
+- None
 microblaze_0_local_memory_dlmb_bram_if_cntlr:
 - lmb_bram_if_cntlr
 - bram

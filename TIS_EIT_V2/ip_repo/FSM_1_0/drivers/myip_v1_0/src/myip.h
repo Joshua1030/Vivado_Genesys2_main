@@ -7,6 +7,14 @@
 #include "xil_types.h"
 #include "xstatus.h"
 
+/* FSM register map:
+ *   REG0 (0x00): SPI SCLK divider N (SCLK = clk/(2N); 0 = default N=2)
+ *   REG1 (0x04): DAC update period in clk cycles (0 = free-run); sample rate = clk / REG1
+ *   REG2 (0x08): channel A amplitude gain, Q12 (4096 = x1.0; 0 = unity; e.g. 410 ~ /10)
+ *   REG3 (0x0C): channel B amplitude gain, Q12
+ *   REG4 (0x10): channel C amplitude gain, Q12
+ *   REG5 (0x14): channel D amplitude gain, Q12
+ * Gain pivots on 0x8000 mid-scale, so the DC common mode is unchanged. */
 #define MYIP_S00_AXI_SLV_REG0_OFFSET 0
 #define MYIP_S00_AXI_SLV_REG1_OFFSET 4
 #define MYIP_S00_AXI_SLV_REG2_OFFSET 8

@@ -47,9 +47,33 @@
 #define XPAR_XGPIO_0_INTERRUPT_PRESENT 0x0
 #define XPAR_XGPIO_0_IS_DUAL 0x1
 
+/* Definitions for peripheral FSM_0 */
+#define XPAR_FSM_0_BASEADDR 0x44a20000
+#define XPAR_FSM_0_HIGHADDR 0x44a2ffff
+
+/* Definitions for peripheral IP_1_0 */
+#define XPAR_IP_1_0_BASEADDR 0x44a30000
+#define XPAR_IP_1_0_HIGHADDR 0x44a3ffff
+
+/* Definitions for peripheral IP_THREE_0 */
+#define XPAR_IP_THREE_0_BASEADDR 0x44a40000
+#define XPAR_IP_THREE_0_HIGHADDR 0x44a4ffff
+
+/* Definitions for peripheral IP_TWO_0 */
+#define XPAR_IP_TWO_0_BASEADDR 0x44a50000
+#define XPAR_IP_TWO_0_HIGHADDR 0x44a5ffff
+
 /* Definitions for peripheral UDP_0 */
 #define XPAR_UDP_0_BASEADDR 0x44a00000
 #define XPAR_UDP_0_HIGHADDR 0x44a0ffff
+
+/* Definitions for peripheral ADDR_GEN_0 */
+#define XPAR_ADDR_GEN_0_BASEADDR 0x44a10000
+#define XPAR_ADDR_GEN_0_HIGHADDR 0x44a1ffff
+
+/* Definitions for peripheral ETHERNET_DEBUG_0 */
+#define XPAR_ETHERNET_DEBUG_0_BASEADDR 0x44a60000
+#define XPAR_ETHERNET_DEBUG_0_HIGHADDR 0x44a6ffff
 
 #define XPAR_LMB_BRAM_0_BASEADDRESS 0x0
 #define XPAR_LMB_BRAM_0_HIGHADDRESS 0x3fff

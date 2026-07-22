@@ -484,6 +484,42 @@ input  wire        clk,            // AXI 主时钟 (例如 100MHz)
     localparam [3:0] DAC_CMD_WRITE_UPDATE = 4'b0001;
 
     // =====================================================================
+    // 2b. 幅度增益级 (Q12 定点乘法，保持共模电压不变)
+    //     out = CM + (sine - CM) * gain，其中 CM = 0x8000 中间码 (COE 直流中点)。
+    //     只缩放围绕中点的交流摆幅，直流共模码保持 0x8000 不变。
+    //     slv_reg2..5[15:0] = 各通道增益，Q12 格式 (4096 = x1.0)；0 映射为单位增益，
+    //     以保留未配置时的满幅默认行为 (与 slv_reg0/1 "0=默认" 约定一致)。
+    // =====================================================================
+    localparam signed [17:0] CM_LEVEL   = 18'sd32768;  // 0x8000 中间码 (共模)
+    localparam integer       GAIN_SHIFT = 12;          // Q12 定点
+    localparam [15:0]        GAIN_UNITY = 16'd4096;     // Q12 下的 1.0
+
+    // 按当前正在装载的通道 (ch_cnt) 选择原始采样值与增益字
+    reg [15:0] gain_sample;
+    reg [15:0] gain_word;
+    always @(*) begin
+        case (ch_cnt)
+            2'd0: begin gain_sample = sine_data_A; gain_word = slv_reg2[15:0]; end
+            2'd1: begin gain_sample = sine_data_B; gain_word = slv_reg3[15:0]; end
+            2'd2: begin gain_sample = sine_data_C; gain_word = slv_reg4[15:0]; end
+            2'd3: begin gain_sample = sine_data_D; gain_word = slv_reg5[15:0]; end
+        endcase
+    end
+
+    // 0 => 单位增益 (保留未配置板卡的满幅行为)
+    wire [15:0] gain_eff = (gain_word == 16'd0) ? GAIN_UNITY : gain_word;
+
+    // 围绕共模做偏移、Q12 缩放、四舍五入、恢复共模，最后饱和到 [0,65535]
+    wire signed [17:0] gain_offset  = $signed({2'b00, gain_sample}) - CM_LEVEL;   // -32768..+32767
+    wire signed [34:0] gain_product = gain_offset * $signed({1'b0, gain_eff});    // Q12 结果
+    wire signed [34:0] gain_rounded = gain_product + 35'sd2048;                   // +0.5 LSB (2^11)
+    wire signed [22:0] gain_scaled  = gain_rounded >>> GAIN_SHIFT;                // 移回整数 LSB
+    wire signed [23:0] gain_sum     = gain_scaled + CM_LEVEL;                     // 恢复共模
+    wire [15:0]        dac_word     = (gain_sum < 24'sd0)     ? 16'h0000 :
+                                      (gain_sum > 24'sd65535) ? 16'hFFFF :
+                                                                gain_sum[15:0];
+
+    // =====================================================================
     // 3. 任务 A：SPI 时钟分频逻辑
     // =====================================================================
     always @(posedge clk or negedge rst_n) begin
@@ -638,11 +674,12 @@ input  wire        clk,            // AXI 主时钟 (例如 100MHz)
                     bit_cnt       <= 6'b0;
                     sync_high_cnt <= 3'b0; // 顺手把等待计数器清零，为下一次做准备
                     dac_sync      <= 1'b1; 
+                    // dac_word 已按 ch_cnt 选出对应通道并施加增益，只有通道选择位不同
                     case (ch_cnt)
-                        2'd0: tx_shift_reg <= {DAC_CMD_WRITE_UPDATE, 4'b0001, sine_data_A, 8'h00}; 
-                        2'd1: tx_shift_reg <= {DAC_CMD_WRITE_UPDATE, 4'b0010, sine_data_B, 8'h00}; 
-                        2'd2: tx_shift_reg <= {DAC_CMD_WRITE_UPDATE, 4'b0100, sine_data_C, 8'h00}; 
-                        2'd3: tx_shift_reg <= {DAC_CMD_WRITE_UPDATE, 4'b1000, sine_data_D, 8'h00}; 
+                        2'd0: tx_shift_reg <= {DAC_CMD_WRITE_UPDATE, 4'b0001, dac_word, 8'h00};
+                        2'd1: tx_shift_reg <= {DAC_CMD_WRITE_UPDATE, 4'b0010, dac_word, 8'h00};
+                        2'd2: tx_shift_reg <= {DAC_CMD_WRITE_UPDATE, 4'b0100, dac_word, 8'h00};
+                        2'd3: tx_shift_reg <= {DAC_CMD_WRITE_UPDATE, 4'b1000, dac_word, 8'h00};
                     endcase
                 end
                 
