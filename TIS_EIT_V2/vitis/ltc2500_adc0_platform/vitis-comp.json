@@ -3,7 +3,7 @@
   "type": "PLATFORM",
   "configuration": {
     "description": "",
-    "xsa": "E:/Vivado_Genesys2_main/TIS_EIT_V2/ltc2500_bd_wrapper.xsa",
+    "xsa": "e:/Vivado_Genesys2_main/TIS_EIT_V2/ltc2500_bd_wrapper.xsa",
     "xsaPathInPlatform": "ltc2500_adc0_platform/hw/ltc2500_bd_wrapper.xsa",
     "emulationXsa": "",
     "emulationXsaPathInPlatform": "",

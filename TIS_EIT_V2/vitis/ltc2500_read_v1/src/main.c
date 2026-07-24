@@ -67,9 +67,20 @@ int main() {
     *(ip1_base) = *(addr_gen_base); // ip1 phase step input, same as phase step A
     
     *three_addr=0x0000;//ADC enable
-    *base_addr=0x0000; //eit_in_enable
-    *(base_addr+1)=0x0001; //offset eit
-    *(base_addr+2)=0x0001; //reset eit
+
+    // ---- IP_Two (0x44A50000) 控制寄存器 ----
+    //   reg0[0] = EIT_IN_EN, reg1[0] = gain, reg2[0] = reset
+    //   reg3[0] = MUX 模式  (0 = 自动扫描/默认, 1 = 手动停靠)
+    //   reg4[2:0] = 手动通道 0..7 (仅在 reg3[0]=1 时生效)
+    // 手动模式与自动模式共用同一张换挡表，源/感 MUX 永不短接。
+    #define MUX_MODE_MANUAL   0   // 置 1 进入手动模式，将 MUX 停靠在某一通道
+    #define MUX_MANUAL_CHAN   0   // 手动模式下的通道号 0..7
+
+    *base_addr=0x0000;      //reg0: EIT_IN_EN
+    *(base_addr+1)=0x0001;  //reg1: gain
+    *(base_addr+2)=0x0001;  //reg2: reset
+    *(base_addr+3)=MUX_MODE_MANUAL; //reg3: MUX 模式 (0=自动, 1=手动)
+    *(base_addr+4)=MUX_MANUAL_CHAN; //reg4: 手动通道 0..7
     // 新版本驱动初始化：直接传入基地址
     status = XGpio_Initialize(&Gpio, GPIO_BASEADDR); 
     

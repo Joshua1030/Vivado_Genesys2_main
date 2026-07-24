@@ -1,6 +1,6 @@
 sdt: hw_artifacts/microblaze_0_baremetal.dts
 family: kintex7
-path: E:\Vivado_Genesys2_main\TIS_EIT_V2\vitis\ltc2500_adc0_platform\microblaze_0\standalone_microblaze_0\bsp
+path: e:\Vivado_Genesys2_main\TIS_EIT_V2\vitis\ltc2500_adc0_platform\microblaze_0\standalone_microblaze_0\bsp
 config: None
 os: standalone
 os_info:

@@ -29,7 +29,7 @@ CMAKE_ASM_COMPILER_AR:FILEPATH=E:/Xilinx/2025.2/Vitis/gnu/microblaze/nt/bin/mb-g
 CMAKE_ASM_COMPILER_RANLIB:FILEPATH=E:/Xilinx/2025.2/Vitis/gnu/microblaze/nt/bin/mb-gcc-ranlib.exe
 
 //ASMFLAGS
-CMAKE_ASM_FLAGS:STRING=  -mlittle-endian -mxl-soft-mul -mcpu=v11.0 -DSDT  -MMD -MP -specs=E:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/Xilinx.spec -IE:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/include
+CMAKE_ASM_FLAGS:STRING=  -mlittle-endian -mxl-soft-mul -mcpu=v11.0 -DSDT  -MMD -MP -specs=e:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/Xilinx.spec -Ie:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/include
 
 //Flags used by the ASM compiler during DEBUG builds.
 CMAKE_ASM_FLAGS_DEBUG:STRING=-g
@@ -56,7 +56,7 @@ CMAKE_CXX_COMPILER_AR:FILEPATH=E:/Xilinx/2025.2/Vitis/gnu/microblaze/nt/bin/mb-g
 CMAKE_CXX_COMPILER_RANLIB:FILEPATH=E:/Xilinx/2025.2/Vitis/gnu/microblaze/nt/bin/mb-gcc-ranlib.exe
 
 //CXXFLAGS
-CMAKE_CXX_FLAGS:STRING=  -mlittle-endian -mxl-soft-mul -mcpu=v11.0 -DSDT  -MMD -MP -specs=E:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/Xilinx.spec -IE:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/include
+CMAKE_CXX_FLAGS:STRING=  -mlittle-endian -mxl-soft-mul -mcpu=v11.0 -DSDT  -MMD -MP -specs=e:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/Xilinx.spec -Ie:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/include
 
 //Flags used by the CXX compiler during DEBUG builds.
 CMAKE_CXX_FLAGS_DEBUG:STRING=-g
@@ -82,7 +82,7 @@ CMAKE_C_COMPILER_AR:FILEPATH=E:/Xilinx/2025.2/Vitis/gnu/microblaze/nt/bin/mb-gcc
 CMAKE_C_COMPILER_RANLIB:FILEPATH=E:/Xilinx/2025.2/Vitis/gnu/microblaze/nt/bin/mb-gcc-ranlib.exe
 
 //CFLAGS
-CMAKE_C_FLAGS:STRING=  -mlittle-endian -mxl-soft-mul -mcpu=v11.0 -DSDT  -MMD -MP -specs=E:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/Xilinx.spec -IE:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/include
+CMAKE_C_FLAGS:STRING=  -mlittle-endian -mxl-soft-mul -mcpu=v11.0 -DSDT  -MMD -MP -specs=e:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/Xilinx.spec -Ie:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/include
 
 //Flags used by the C compiler during DEBUG builds.
 CMAKE_C_FLAGS_DEBUG:STRING=-g
@@ -121,13 +121,13 @@ CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO:STRING=
 CMAKE_FIND_PACKAGE_REDIRECTS_DIR:STATIC=E:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/libsrc/build_configs/gen_bsp/CMakeFiles/pkgRedirects
 
 //No help, variable specified on the command line.
-CMAKE_INCLUDE_PATH:UNINITIALIZED=E:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/include
+CMAKE_INCLUDE_PATH:UNINITIALIZED=e:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/include
 
 //Install path prefix, prepended onto install directories.
 CMAKE_INSTALL_PREFIX:PATH=C:/Program Files (x86)/bsp
 
 //No help, variable specified on the command line.
-CMAKE_LIBRARY_PATH:UNINITIALIZED=E:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/lib
+CMAKE_LIBRARY_PATH:UNINITIALIZED=e:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/lib
 
 //Path to a program.
 CMAKE_LINKER:FILEPATH=E:/Xilinx/2025.2/Vitis/gnu/microblaze/nt/bin/mb-ld.exe
@@ -158,7 +158,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELEASE:STRING=
 CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO:STRING=
 
 //No help, variable specified on the command line.
-CMAKE_MODULE_PATH:UNINITIALIZED=E:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp
+CMAKE_MODULE_PATH:UNINITIALIZED=e:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp
 
 //Path to a program.
 CMAKE_NM:FILEPATH=E:/Xilinx/2025.2/Vitis/gnu/microblaze/nt/bin/mb-nm.exe
@@ -214,7 +214,7 @@ CMAKE_SKIP_INSTALL_RPATH:BOOL=NO
 CMAKE_SKIP_RPATH:BOOL=NO
 
 //Specs file path for using CMAKE toolchain files
-CMAKE_SPECS_FILE:STRING=E:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/Xilinx.spec
+CMAKE_SPECS_FILE:STRING=e:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/Xilinx.spec
 
 //Flags used by the linker during the creation of static libraries
 // during all build types.
@@ -240,7 +240,7 @@ CMAKE_STATIC_LINKER_FLAGS_RELWITHDEBINFO:STRING=
 CMAKE_STRIP:FILEPATH=E:/Xilinx/2025.2/Vitis/gnu/microblaze/nt/bin/mb-strip.exe
 
 //No help, variable specified on the command line.
-CMAKE_TOOLCHAIN_FILE:UNINITIALIZED=E:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/microblaze_toolchain.cmake
+CMAKE_TOOLCHAIN_FILE:UNINITIALIZED=e:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/microblaze_toolchain.cmake
 
 //If this value is on, makefiles will be generated without the
 // .SILENT directive, and all commands will be echoed to the console

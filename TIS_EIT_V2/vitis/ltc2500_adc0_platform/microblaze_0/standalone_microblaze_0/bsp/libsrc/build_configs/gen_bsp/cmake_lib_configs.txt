@@ -35,7 +35,7 @@ CMAKE_MACHINE:STRING=kintex7
 CMAKE_SIZE:FILEPATH=mb-size
 
 // Specs file path for using CMAKE toolchain files
-CMAKE_SPECS_FILE:STRING=E:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/Xilinx.spec
+CMAKE_SPECS_FILE:STRING=e:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/Xilinx.spec
 
 // The CMake toolchain file
 CMAKE_TOOLCHAIN_FILE:FILEPATH=E:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/microblaze_toolchain.cmake

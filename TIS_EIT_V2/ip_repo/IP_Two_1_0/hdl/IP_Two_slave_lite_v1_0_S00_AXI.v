@@ -598,53 +598,75 @@
 	assign EIT_IN_EN= slv_reg0[0];
 	assign gain = slv_reg1[0];
     assign reset = slv_reg2[0];
+    // ------------------------------------------------------------------
+    // Source/Sense MUX control
+    //
+    //   slv_reg3[0]  : mux mode   0 = automatic scan (default)
+    //                             1 = manual (park on one channel)
+    //   slv_reg4[2:0]: manual channel 0..7 (only used when slv_reg3[0]=1)
+    //
+    // 自动模式与手动模式共用同一张 通道->{mux1,mux2} 查找表 (chan_lut)。
+    // 8 组编码保证任意状态下 mux1 != mux2（源线绝不等于感线）。
+    // 末级安全网在 mux1 == mux2 时强制输出安全停靠值，从硬件上保证
+    // 两个 MUX 输出永远不会被短接（无论模式或表内容如何）。
+    // ------------------------------------------------------------------
+
+    // 安全停靠值（复位/短路保护时的默认输出，mux1 != mux2）
+    localparam [2:0] SAFE_MUX1 = 3'b111;
+    localparam [2:0] SAFE_MUX2 = 3'b011;
+
+    // 通道 -> {mux1, mux2} 查找表。8 个组合保证 mux1 != mux2（防止源/感短路）。
+    function [5:0] chan_lut;
+        input [2:0] ch;
+        begin
+            case (ch)
+                3'd0: chan_lut = {3'b111, 3'b011}; // 通道0：MUX1/MUX2 编码（错开，防止短路）
+                3'd1: chan_lut = {3'b011, 3'b010};
+                3'd2: chan_lut = {3'b010, 3'b001};
+                3'd3: chan_lut = {3'b001, 3'b000};
+                3'd4: chan_lut = {3'b000, 3'b110};
+                3'd5: chan_lut = {3'b110, 3'b101};
+                3'd6: chan_lut = {3'b101, 3'b100};
+                3'd7: chan_lut = {3'b100, 3'b111};
+                default: chan_lut = {SAFE_MUX1, SAFE_MUX2};
+            endcase
+        end
+    endfunction
+
+    // 自动扫描路径：与原逻辑一致——每个 done_tick 下降沿按 cha_cnt 换挡。
+    reg [2:0] mux1_auto;
+    reg [2:0] mux2_auto;
     always @(negedge done_tick or negedge rst_n) begin
         if (!rst_n) begin
-            // 复位时默认输出 0，确保处于初始安全状态
-            mux1 <= 3'b111;
-            mux2 <= 3'b011;
+            // 复位时默认输出安全停靠值，确保处于初始安全状态
+            mux1_auto <= SAFE_MUX1;
+            mux2_auto <= SAFE_MUX2;
         end
         else begin
-          
-                case (cha_cnt)
-                    3'd0: begin
-                        mux1 <= 3'b111; // 模板值：通道0时 MUX1 的编码
-                        mux2 <= 3'b011; // 模板值：通道0时 MUX2 的编码（初始错开，防止短路）
-                    end
-                    3'd1: begin
-                        mux1 <= 3'b011;
-                        mux2 <= 3'b010;
-                    end
-                    3'd2: begin
-                        mux1 <= 3'b010;
-                        mux2 <= 3'b001;
-                    end
-                    3'd3: begin
-                        mux1 <= 3'b001;
-                        mux2 <= 3'b000;
-                    end
-                    3'd4: begin
-                        mux1 <= 3'b000;
-                        mux2 <= 3'b110;
-                    end
-                    3'd5: begin
-                        mux1 <= 3'b110;
-                        mux2 <= 3'b101;
-                    end
-                    3'd6: begin
-                        mux1 <= 3'b101;
-                        mux2 <= 3'b100;
-                    end
-                    3'd7: begin
-                        mux1 <= 3'b100;
-                        mux2 <= 3'b111;
-                    end
-                    default: begin
-                        mux1 <= 3'b111;
-                        mux2 <= 3'b011;
-                    end
-                endcase
-            
+            {mux1_auto, mux2_auto} <= chan_lut(cha_cnt);
+        end
+    end
+
+    // 手动路径：组合查表，写入 slv_reg4 后立即换挡。
+    wire        manual_mode = slv_reg3[0];
+    wire [5:0]  manual_pair = chan_lut(slv_reg4[2:0]);
+    wire [2:0]  mux1_manual = manual_pair[5:3];
+    wire [2:0]  mux2_manual = manual_pair[2:0];
+
+    // 模式选择：手动模式取手动通道，否则取自动扫描结果。
+    wire [2:0]  mux1_sel = manual_mode ? mux1_manual : mux1_auto;
+    wire [2:0]  mux2_sel = manual_mode ? mux2_manual : mux2_auto;
+
+    // 安全网（防御性）：mux1 与 mux2 绝不允许选中同一路（源/感短路）。
+    // 查找表本身已保证 mux1 != mux2，此处再兜底，任何情况下都成立。
+    always @(*) begin
+        if (mux1_sel == mux2_sel) begin
+            mux1 = SAFE_MUX1;
+            mux2 = SAFE_MUX2;
+        end
+        else begin
+            mux1 = mux1_sel;
+            mux2 = mux2_sel;
         end
     end
     

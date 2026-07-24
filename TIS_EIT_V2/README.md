@@ -27,7 +27,7 @@ into `work/` (gitignored) by a Tcl script and is fully disposable. Never commit
 ## Directory layout
 
 ```
-TIS_EIT_V1/
+TIS_EIT_V2/
 ├── ip_repo/                  # 8 user-packaged IPs used by the block design (see inventory)
 ├── bd/ltc2500_bd.tcl         # block design, exported with write_bd_tcl (then hand-patched, see notes)
 ├── coe/sine_64k_16bit.coe    # 64k x 16 sine LUT loaded into 4 block RAMs
@@ -43,11 +43,11 @@ TIS_EIT_V1/
 ## Quick start (hardware)
 
 ```powershell
-cd TIS_EIT_V1
+cd TIS_EIT_V2
 & "E:\Xilinx\2025.2\Vivado\bin\vivado.bat" -mode batch -source scripts\recreate_project.tcl
 ```
 
-(or open the Vivado GUI and run `source .../TIS_EIT_V1/scripts/recreate_project.tcl`
+(or open the Vivado GUI and run `source .../TIS_EIT_V2/scripts/recreate_project.tcl`
 in the Tcl console). This creates `work/ltc2500_top/ltc2500_top.xpr` with the block
 design built, validated, wrapper generated, and constraints attached. Open that
 `.xpr` in the GUI to browse or edit the design.
