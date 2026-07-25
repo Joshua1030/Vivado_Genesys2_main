@@ -24,6 +24,7 @@ input  wire        clk,
     input  wire        sw_ch1,
     input  wire        sw_ch2,
     input  wire        done_tick,
+    input  wire        run,
 
     // 驱动外部硬件的输出信号
     output   [2:0]  mux,         // Source MUX 控制线 (3-bit)
@@ -37,6 +38,7 @@ input  wire        clk,
     output      o_ja5,
     output      o_ja6,
     output      [2:0]  adc_ch,
+    output      adc_start,
 		// User ports ends
 		// Do not modify the ports beyond this line
 
@@ -80,6 +82,8 @@ input  wire        clk,
 	.sw_ch1(sw_ch1),
 	.sw_ch2(sw_ch2),
 	.done_tick(done_tick),
+	.run(run),
+	.adc_start(adc_start),
 	.o_ja1(o_ja1),
 	.o_ja2(o_ja2),
 	.o_ja3(o_ja3),

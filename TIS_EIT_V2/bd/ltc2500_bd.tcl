@@ -634,6 +634,8 @@ proc create_root_design { parentCell } {
   connect_bd_net -net addr_gen_0_lut_addr_D  [get_bd_pins addr_gen_0/lut_addr_D] \
   [get_bd_pins blk_mem_gen_3/addra]
   connect_bd_net -net axi_gpio_0_gpio2_io_o  [get_bd_pins axi_gpio_0/gpio2_io_o] \
+  [get_bd_pins IP_Three_0/run]
+  connect_bd_net -net IP_Three_0_adc_start  [get_bd_pins IP_Three_0/adc_start] \
   [get_bd_pins ltc_driver_fsm_0/i_start]
   connect_bd_net -net blk_mem_gen_0_douta  [get_bd_pins blk_mem_gen_0/douta] \
   [get_bd_pins ila_0/probe13] \

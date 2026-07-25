@@ -77,11 +77,18 @@ int main() {
     //   reg2[0] = 自动扫描方式  0 = 自由连续扫描, 1 = 嵌套8x8(每次DAC换挡复位感测扫描)
     // JA0 = EIT_IN_EN (来自 IP_Two reg0，两个 MUX 的使能)。
     // 手动模式下 ADC 通道来自拨码开关 sw0/1/2；两个差分 MUX 始终同一通道。
+    //   reg3[31:0] = ADC 采样周期 N（100MHz 时钟数）；采样率 = 100MHz / N。
+    //                0 = 自由运行（等同原 free-running，仅受 GPIO run 门控）。
+    //                采样率上限受 FSM 转换环路时间限制（约 ~300 kSPS 量级）。
     #define ADC_MODE_MANUAL   0   // 0=自动, 1=手动(拨码开关)
     #define ADC_AUTO_NESTED   0   // 0=自由扫描, 1=嵌套8x8 (仅自动模式)
+    #define ADC_SAMPLE_RATE_HZ 0  // 期望 ADC 采样率(Hz)；0 = 自由运行(最大速率)
     *three_addr      = 0x0000;          // reg0: enable (保留)
     *(three_addr+1)  = ADC_MODE_MANUAL; // reg1: 模式
     *(three_addr+2)  = ADC_AUTO_NESTED; // reg2: 自动扫描方式
+    // reg3: 采样周期 N = F_CLK / 采样率；0 保持自由运行
+    *(three_addr+3)  = (ADC_SAMPLE_RATE_HZ == 0) ? 0u
+                       : (u32)(F_CLK_HZ / (unsigned long)ADC_SAMPLE_RATE_HZ);
 
     // ---- IP_Two (0x44A50000) 控制寄存器 ----
     //   reg0[0] = EIT_IN_EN, reg1[0] = gain, reg2[0] = reset

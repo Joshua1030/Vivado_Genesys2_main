@@ -16,6 +16,7 @@ differential 8→1 sense muxes on the **JA PMOD**. Both muxes are always driven 
 | `0x00` | slv_reg0 | `[0]` | `enable` → old FMC `enable_0` pin (retained) |
 | `0x04` | slv_reg1 | `[0]` | **mode**: `0` = automatic scan, `1` = manual (board switches) |
 | `0x08` | slv_reg2 | `[0]` | **auto scheme**: `0` = free-run sweep, `1` = nested 8×8 |
+| `0x0C` | slv_reg3 | `[31:0]` | **ADC sample period N** (100 MHz clocks) → sample rate = 100 MHz / N. `0` = free-run (default). Also gates the ADC start (`adc_start` → `ltc_driver_fsm/i_start`, AND-ed with the GPIO `run`). Max rate is capped by the FSM conversion-loop time (~a few hundred clocks). |
 
 ## Inputs / outputs
 
@@ -24,6 +25,8 @@ differential 8→1 sense muxes on the **JA PMOD**. Both muxes are always driven 
 | `master_clk` | in | `ltc_driver_fsm/o_mclk` | ADC conversion strobe; sense counter advances on its falling edge |
 | `sw_ch0/1/2` | in | board `sw0/sw1/sw2` | manual channel (0–7), used when `slv_reg1[0]=1` |
 | `done_tick` | in | `IP_1/done_tick` | DAC channel switch; resets the sense sweep in nested mode |
+| `run` | in | `axi_gpio_0/gpio2_io_o` | ADC run/enable (the old `i_start` GPIO); gates `adc_start` |
+| `adc_start` | out | `ltc_driver_fsm/i_start` | ADC conversion-start; paced at 100 MHz / `slv_reg3` (rate control) |
 | `o_ja1..o_ja6` | out | JA1..JA6 | the two muxes' address lines (same address on both) |
 | `adc_ch[2:0]` | out | `ethernet_debug/adc_ch` | current sense channel (0–7) for the packet header |
 | `mux[2:0]`, `enable` | out | FMC `mux_0`, `enable_0` | legacy FMC outputs, retained (vestigial) |
@@ -62,6 +65,7 @@ volatile int *three_addr = (int*)0x44A40000;
 three_addr[0] = 1;   // enable (legacy FMC)
 three_addr[1] = 0;   // mode: 0=auto, 1=manual
 three_addr[2] = 0;   // auto scheme: 0=free-run, 1=nested 8x8
+three_addr[3] = 0;   // ADC sample period N (100 MHz clks); 0=free-run, else rate=100MHz/N
 ```
 
 The per-sample DAC/ADC channel tag is added downstream in `ethernet_debug` — see its

@@ -26,6 +26,8 @@
     input  wire        sw_ch2,
     // 来自 IP_1 的 DAC 换挡脉冲（嵌套 8x8 模式下复位感测扫描）
     input  wire        done_tick,
+    // ADC 采样率控制：运行使能（来自 GPIO，原 i_start）
+    input  wire        run,
 
     // 驱动外部硬件的输出信号
     output      [2:0]  mux,         // 旧 FMC 感测 MUX 控制线（保留）
@@ -40,7 +42,8 @@
     output      o_ja5,   // mux2 A2
     output      o_ja6,   // mux2 A1
     output      [2:0]  adc_ch,   // 当前 ADC 感测通道 (0..7)，供 ethernet_debug 打包表头
-    
+    output      adc_start,  // ADC 转换启动脉冲 -> ltc_driver_fsm/i_start（决定采样率）
+
 		// User ports ends
 		// Do not modify the ports beyond this line
 
@@ -388,6 +391,36 @@
 
     // 旧 FMC mux_0 输出保留，驱动同一地址
     assign mux = addr;
+
+    // ================= ADC 采样率控制 =================
+    // slv_reg3[31:0] = 采样周期 N（100MHz S_AXI_ACLK 时钟数）；采样率 = 100MHz / N。
+    // N = 0  -> 自由运行：adc_start 由 run 保持高电平（等同原 free-running 行为，默认）。
+    // N >= 1 -> 每 N 个时钟产生一个（展宽 3 拍的）启动脉冲。
+    // 注意：实际采样率上限受 ltc_driver_fsm 转换环路时间限制；N 小于该下限时按最大环路速率运行。
+    // 该逻辑运行在 S_AXI_ACLK(100MHz) 域——与 ltc_driver_fsm/i_clk 同一时钟网，无跨时钟。
+    wire [31:0] adc_period = slv_reg3;
+    reg  [31:0] adc_cnt;
+    reg  [2:0]  adc_tick_sr;   // 展宽启动脉冲，确保 FSM 在 IDLE 时可靠捕获
+    always @(posedge S_AXI_ACLK or negedge S_AXI_ARESETN) begin
+        if (!S_AXI_ARESETN) begin
+            adc_cnt     <= 32'd0;
+            adc_tick_sr <= 3'd0;
+        end
+        else if (adc_period == 32'd0) begin
+            adc_cnt     <= 32'd0;
+            adc_tick_sr <= 3'd0;
+        end
+        else if (adc_cnt >= adc_period - 32'd1) begin
+            adc_cnt     <= 32'd0;
+            adc_tick_sr <= 3'b111;                     // 触发：3 拍宽启动脉冲
+        end
+        else begin
+            adc_cnt     <= adc_cnt + 32'd1;
+            adc_tick_sr <= {1'b0, adc_tick_sr[2:1]};   // 脉冲衰减
+        end
+    end
+    wire rate_tick = |adc_tick_sr;
+    assign adc_start = run && ((adc_period == 32'd0) ? 1'b1 : rate_tick);
 	// User logic ends
 
 endmodule
