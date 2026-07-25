@@ -92,6 +92,40 @@ Notes:
 - Launching a **Vitis** debug session programs the bitstream for you (it is
   packed inside the XSA), so for software work you rarely program manually.
 
+### Run the ILA on another machine (no local build)
+
+To bring up the ILA on a PC that never builds this design, you only need two
+files — a **matched pair from the same build**, kept at the repo root and
+committed (whitelisted in `.gitignore`, refreshed automatically by
+`scripts/build.tcl`):
+
+| File | Purpose |
+|---|---|
+| `ltc2500_bd_wrapper.bit` | programs the FPGA over JTAG |
+| `ltc2500_bd_wrapper.ltx` | ILA debug-probes map — names every probe in the Hardware Manager |
+
+On the other machine install **Vivado Lab Edition** (free — no license, no VPN;
+it is just the Hardware Manager + ILA). Then:
+
+1. Connect the Genesys2 USB-JTAG, power on.
+2. **Open Hardware Manager → Open Target → Auto Connect**.
+3. **Program Device** → select `ltc2500_bd_wrapper.bit`. The `.ltx` sitting next
+   to it (same basename) is picked up automatically, so all ILA probes appear
+   named and the waveform/trigger UI is ready. (If it isn't auto-filled, set the
+   *Probes file* to the `.ltx` manually.)
+
+Notes:
+
+- The `.bit` and `.ltx` **must come from the same build** — they encode matching
+  probe indices. Always take/commit them as a pair; `build.tcl` copies both (plus
+  the `.xsa`) to the repo root at the end of every build.
+- The committed `.xsa` also contains the bitstream (for Vitis), but a pure
+  Hardware-Manager ILA session needs the `.bit` + `.ltx`, not the XSA.
+- Tcl equivalent: `open_hw_manager` → `connect_hw_server` → `open_hw_target`,
+  then set `PROGRAM.FILE` to the `.bit` and
+  `set_property PROBES.FILE {ltc2500_bd_wrapper.ltx} [current_hw_device]` before
+  `program_hw_devices`.
+
 ## Software (Vitis Unified 2025.2)
 
 `vitis/` is this project's **Vitis Unified** workspace (2025.2, *component*-based —

@@ -1,0 +1,859 @@
+{
+    "ltx_root": {
+        "version": 4,
+        "minor": 0,
+        "ltx_data": [
+            {
+                "name": "EDA_PROBESET",
+                "active": true,
+                "debug_cores": [
+                    {
+                        "type": "XSDB_V3",
+                        "name": "dbg_hub",
+                        "spec": "labtools_xsdbm_v3",
+                        "clk_input_freq_hz": "100000000"
+                    },
+                    {
+                        "type": "ILA_V3",
+                        "name": "ltc2500_bd_i/ila_0",
+                        "spec": "labtools_ila_v6",
+                        "ipName": "ila",
+                        "core_location": {
+                            "user_chain": 1,
+                            "slave_index": 0,
+                            "bscan_switch_index": 0
+                        },
+                        "uuid": "715085263D175239941981D3F652756D",
+                        "pins": [
+                            {
+                                "name": "probe0",
+                                "id": 0,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": false,
+                                "leftIndex": 0,
+                                "rightIndex": 0,
+                                "portIndex": 0,
+                                "nets": [
+                                    {
+                                        "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_error",
+                                        "isBus": false
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe1",
+                                "id": 1,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": false,
+                                "leftIndex": 0,
+                                "rightIndex": 0,
+                                "portIndex": 1,
+                                "nets": [
+                                    {
+                                        "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_data_valid",
+                                        "isBus": false
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe2",
+                                "id": 2,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": false,
+                                "leftIndex": 0,
+                                "rightIndex": 0,
+                                "portIndex": 2,
+                                "nets": [
+                                    {
+                                        "name": "ltc2500_bd_i/ltc_driver_eth_0_o_eth_valid",
+                                        "isBus": false
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe3",
+                                "id": 3,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": true,
+                                "leftIndex": 0,
+                                "rightIndex": 7,
+                                "portIndex": 3,
+                                "nets": [
+                                    {
+                                        "name": "ltc2500_bd_i/ltc_driver_eth_0_o_eth_data",
+                                        "isBus": true,
+                                        "subnets": [
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_eth_0_o_eth_data[7]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_eth_0_o_eth_data[6]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_eth_0_o_eth_data[5]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_eth_0_o_eth_data[4]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_eth_0_o_eth_data[3]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_eth_0_o_eth_data[2]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_eth_0_o_eth_data[1]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_eth_0_o_eth_data[0]"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe4",
+                                "id": 4,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": true,
+                                "leftIndex": 0,
+                                "rightIndex": 31,
+                                "portIndex": 4,
+                                "nets": [
+                                    {
+                                        "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_read_data",
+                                        "isBus": true,
+                                        "subnets": [
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_read_data[31]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_read_data[30]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_read_data[29]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_read_data[28]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_read_data[27]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_read_data[26]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_read_data[25]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_read_data[24]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_read_data[23]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_read_data[22]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_read_data[21]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_read_data[20]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_read_data[19]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_read_data[18]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_read_data[17]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_read_data[16]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_read_data[15]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_read_data[14]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_read_data[13]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_read_data[12]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_read_data[11]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_read_data[10]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_read_data[9]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_read_data[8]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_read_data[7]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_read_data[6]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_read_data[5]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_read_data[4]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_read_data[3]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_read_data[2]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_read_data[1]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_read_data[0]"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe5",
+                                "id": 5,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": false,
+                                "leftIndex": 0,
+                                "rightIndex": 0,
+                                "portIndex": 5,
+                                "nets": [
+                                    {
+                                        "name": "ltc2500_bd_i/o_mclk",
+                                        "isBus": false
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe6",
+                                "id": 6,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": false,
+                                "leftIndex": 0,
+                                "rightIndex": 0,
+                                "portIndex": 6,
+                                "nets": [
+                                    {
+                                        "name": "ltc2500_bd_i/o_sckb",
+                                        "isBus": false
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe7",
+                                "id": 7,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": false,
+                                "leftIndex": 0,
+                                "rightIndex": 0,
+                                "portIndex": 7,
+                                "nets": [
+                                    {
+                                        "name": "ltc2500_bd_i/o_rdlb",
+                                        "isBus": false
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe8",
+                                "id": 8,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": false,
+                                "leftIndex": 0,
+                                "rightIndex": 0,
+                                "portIndex": 8,
+                                "nets": [
+                                    {
+                                        "name": "ltc2500_bd_i/i_busy",
+                                        "isBus": false
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe9",
+                                "id": 9,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": false,
+                                "leftIndex": 0,
+                                "rightIndex": 0,
+                                "portIndex": 9,
+                                "nets": [
+                                    {
+                                        "name": "ltc2500_bd_i/i_drl",
+                                        "isBus": false
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe10",
+                                "id": 10,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": false,
+                                "leftIndex": 0,
+                                "rightIndex": 0,
+                                "portIndex": 10,
+                                "nets": [
+                                    {
+                                        "name": "ltc2500_bd_i/i_sdob",
+                                        "isBus": false
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe11",
+                                "id": 11,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": true,
+                                "leftIndex": 0,
+                                "rightIndex": 3,
+                                "portIndex": 11,
+                                "nets": [
+                                    {
+                                        "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_debug_state",
+                                        "isBus": true,
+                                        "subnets": [
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_debug_state[3]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_debug_state[2]",
+                                                "parentNetId": 50
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_debug_state[1]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ltc_driver_fsm_0_o_debug_state[0]"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe12",
+                                "id": 12,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": true,
+                                "leftIndex": 0,
+                                "rightIndex": 15,
+                                "portIndex": 12,
+                                "nets": [
+                                    {
+                                        "name": "ltc2500_bd_i/addr_gen_0_lut_addr_A1",
+                                        "isBus": true,
+                                        "subnets": [
+                                            {
+                                                "name": "ltc2500_bd_i/addr_gen_0_lut_addr_A1[15]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/addr_gen_0_lut_addr_A1[14]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/addr_gen_0_lut_addr_A1[13]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/addr_gen_0_lut_addr_A1[12]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/addr_gen_0_lut_addr_A1[11]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/addr_gen_0_lut_addr_A1[10]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/addr_gen_0_lut_addr_A1[9]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/addr_gen_0_lut_addr_A1[8]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/addr_gen_0_lut_addr_A1[7]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/addr_gen_0_lut_addr_A1[6]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/addr_gen_0_lut_addr_A1[5]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/addr_gen_0_lut_addr_A1[4]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/addr_gen_0_lut_addr_A1[3]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/addr_gen_0_lut_addr_A1[2]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/addr_gen_0_lut_addr_A1[1]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/addr_gen_0_lut_addr_A1[0]"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe13",
+                                "id": 13,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": true,
+                                "leftIndex": 0,
+                                "rightIndex": 15,
+                                "portIndex": 13,
+                                "nets": [
+                                    {
+                                        "name": "ltc2500_bd_i/blk_mem_gen_0_douta",
+                                        "isBus": true,
+                                        "subnets": [
+                                            {
+                                                "name": "ltc2500_bd_i/blk_mem_gen_0_douta[15]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/blk_mem_gen_0_douta[14]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/blk_mem_gen_0_douta[13]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/blk_mem_gen_0_douta[12]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/blk_mem_gen_0_douta[11]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/blk_mem_gen_0_douta[10]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/blk_mem_gen_0_douta[9]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/blk_mem_gen_0_douta[8]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/blk_mem_gen_0_douta[7]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/blk_mem_gen_0_douta[6]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/blk_mem_gen_0_douta[5]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/blk_mem_gen_0_douta[4]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/blk_mem_gen_0_douta[3]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/blk_mem_gen_0_douta[2]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/blk_mem_gen_0_douta[1]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/blk_mem_gen_0_douta[0]"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe14",
+                                "id": 14,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": true,
+                                "leftIndex": 0,
+                                "rightIndex": 2,
+                                "portIndex": 14,
+                                "nets": [
+                                    {
+                                        "name": "ltc2500_bd_i/mux_dac1",
+                                        "isBus": true,
+                                        "subnets": [
+                                            {
+                                                "name": "ltc2500_bd_i/mux_dac1[2]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/mux_dac1[1]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/mux_dac1[0]"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe15",
+                                "id": 15,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": true,
+                                "leftIndex": 0,
+                                "rightIndex": 2,
+                                "portIndex": 15,
+                                "nets": [
+                                    {
+                                        "name": "ltc2500_bd_i/mux_dac2",
+                                        "isBus": true,
+                                        "subnets": [
+                                            {
+                                                "name": "ltc2500_bd_i/mux_dac2[2]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/mux_dac2[1]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/mux_dac2[0]"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe16",
+                                "id": 16,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": false,
+                                "leftIndex": 0,
+                                "rightIndex": 0,
+                                "portIndex": 16,
+                                "nets": [
+                                    {
+                                        "name": "ltc2500_bd_i/ethernet_debug_0_clk_trg",
+                                        "isBus": false
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe17",
+                                "id": 17,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": true,
+                                "leftIndex": 0,
+                                "rightIndex": 7,
+                                "portIndex": 17,
+                                "nets": [
+                                    {
+                                        "name": "ltc2500_bd_i/ethernet_debug_0_data_out",
+                                        "isBus": true,
+                                        "subnets": [
+                                            {
+                                                "name": "ltc2500_bd_i/ethernet_debug_0_data_out[7]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ethernet_debug_0_data_out[6]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ethernet_debug_0_data_out[5]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ethernet_debug_0_data_out[4]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ethernet_debug_0_data_out[3]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ethernet_debug_0_data_out[2]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ethernet_debug_0_data_out[1]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ethernet_debug_0_data_out[0]"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe18",
+                                "id": 18,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": true,
+                                "leftIndex": 0,
+                                "rightIndex": 1,
+                                "portIndex": 18,
+                                "nets": [
+                                    {
+                                        "name": "ltc2500_bd_i/ethernet_debug_0_dbg_rx_byte_cnt",
+                                        "isBus": true,
+                                        "subnets": [
+                                            {
+                                                "name": "ltc2500_bd_i/ethernet_debug_0_dbg_rx_byte_cnt[1]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/ethernet_debug_0_dbg_rx_byte_cnt[0]"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe19",
+                                "id": 19,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": false,
+                                "leftIndex": 0,
+                                "rightIndex": 0,
+                                "portIndex": 19,
+                                "nets": [
+                                    {
+                                        "name": "ltc2500_bd_i/ethernet_debug_0_dbg_tx_start_en",
+                                        "isBus": false
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe20",
+                                "id": 20,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": false,
+                                "leftIndex": 0,
+                                "rightIndex": 0,
+                                "portIndex": 20,
+                                "nets": [
+                                    {
+                                        "name": "ltc2500_bd_i/ethernet_debug_0_dbg_current_state",
+                                        "isBus": false
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe21",
+                                "id": 21,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": true,
+                                "leftIndex": 0,
+                                "rightIndex": 12,
+                                "portIndex": 21,
+                                "nets": [
+                                    {
+                                        "name": "ltc2500_bd_i/UDP_0_addr",
+                                        "isBus": true,
+                                        "subnets": [
+                                            {
+                                                "name": "ltc2500_bd_i/UDP_0_addr[12]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/UDP_0_addr[11]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/UDP_0_addr[10]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/UDP_0_addr[9]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/UDP_0_addr[8]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/UDP_0_addr[7]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/UDP_0_addr[6]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/UDP_0_addr[5]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/UDP_0_addr[4]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/UDP_0_addr[3]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/UDP_0_addr[2]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/UDP_0_addr[1]"
+                                            },
+                                            {
+                                                "name": "ltc2500_bd_i/UDP_0_addr[0]"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe22",
+                                "id": 22,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": false,
+                                "leftIndex": 0,
+                                "rightIndex": 0,
+                                "portIndex": 22,
+                                "nets": [
+                                    {
+                                        "name": "ltc2500_bd_i/UDP_0_write_en",
+                                        "isBus": false
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe23",
+                                "id": 23,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": false,
+                                "leftIndex": 0,
+                                "rightIndex": 0,
+                                "portIndex": 23,
+                                "nets": [
+                                    {
+                                        "name": "ltc2500_bd_i/dac_sclk_0",
+                                        "isBus": false
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe24",
+                                "id": 24,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": false,
+                                "leftIndex": 0,
+                                "rightIndex": 0,
+                                "portIndex": 24,
+                                "nets": [
+                                    {
+                                        "name": "ltc2500_bd_i/dac_sync_0",
+                                        "isBus": false
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe25",
+                                "id": 25,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": false,
+                                "leftIndex": 0,
+                                "rightIndex": 0,
+                                "portIndex": 25,
+                                "nets": [
+                                    {
+                                        "name": "ltc2500_bd_i/dac_sdo_0",
+                                        "isBus": false
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe26",
+                                "id": 26,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": false,
+                                "leftIndex": 0,
+                                "rightIndex": 0,
+                                "portIndex": 26,
+                                "nets": [
+                                    {
+                                        "name": "ltc2500_bd_i/dac_ldac_0",
+                                        "isBus": false
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "parent_nets": [
+                    {
+                        "id": 50,
+                        "name": "ltc2500_bd_i/ltc_driver_fsm_0/inst/o_debug_state[2]",
+                        "state_reg": [
+                            {
+                                "name": "ltc2500_bd_i/ltc_driver_fsm_0/inst/FSM_sequential_state_reg[2]",
+                                "states": [
+                                    {
+                                        "name": "STATE_WAIT_DRL",
+                                        "val": "0011"
+                                    },
+                                    {
+                                        "name": "STATE_ACQUIRE",
+                                        "val": "0011"
+                                    },
+                                    {
+                                        "name": "STATE_WAIT_BUSY",
+                                        "val": "0010"
+                                    },
+                                    {
+                                        "name": "STATE_ERROR",
+                                        "val": "1001"
+                                    },
+                                    {
+                                        "name": "STATE_START",
+                                        "val": "0001"
+                                    },
+                                    {
+                                        "name": "STATE_IDLE",
+                                        "val": "0000"
+                                    },
+                                    {
+                                        "name": "STATE_STOP",
+                                        "val": "1000"
+                                    },
+                                    {
+                                        "name": "STATE_READ_DONE",
+                                        "val": "0110"
+                                    },
+                                    {
+                                        "name": "STATE_SEND_ETH",
+                                        "val": "0111"
+                                    },
+                                    {
+                                        "name": "STATE_READ_DATA",
+                                        "val": "0101"
+                                    },
+                                    {
+                                        "name": "STATE_QUIET",
+                                        "val": "0100"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

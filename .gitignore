@@ -75,6 +75,12 @@ vitis_workspace/
 # CRITICAL: This allows Vitis to know about the FPGA hardware
 !*.xsa
 
+# --- ILA on another machine (matched bitstream + debug-probes pair) ---
+# Whitelisted so a clone can program + run the ILA in Vivado Lab Edition
+# without a local build. Keep these in sync (build.tcl refreshes them).
+!ltc2500_bd_wrapper.ltx
+!ltc2500_bd_wrapper.bit
+
 # --- Custom IP Repositories ---
 !ip_repo/
 !*.xci
