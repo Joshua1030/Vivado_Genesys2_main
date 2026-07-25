@@ -593,14 +593,24 @@
 	// Add user logic here
 	  wire [31:0]phase_step;
 	  assign phase_step=slv_reg0;
+
+	  // slv_reg1[15:0] = 每个通道停留的正弦周期数 N (cycles per channel)。
+	  // 0 或 1 => 每个周期都换挡（与原逻辑一致）。复位默认 0，未写寄存器即保持原行为。
+	  wire [15:0] n_eff = (slv_reg1[15:0] == 16'd0) ? 16'd1 : slv_reg1[15:0];
+	  reg  [15:0] cycle_cnt;   // 当前通道上已完成的正弦周期数
+
+	  // 单个正弦周期结束标志（DDS 通道A累加器即将回绕 0x10000）
+	  wire cycle_done = (({1'b0, address} + {1'b0, phase_step[15:0]}) >= 17'h10000);
+
     always @(negedge CLK_A or negedge rst_n) begin
         if (!rst_n) begin
             chanel_cnt <= 3'b000;
+            cycle_cnt  <= 16'd0;
             done_tick  <= 1'b0;
             total_tick <= 1'b0;
             sync<=1'b0;
             enable<=1'b1;
-            
+
         end
         else begin
             // 默认状态下，保持 Tick 信号为低电平（产生脉冲）
@@ -609,19 +619,28 @@
             sync<=1'b0;
             enable<=1'b1;
             // 判断当前正弦波地址是否到达终点 (FFFF)
-            if (({1'b0, address} + {1'b0, phase_step[15:0]}) >= 17'h10000) begin
-                done_tick <= 1'b1; // 每个 Cycle 结束都会有 done_tick
-                enable<=1'b0;
+            if (cycle_done) begin
+                // sync 每个正弦周期都触发，保持各周期相位对齐（不随 N 改变）
                 sync<=1;
-                if (chanel_cnt == 3'd7) begin
-                    // 8次循环都结束了，清零通道并触发 total_tick
-                    chanel_cnt <= 3'b000;
-                    total_tick <= 1'b1;
+                if (cycle_cnt >= n_eff - 16'd1) begin
+                    // 本通道已跑满 N 个周期 —— 此刻换挡
+                    cycle_cnt <= 16'd0;
+                    done_tick <= 1'b1; // 换挡脉冲，驱动 IP_Two 锁存新的 mux
+                    enable<=1'b0;      // 仅在真正换挡时拉低使能（换挡保护/消隐）
+                    if (chanel_cnt == 3'd7) begin
+                        // 8个通道都换完了，清零通道并触发 total_tick
+                        chanel_cnt <= 3'b000;
+                        total_tick <= 1'b1;
+                    end
+                    else begin
+                        // 未满 8 次，通道计数递增
+                        chanel_cnt <= chanel_cnt + 1'b1;
+                        total_tick <= 1'b0;
+                    end
                 end
                 else begin
-                    // 未满 8 次，通道计数递增
-                    chanel_cnt <= chanel_cnt + 1'b1;
-                    total_tick <= 1'b0;
+                    // 本通道停留期：保持通道不变，不换挡、不消隐
+                    cycle_cnt <= cycle_cnt + 16'd1;
                 end
             end
             else begin

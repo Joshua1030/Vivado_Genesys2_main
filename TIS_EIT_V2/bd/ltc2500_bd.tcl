@@ -577,9 +577,11 @@ proc create_root_design { parentCell } {
   [get_bd_ports dac_sync_0] \
   [get_bd_pins ila_0/probe24]
   connect_bd_net -net IP_1_0_chanel_cnt  [get_bd_pins IP_1_0/chanel_cnt] \
-  [get_bd_pins IP_Two_0/cha_cnt]
+  [get_bd_pins IP_Two_0/cha_cnt] \
+  [get_bd_pins ethernet_debug_0/dac_ch]
   connect_bd_net -net IP_1_0_done_tick  [get_bd_pins IP_1_0/done_tick] \
-  [get_bd_pins IP_Two_0/done_tick]
+  [get_bd_pins IP_Two_0/done_tick] \
+  [get_bd_pins IP_Three_0/done_tick]
   connect_bd_net -net IP_1_0_enable  [get_bd_pins IP_1_0/enable] \
   [get_bd_ports EIT_IN_EN_0]
   connect_bd_net -net IP_1_0_sync  [get_bd_pins IP_1_0/sync] \
@@ -768,19 +770,27 @@ proc create_root_design { parentCell } {
   [get_bd_pins IP_Two_0/s00_axi_aresetn] \
   [get_bd_pins ethernet_debug_0/s00_axi_aresetn]
   connect_bd_net -net sw0_1  [get_bd_ports sw0] \
-  [get_bd_ports ja0]
+  [get_bd_pins IP_Three_0/sw_ch0]
   connect_bd_net -net sw1_1  [get_bd_ports sw1] \
-  [get_bd_ports ja1]
+  [get_bd_pins IP_Three_0/sw_ch1]
   connect_bd_net -net sw2_1  [get_bd_ports sw2] \
+  [get_bd_pins IP_Three_0/sw_ch2]
+  connect_bd_net -net IP_Two_0_EIT_IN_EN  [get_bd_pins IP_Two_0/EIT_IN_EN] \
+  [get_bd_ports ja0]
+  connect_bd_net -net IP_Three_0_o_ja1  [get_bd_pins IP_Three_0/o_ja1] \
+  [get_bd_ports ja1]
+  connect_bd_net -net IP_Three_0_o_ja2  [get_bd_pins IP_Three_0/o_ja2] \
   [get_bd_ports ja2]
-  connect_bd_net -net sw3_1  [get_bd_ports sw3] \
+  connect_bd_net -net IP_Three_0_o_ja3  [get_bd_pins IP_Three_0/o_ja3] \
   [get_bd_ports ja3]
-  connect_bd_net -net sw4_1  [get_bd_ports sw4] \
+  connect_bd_net -net IP_Three_0_o_ja4  [get_bd_pins IP_Three_0/o_ja4] \
   [get_bd_ports ja4]
-  connect_bd_net -net sw5_1  [get_bd_ports sw5] \
+  connect_bd_net -net IP_Three_0_o_ja5  [get_bd_pins IP_Three_0/o_ja5] \
   [get_bd_ports ja5]
-  connect_bd_net -net sw6_1  [get_bd_ports sw6] \
+  connect_bd_net -net IP_Three_0_o_ja6  [get_bd_pins IP_Three_0/o_ja6] \
   [get_bd_ports ja6]
+  connect_bd_net -net IP_Three_0_adc_ch  [get_bd_pins IP_Three_0/adc_ch] \
+  [get_bd_pins ethernet_debug_0/adc_ch]
   connect_bd_net -net xlconstant_0_dout  [get_bd_pins xlconstant_0/dout] \
   [get_bd_pins blk_mem_gen_0/ena] \
   [get_bd_pins blk_mem_gen_1/ena] \

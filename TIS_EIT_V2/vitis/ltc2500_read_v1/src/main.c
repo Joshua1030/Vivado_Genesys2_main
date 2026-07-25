@@ -65,8 +65,23 @@ int main() {
     //*(fsm_0_base+1) = 1; // update tick
     
     *(ip1_base) = *(addr_gen_base); // ip1 phase step input, same as phase step A
-    
-    *three_addr=0x0000;//ADC enable
+
+    // IP_1 (0x44A30000) 自动扫描：每个电极通道停留的正弦周期数 N。
+    // reg1[15:0] = N；0/1 = 每个周期换挡（原行为）。默认 1。
+    #define CYCLES_PER_CHANNEL 1u
+    *(ip1_base+1) = CYCLES_PER_CHANNEL; // ip1 slv_reg1 = 每通道正弦周期数 N
+
+    // ---- IP_Three (0x44A40000) ADC 感测 MUX 控制（驱动 JA PMOD 的两个差分 8:1 MUX）----
+    //   reg0[0] = enable (旧 FMC enable_0，保留)
+    //   reg1[0] = 模式    0 = 自动扫描, 1 = 手动(板载拨码开关 sw0/1/2 选通道)
+    //   reg2[0] = 自动扫描方式  0 = 自由连续扫描, 1 = 嵌套8x8(每次DAC换挡复位感测扫描)
+    // JA0 = EIT_IN_EN (来自 IP_Two reg0，两个 MUX 的使能)。
+    // 手动模式下 ADC 通道来自拨码开关 sw0/1/2；两个差分 MUX 始终同一通道。
+    #define ADC_MODE_MANUAL   0   // 0=自动, 1=手动(拨码开关)
+    #define ADC_AUTO_NESTED   0   // 0=自由扫描, 1=嵌套8x8 (仅自动模式)
+    *three_addr      = 0x0000;          // reg0: enable (保留)
+    *(three_addr+1)  = ADC_MODE_MANUAL; // reg1: 模式
+    *(three_addr+2)  = ADC_AUTO_NESTED; // reg2: 自动扫描方式
 
     // ---- IP_Two (0x44A50000) 控制寄存器 ----
     //   reg0[0] = EIT_IN_EN, reg1[0] = gain, reg2[0] = reset

@@ -20,11 +20,26 @@
         input  wire        master_clk,    
         
     
+    // 手动通道选择（来自板载拨码开关 sw0/1/2）
+    input  wire        sw_ch0,
+    input  wire        sw_ch1,
+    input  wire        sw_ch2,
+    // 来自 IP_1 的 DAC 换挡脉冲（嵌套 8x8 模式下复位感测扫描）
+    input  wire        done_tick,
+
     // 驱动外部硬件的输出信号
-    output reg  [2:0]  mux,         // Source MUX 控制线 (3-bit)
+    output      [2:0]  mux,         // 旧 FMC 感测 MUX 控制线（保留）
     output  reg prev_master_clk,
     output reg current_master_clk,
     output enable,
+    // ADC 感测 MUX 地址线 -> JA PMOD 上两个差分 8:1 MUX（同一通道）
+    output      o_ja1,   // mux1 A0
+    output      o_ja2,   // mux1 A2
+    output      o_ja3,   // mux1 A1
+    output      o_ja4,   // mux2 A0
+    output      o_ja5,   // mux2 A2
+    output      o_ja6,   // mux2 A1
+    output      [2:0]  adc_ch,   // 当前 ADC 感测通道 (0..7)，供 ethernet_debug 打包表头
     
 		// User ports ends
 		// Do not modify the ports beyond this line
@@ -312,70 +327,67 @@
 	// Implement memory mapped register select and read logic generation
 	  assign S_AXI_RDATA = (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 2'h0) ? slv_reg0 : (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 2'h1) ? slv_reg1 : (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 2'h2) ? slv_reg2 : (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 2'h3) ? slv_reg3 : 0; 
 	// Add user logic here
-    assign enable= slv_reg0[0];
-    // 定义一个 3 位宽的寄存器变量，用于通道计数
-    reg [2:0] cha_cnt;
+    assign enable = slv_reg0[0];       // 旧 FMC 使能（保留）
+    wire mode_manual   = slv_reg1[0];  // 0=自动扫描, 1=手动(拨码开关 sw0/1/2)
+    wire scheme_nested = slv_reg2[0];  // 0=自由连续扫描, 1=嵌套8x8(每次DAC换挡复位)
+
+    // master_clk (o_mclk) 边沿检测
     always@(posedge clk or negedge rst_n )begin
         if (!rst_n) begin
-            // 复位时默认输出 0，确保处于初始安全状态
-            prev_master_clk <= 0;
+            prev_master_clk    <= 0;
             current_master_clk <= 0;
         end
         else begin
-            prev_master_clk<=current_master_clk; 
-            current_master_clk<=master_clk;
-        end    
+            prev_master_clk    <= current_master_clk;
+            current_master_clk <= master_clk;
+        end
     end
-    
-    wire mclk_negedge;
-    assign mclk_negedge = prev_master_clk && (!current_master_clk); //需要确认
-    
-    // channel count累加和归零
+    wire mclk_negedge = prev_master_clk && (!current_master_clk);
+
+    // 自动扫描计数器：自由模式每次 ADC 转换 +1；
+    // 嵌套8x8模式在 DAC 换挡(done_tick)时复位为0（每个注入通道重新扫描 8 个感测通道）
+    reg [2:0] cha_cnt;
     always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
+        if (!rst_n)
             cha_cnt <= 3'd0;
-        end
-        else if (mclk_negedge) begin
-             cha_cnt <= cha_cnt + 1'b1;
-        end
+        else if (scheme_nested && done_tick)
+            cha_cnt <= 3'd0;
+        else if (mclk_negedge)
+            cha_cnt <= cha_cnt + 1'b1;
     end
-    
-    always@(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            mux <= 3'b111;
-        end
-        else if (mclk_negedge) begin
-            case (cha_cnt)
-                3'd0: begin
-                    mux <= 3'b111;
-                end
-                3'd1: begin
-                    mux <= 3'b110;
-                end
-                3'd2: begin
-                    mux <= 3'b101;
-                end
-                3'd3: begin
-                    mux <= 3'b100;
-                end
-                3'd4: begin
-                    mux <= 3'b000;
-                end
-                3'd5: begin
-                    mux <= 3'b001;
-                end
-                3'd6: begin
-                    mux <= 3'b010;
-                end
-                3'd7: begin
-                    mux <= 3'b011;
-                end
-                default: begin
-                    mux <= 3'b111;
-                end 
-            endcase
-        end
-      end
+
+    // 通道选择：手动=拨码开关，自动=扫描计数器
+    wire [2:0] sw_ch   = {sw_ch2, sw_ch1, sw_ch0};
+    wire [2:0] channel = mode_manual ? sw_ch : cha_cnt;
+    assign adc_ch = channel;
+
+    // 通道 -> MUX 地址映射（CH1..CH8 对应地址 111..011）
+    function [2:0] chan_lut;
+        input [2:0] ch;
+        case (ch)
+            3'd0: chan_lut = 3'b111; // CH1
+            3'd1: chan_lut = 3'b110; // CH2
+            3'd2: chan_lut = 3'b101; // CH3
+            3'd3: chan_lut = 3'b100; // CH4
+            3'd4: chan_lut = 3'b000; // CH5
+            3'd5: chan_lut = 3'b001; // CH6
+            3'd6: chan_lut = 3'b010; // CH7
+            3'd7: chan_lut = 3'b011; // CH8
+            default: chan_lut = 3'b111;
+        endcase
+    endfunction
+    wire [2:0] addr = chan_lut(channel);
+
+    // 两个差分 MUX 共用同一地址；JA 引脚顺序为 A0/A2/A1
+    assign o_ja1 = addr[0]; // mux1 A0
+    assign o_ja2 = addr[2]; // mux1 A2
+    assign o_ja3 = addr[1]; // mux1 A1
+    assign o_ja4 = addr[0]; // mux2 A0
+    assign o_ja5 = addr[2]; // mux2 A2
+    assign o_ja6 = addr[1]; // mux2 A1
+
+    // 旧 FMC mux_0 输出保留，驱动同一地址
+    assign mux = addr;
 	// User logic ends
 
 endmodule

@@ -20,11 +20,23 @@ input  wire        clk,
         input  wire        master_clk,    
         
     
+    input  wire        sw_ch0,
+    input  wire        sw_ch1,
+    input  wire        sw_ch2,
+    input  wire        done_tick,
+
     // 驱动外部硬件的输出信号
     output   [2:0]  mux,         // Source MUX 控制线 (3-bit)
     output   prev_master_clk,
     output  current_master_clk,
     output enable,
+    output      o_ja1,
+    output      o_ja2,
+    output      o_ja3,
+    output      o_ja4,
+    output      o_ja5,
+    output      o_ja6,
+    output      [2:0]  adc_ch,
 		// User ports ends
 		// Do not modify the ports beyond this line
 
@@ -64,6 +76,17 @@ input  wire        clk,
 	.prev_master_clk(prev_master_clk),
 	.current_master_clk(current_master_clk),
 	.enable(enable),
+	.sw_ch0(sw_ch0),
+	.sw_ch1(sw_ch1),
+	.sw_ch2(sw_ch2),
+	.done_tick(done_tick),
+	.o_ja1(o_ja1),
+	.o_ja2(o_ja2),
+	.o_ja3(o_ja3),
+	.o_ja4(o_ja4),
+	.o_ja5(o_ja5),
+	.o_ja6(o_ja6),
+	.adc_ch(adc_ch),
 		.S_AXI_ACLK(s00_axi_aclk),
 		.S_AXI_ARESETN(s00_axi_aresetn),
 		.S_AXI_AWADDR(s00_axi_awaddr),

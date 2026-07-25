@@ -19,6 +19,8 @@
     input  wire        rst_n,          // 异步复位（低电平有效）
     input  wire        o_eth_valid,    // 外部每传过来一个有效字节，该信号拉高一个周期
     input  wire [7:0]  o_eth_data,     // 输入的 8 位（1字节）数据
+    input  wire [2:0]  dac_ch,         // 当前 DAC 注入通道 (0..7)，写入表头
+    input  wire [2:0]  adc_ch,         // 当前 ADC 感测通道 (0..7)，写入表头
 
     output reg         clk_trg,        // 输出的延长时钟信号
     output reg  [7:0]  data_out,       // 伴随输出的 8 位（2位十六进制）数据
@@ -320,11 +322,13 @@ reg next_state;
 
     // 内部计数器与寄存器
     reg [6:0]  clk_cnt;         // 用于计算单周期内 0 到 24 (共25个时钟周期)
-    reg [1:0]  byte_tx_cnt;     // 用于追踪当前发送到了第几份数据 (0 到 3)
+    reg [2:0]  byte_tx_cnt;     // 当前发送到第几个字节 (0..5：标记+通道+4数据)
 
     // 接收控制寄存器
     reg [31:0] rx_shift_reg;    // 32位接收移位拼接寄存器
     reg [31:0] data_latch;      // 用于发送期间稳定锁存的 32 位数据
+    reg [7:0]  ch_latch;        // 锁存的表头通道字节 {0,DAC[2:0],0,ADC[2:0]}
+    localparam [7:0] HDR_MARKER = 8'hA5;  // 每个样本表头的同步标记字节
 
     // =================================================================
     // 1. 输入 8 位数据流拼接与组包块
@@ -365,8 +369,8 @@ reg next_state;
                     next_state = STATE_IDLE;
             end
             STATE_TX: begin
-                // 当 4 个字节全部输出完毕（第3个字节且分频计数器数满）时回到 IDLE
-                if (byte_tx_cnt == 2'd3 && clk_cnt == 7'd24)
+                // 当 6 个字节（标记+通道+4数据）全部输出完毕时回到 IDLE
+                if (byte_tx_cnt == 3'd5 && clk_cnt == 7'd24)
                     next_state = STATE_IDLE;
                 else
                     next_state = STATE_TX;
@@ -382,18 +386,20 @@ reg next_state;
         if (!rst_n) begin
             dbg_current_state <= STATE_IDLE;
             clk_cnt           <= 7'd0;
-            byte_tx_cnt       <= 2'd0;
+            byte_tx_cnt       <= 3'd0;
             data_latch        <= 32'd0;
+            ch_latch          <= 8'd0;
         end else begin
             dbg_current_state <= next_state; // 状态正常跳转
 
             case (dbg_current_state)
                 STATE_IDLE: begin
                     clk_cnt     <= 7'd0;
-                    byte_tx_cnt <= 2'd0;
-                    // 当检测到使能要往 TX 跳转时，在这一拍锁存拼接好的数据
+                    byte_tx_cnt <= 3'd0;
+                    // 当检测到使能要往 TX 跳转时，在这一拍同时锁存数据与通道
                     if (dbg_tx_start_en) begin
                         data_latch <= rx_shift_reg;
+                        ch_latch   <= {1'b0, dac_ch, 1'b0, adc_ch};
                     end
                 end
 
@@ -434,10 +440,12 @@ reg next_state;
         end else begin
             if (dbg_current_state == STATE_TX) begin
                 case (byte_tx_cnt)
-                    2'd0: data_out <= data_latch[31:24];
-                    2'd1: data_out <= data_latch[23:16];
-                    2'd2: data_out <= data_latch[15:8];
-                    2'd3: data_out <= data_latch[7:0];
+                    3'd0: data_out <= HDR_MARKER;          // 表头同步标记 0xA5
+                    3'd1: data_out <= ch_latch;            // {0,DAC,0,ADC} 通道字节
+                    3'd2: data_out <= data_latch[31:24];
+                    3'd3: data_out <= data_latch[23:16];
+                    3'd4: data_out <= data_latch[15:8];
+                    3'd5: data_out <= data_latch[7:0];
                     default: data_out <= 8'd0;
                 endcase
             end else begin

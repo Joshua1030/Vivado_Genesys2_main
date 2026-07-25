@@ -1,0 +1,68 @@
+# IP_Three — ADC sense-MUX controller (AXI4-Lite)
+
+`IP_Three` selects which electrode the single LTC2500 ADC reads, by driving the two
+differential 8→1 sense muxes on the **JA PMOD**. Both muxes are always driven to the
+**same** channel address. It supports a **manual** mode (board slide switches) and an
+**automatic** time-multiplexing mode with two schemes.
+
+- HDL: [`hdl/myip_slave_lite_v1_0_S00_AXI.v`](hdl/myip_slave_lite_v1_0_S00_AXI.v) (user
+  logic), [`hdl/myip.v`](hdl/myip.v) (wrapper).
+- Base address: **`0x44A40000`** (= `three_addr` in the app).
+
+## Register map
+
+| Offset | Register | Field | Meaning |
+|:---:|:---:|:---:|---|
+| `0x00` | slv_reg0 | `[0]` | `enable` → old FMC `enable_0` pin (retained) |
+| `0x04` | slv_reg1 | `[0]` | **mode**: `0` = automatic scan, `1` = manual (board switches) |
+| `0x08` | slv_reg2 | `[0]` | **auto scheme**: `0` = free-run sweep, `1` = nested 8×8 |
+
+## Inputs / outputs
+
+| Signal | Dir | Wired to | Meaning |
+|---|---|---|---|
+| `master_clk` | in | `ltc_driver_fsm/o_mclk` | ADC conversion strobe; sense counter advances on its falling edge |
+| `sw_ch0/1/2` | in | board `sw0/sw1/sw2` | manual channel (0–7), used when `slv_reg1[0]=1` |
+| `done_tick` | in | `IP_1/done_tick` | DAC channel switch; resets the sense sweep in nested mode |
+| `o_ja1..o_ja6` | out | JA1..JA6 | the two muxes' address lines (same address on both) |
+| `adc_ch[2:0]` | out | `ethernet_debug/adc_ch` | current sense channel (0–7) for the packet header |
+| `mux[2:0]`, `enable` | out | FMC `mux_0`, `enable_0` | legacy FMC outputs, retained (vestigial) |
+
+## JA PMOD pinout (both muxes = same channel)
+
+`JA0 = EIT_IN_EN` (from IP_Two reg0, the shared mux enable). The two differential muxes
+take the address in pin order **A0 / A2 / A1**:
+
+| Pin | mux | signal | Pin | mux | signal |
+|:---:|:---:|:---:|:---:|:---:|:---:|
+| JA1 | 1 | Addr0 | JA4 | 2 | Addr0 |
+| JA2 | 1 | Addr2 | JA5 | 2 | Addr2 |
+| JA3 | 1 | Addr1 | JA6 | 2 | Addr1 |
+
+## Channel ↔ address mapping (CH1–CH8)
+
+| Channel (index) | 0 (CH1) | 1 (CH2) | 2 (CH3) | 3 (CH4) | 4 (CH5) | 5 (CH6) | 6 (CH7) | 7 (CH8) |
+|---|---|---|---|---|---|---|---|---|
+| Address `[2:0]` | 111 | 110 | 101 | 100 | 000 | 001 | 010 | 011 |
+
+## Modes
+
+- **Manual** (`slv_reg1[0]=1`): channel = `{sw2,sw1,sw0}`; both muxes park there.
+- **Auto free-run** (`slv_reg1[0]=0`, `slv_reg2[0]=0`): the sense counter advances 0→7 on
+  every ADC conversion (`o_mclk`), independent of the DAC. Fastest.
+- **Auto nested 8×8** (`slv_reg1[0]=0`, `slv_reg2[0]=1`): same, but the sense counter
+  **resets to 0 on each DAC channel switch** (`IP_1/done_tick`), so every injection
+  channel is measured against all 8 sense channels — a full 8×8 frame. Assumes the DAC
+  dwell (`IP_1/slv_reg1` cycles-per-channel) spans ≥8 ADC conversions.
+
+## Software
+
+```c
+volatile int *three_addr = (int*)0x44A40000;
+three_addr[0] = 1;   // enable (legacy FMC)
+three_addr[1] = 0;   // mode: 0=auto, 1=manual
+three_addr[2] = 0;   // auto scheme: 0=free-run, 1=nested 8x8
+```
+
+The per-sample DAC/ADC channel tag is added downstream in `ethernet_debug` — see its
+README for the 6-byte wire format.

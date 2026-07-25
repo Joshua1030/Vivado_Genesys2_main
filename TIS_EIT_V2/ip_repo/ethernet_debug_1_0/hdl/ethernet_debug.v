@@ -19,7 +19,9 @@ input  wire        global_clk,     // 100MHz 系统主时钟
     input  wire        rst_n,          // 异步复位（低电平有效）
     input  wire        o_eth_valid,    // 外部每传过来一个有效字节，该信号拉高一个周期
     input  wire [7:0]  o_eth_data,     // 输入的 8 位（1字节）数据
-    
+    input  wire [2:0]  dac_ch,         // 当前 DAC 注入通道 (0..7)，写入表头
+    input  wire [2:0]  adc_ch,         // 当前 ADC 感测通道 (0..7)，写入表头
+
     output          clk_trg,        // 输出的延长时钟信号
     output   [7:0]  data_out,
     output   [1:0]  dbg_rx_byte_cnt,   // 观察点1：接收字节计数有没有在动
@@ -61,6 +63,8 @@ input  wire        global_clk,     // 100MHz 系统主时钟
 	.rst_n(rst_n),
 	.o_eth_valid(o_eth_valid),
 	.o_eth_data(o_eth_data),
+	.dac_ch(dac_ch),
+	.adc_ch(adc_ch),
 	.clk_trg(clk_trg),
 	.data_out(data_out),
 	.dbg_rx_byte_cnt(dbg_rx_byte_cnt),
