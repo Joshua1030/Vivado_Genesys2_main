@@ -48,12 +48,12 @@
                                 //     (每注入通道扫过全部 8 个感测通道 -> 8x8 帧)
                                 // 0 = legacy: DAC 每 N 周期换挡; ADC 见 ADC_AUTO_NESTED
 
-/* ---- IP_Three ADC 感测 MUX ---- */
+/* ---- IP_Three ADC MUX ---- */
 #define ADC_MODE_MANUAL    0   // 0=自动扫描, 1=手动(板载拨码开关 sw0/1/2)
 #define ADC_AUTO_NESTED    0   // legacy 用: 0=自由扫描, 1=嵌套8x8(每次转换,DAC换挡复位)
 #define ADC_SAMPLE_RATE_HZ 0   // 期望 ADC 采样率(Hz); 0 = 自由运行(最大速率, 受 FSM 环路限制)
 
-/* ---- IP_Two 源/感 MUX ---- */
+/* ---- IP_Two DAC MUX ---- */
 #define MUX_MODE_MANUAL 0   // 0=自动扫描/默认, 1=手动停靠某通道
 #define MUX_MANUAL_CHAN 0   // 手动模式下的通道号 0..7
 
