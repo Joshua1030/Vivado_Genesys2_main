@@ -34,7 +34,7 @@ localparam int CYCLES_MCLKH = 3;
 localparam int CYCLES_MCLKL = 2;  
 localparam int CYCLES_CONV  = 75; 
 localparam int CYCLES_ACQ   = 35; 
-localparam int SCK_DIV      = 2;
+localparam int SCK_DIV      = 1;  // SCLK = 100MHz/(2*SCK_DIV) = 50MHz (was 2 -> 25MHz);读出 32bit ~127->~64 clk
 
 typedef enum logic [3:0] { 
     STATE_IDLE,

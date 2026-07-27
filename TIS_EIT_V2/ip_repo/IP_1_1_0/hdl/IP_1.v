@@ -25,6 +25,7 @@
     output [2:0]  chanel_cnt,
     output sync,
     output enable,
+    output [2:0]  dac_ch_sel,   // DAC 注入通道 (nested:每8N周期; legacy:=chanel_cnt)
 		// User ports ends
 		// Do not modify the ports beyond this line
 
@@ -67,6 +68,7 @@
 	
 	.sync(sync),
 	.enable(enable),
+	.dac_ch_sel(dac_ch_sel),
 		.S_AXI_ACLK(s00_axi_aclk),
 		.S_AXI_ARESETN(s00_axi_aresetn),
 		.S_AXI_AWADDR(s00_axi_awaddr),

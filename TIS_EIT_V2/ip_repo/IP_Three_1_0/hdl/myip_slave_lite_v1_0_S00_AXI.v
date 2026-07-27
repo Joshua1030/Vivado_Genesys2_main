@@ -332,7 +332,12 @@
 	// Add user logic here
     assign enable = slv_reg0[0];       // 旧 FMC 使能（保留）
     wire mode_manual   = slv_reg1[0];  // 0=自动扫描, 1=手动(拨码开关 sw0/1/2)
-    wire scheme_nested = slv_reg2[0];  // 0=自由连续扫描, 1=嵌套8x8(每次DAC换挡复位)
+    // slv_reg2[1:0] = 自动扫描方式：
+    //   00 = 自由连续扫描（每次 ADC 转换 +1，与 DAC 无关）—— 原行为
+    //   01 = 嵌套8x8 legacy（每次转换 +1，DAC 换挡 done_tick 时复位）—— 原行为
+    //   10 = 周期节拍扫描（每 N 个正弦周期，即每个 done_tick，感测通道 +1）—— 新增
+    wire [1:0] scheme = slv_reg2[1:0];
+    localparam [1:0] SCH_FREERUN = 2'b00, SCH_NESTED_LEGACY = 2'b01, SCH_CYCLE_PACED = 2'b10;
 
     // master_clk (o_mclk) 边沿检测
     always@(posedge clk or negedge rst_n )begin
@@ -347,13 +352,27 @@
     end
     wire mclk_negedge = prev_master_clk && (!current_master_clk);
 
-    // 自动扫描计数器：自由模式每次 ADC 转换 +1；
-    // 嵌套8x8模式在 DAC 换挡(done_tick)时复位为0（每个注入通道重新扫描 8 个感测通道）
+    // done_tick(来自 IP_1，每 N 个正弦周期一个脉冲，宽度远大于 clk 周期)上升沿检测
+    reg prev_done_tick;
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) prev_done_tick <= 1'b0;
+        else        prev_done_tick <= done_tick;
+    end
+    wire done_rise = done_tick && (!prev_done_tick);
+
+    // 自动扫描计数器：
+    //   自由/legacy嵌套：每次 ADC 转换 +1；legacy嵌套额外在 done_tick 时复位为0。
+    //   周期节拍(cycle-paced)：每个 done_tick(每 N 个正弦周期)感测通道 +1，
+    //     3-bit 自然回绕对齐 DAC 帧(每 8 个 done_tick 一个 total_tick)。
     reg [2:0] cha_cnt;
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n)
             cha_cnt <= 3'd0;
-        else if (scheme_nested && done_tick)
+        else if (scheme == SCH_CYCLE_PACED) begin
+            if (done_rise)
+                cha_cnt <= cha_cnt + 1'b1;
+        end
+        else if (scheme == SCH_NESTED_LEGACY && done_tick)
             cha_cnt <= 3'd0;
         else if (mclk_negedge)
             cha_cnt <= cha_cnt + 1'b1;

@@ -15,7 +15,7 @@ differential 8→1 sense muxes on the **JA PMOD**. Both muxes are always driven 
 |:---:|:---:|:---:|---|
 | `0x00` | slv_reg0 | `[0]` | `enable` → old FMC `enable_0` pin (retained) |
 | `0x04` | slv_reg1 | `[0]` | **mode**: `0` = automatic scan, `1` = manual (board switches) |
-| `0x08` | slv_reg2 | `[0]` | **auto scheme**: `0` = free-run sweep, `1` = nested 8×8 |
+| `0x08` | slv_reg2 | `[1:0]` | **auto scheme**: `00` = free-run sweep (per-conversion), `01` = nested 8×8 legacy (per-conversion, reset on `done_tick`), `10` = **cycle-paced** (sense mux +1 every N sine cycles, on `done_tick`) |
 | `0x0C` | slv_reg3 | `[31:0]` | **ADC sample period N** (100 MHz clocks) → sample rate = 100 MHz / N. `0` = free-run (default). Also gates the ADC start (`adc_start` → `ltc_driver_fsm/i_start`, AND-ed with the GPIO `run`). Max rate is capped by the FSM conversion-loop time (~a few hundred clocks). |
 
 ## Inputs / outputs
@@ -51,12 +51,16 @@ take the address in pin order **A0 / A2 / A1**:
 ## Modes
 
 - **Manual** (`slv_reg1[0]=1`): channel = `{sw2,sw1,sw0}`; both muxes park there.
-- **Auto free-run** (`slv_reg1[0]=0`, `slv_reg2[0]=0`): the sense counter advances 0→7 on
+- **Auto free-run** (`slv_reg1[0]=0`, `slv_reg2[1:0]=00`): the sense counter advances 0→7 on
   every ADC conversion (`o_mclk`), independent of the DAC. Fastest.
-- **Auto nested 8×8** (`slv_reg1[0]=0`, `slv_reg2[0]=1`): same, but the sense counter
-  **resets to 0 on each DAC channel switch** (`IP_1/done_tick`), so every injection
-  channel is measured against all 8 sense channels — a full 8×8 frame. Assumes the DAC
+- **Auto nested 8×8 legacy** (`slv_reg2[1:0]=01`): same per-conversion advance, but the sense
+  counter **resets to 0 on each DAC channel switch** (`IP_1/done_tick`). Assumes the DAC
   dwell (`IP_1/slv_reg1` cycles-per-channel) spans ≥8 ADC conversions.
+- **Auto cycle-paced** (`slv_reg2[1:0]=10`): the sense counter advances **once per N sine
+  cycles** (on each `IP_1/done_tick`), decoupled from the conversion rate. Paired with
+  `IP_1/slv_reg2[0]=1` (DAC advances every 8·N cycles), this gives a true nested 8×8 frame:
+  each injection channel is measured against all 8 sense channels for N cycles each. The
+  ADC sample rate (`slv_reg3`) then sets how many samples are captured per sense channel.
 
 ## Software
 
@@ -64,7 +68,7 @@ take the address in pin order **A0 / A2 / A1**:
 volatile int *three_addr = (int*)0x44A40000;
 three_addr[0] = 1;   // enable (legacy FMC)
 three_addr[1] = 0;   // mode: 0=auto, 1=manual
-three_addr[2] = 0;   // auto scheme: 0=free-run, 1=nested 8x8
+three_addr[2] = 2;   // auto scheme: 0=free-run, 1=nested-legacy, 2=cycle-paced (pair w/ IP_1 reg2=1)
 three_addr[3] = 0;   // ADC sample period N (100 MHz clks); 0=free-run, else rate=100MHz/N
 ```
 

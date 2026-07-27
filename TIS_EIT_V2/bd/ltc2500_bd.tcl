@@ -576,7 +576,7 @@ proc create_root_design { parentCell } {
   connect_bd_net -net FSM_0_dac_sync  [get_bd_pins FSM_0/dac_sync] \
   [get_bd_ports dac_sync_0] \
   [get_bd_pins ila_0/probe24]
-  connect_bd_net -net IP_1_0_chanel_cnt  [get_bd_pins IP_1_0/chanel_cnt] \
+  connect_bd_net -net IP_1_0_dac_ch_sel  [get_bd_pins IP_1_0/dac_ch_sel] \
   [get_bd_pins IP_Two_0/cha_cnt] \
   [get_bd_pins ethernet_debug_0/dac_ch]
   connect_bd_net -net IP_1_0_done_tick  [get_bd_pins IP_1_0/done_tick] \

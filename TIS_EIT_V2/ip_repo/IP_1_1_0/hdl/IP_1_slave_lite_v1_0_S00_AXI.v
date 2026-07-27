@@ -25,6 +25,8 @@
     output reg  [2:0]  chanel_cnt,
     output reg sync,
     output reg enable,
+    // DAC 注入通道选择：nested 模式=每 8N 个正弦周期换挡(dac_cnt)；legacy=每 N 周期(chanel_cnt)
+    output     [2:0]  dac_ch_sel,
 		// User ports ends
 		// Do not modify the ports beyond this line
 
@@ -602,10 +604,16 @@
 	  // 单个正弦周期结束标志（DDS 通道A累加器即将回绕 0x10000）
 	  wire cycle_done = (({1'b0, address} + {1'b0, phase_step[15:0]}) >= 17'h10000);
 
+  // slv_reg2[0] = nested 模式：0=legacy(DAC 每 N 周期换挡=chanel_cnt)，
+  //                            1=nested(DAC 每 8N 周期换挡=dac_cnt，配合 ADC 每 N 周期扫描)。
+  wire        nested_mode = slv_reg2[0];
+  reg  [2:0]  dac_cnt;   // DAC 注入通道计数：每 total_tick(=每 8N 周期) +1
+
     always @(negedge CLK_A or negedge rst_n) begin
         if (!rst_n) begin
             chanel_cnt <= 3'b000;
             cycle_cnt  <= 16'd0;
+            dac_cnt    <= 3'b000;
             done_tick  <= 1'b0;
             total_tick <= 1'b0;
             sync<=1'b0;
@@ -631,6 +639,7 @@
                         // 8个通道都换完了，清零通道并触发 total_tick
                         chanel_cnt <= 3'b000;
                         total_tick <= 1'b1;
+                        dac_cnt    <= dac_cnt + 1'b1;  // DAC 注入通道推进（每 8N 周期）
                     end
                     else begin
                         // 未满 8 次，通道计数递增
@@ -652,6 +661,11 @@
             end
         end
     end
+
+    // DAC 注入通道输出：nested 模式取每-8N 计数 dac_cnt，legacy 取每-N 计数 chanel_cnt。
+    // 下游 IP_Two 仍在 done_tick(每 N 周期)锁存该值；nested 下该值仅每 8N 变化，
+    // 中间的重复锁存是幂等的，故注入 mux 实际每 8N 周期换挡。
+    assign dac_ch_sel = nested_mode ? dac_cnt : chanel_cnt;
 	// User logic ends
 
 	endmodule
