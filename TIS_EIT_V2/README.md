@@ -475,6 +475,14 @@ local backup; ~1.1 GB of duplicated Vivado projects). Canonical sources used:
 3. **blk_mem_gen_0..3**: `CONFIG.Coe_File` re-pointed from the dead absolute path
    `c:/Combine/sine_64k_16bit.coe` to `${script_folder}/../coe/sine_64k_16bit.coe`.
 
+> As of the 2026-07-28 re-export, patches 1 and 2 now round-trip on their own —
+> the export emits `-freq_hz 200000000` inline on the `create_bd_port` calls and
+> the clk_wiz values have become `user`-sourced — so in practice only the
+> `Coe_File` patch has to be re-applied every time (it reverts to an absolute
+> path on every export). Still check all three: `value_src` can flip back. The
+> `# NOTE (hand-patch)` comments in the script are dropped by every export too;
+> restore them so the next `git diff` keeps flagging this.
+
 ### Rules (the definitive checklist)
 
 1. `work/` is disposable output: never commit it, never edit files under it

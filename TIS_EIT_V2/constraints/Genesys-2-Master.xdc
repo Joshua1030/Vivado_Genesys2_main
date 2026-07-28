@@ -276,7 +276,7 @@ set_property -dict { PACKAGE_PIN D11   IOSTANDARD LVCMOS25 } [get_ports { mux_da
 #set_property -dict { PACKAGE_PIN A11   IOSTANDARD LVCMOS12 } [get_ports { FMC_HB_P[12] }]; #IO_L17P_T2_18 Sch=fmc_hb_p[12]
 #set_property -dict { PACKAGE_PIN B12   IOSTANDARD LVCMOS12 } [get_ports { FMC_HB_N[13] }]; #IO_L15N_T2_DQS_18 Sch=fmc_hb_n[13]
 #set_property -dict { PACKAGE_PIN C12   IOSTANDARD LVCMOS12 } [get_ports { FMC_HB_P[13] }]; #IO_L15P_T2_DQS_18 Sch=fmc_hb_p[13]
-set_property -dict { PACKAGE_PIN H12   IOSTANDARD LVCMOS25 } [get_ports { enable_0 }]; #IO_L10N_T1_18 Sch=fmc_hb_n[14]
+#set_property -dict { PACKAGE_PIN H12   IOSTANDARD LVCMOS25 } [get_ports { enable_0 }]; #IO_L10N_T1_18 Sch=fmc_hb_n[14]
 set_property -dict { PACKAGE_PIN H11   IOSTANDARD LVCMOS25 } [get_ports { mux_0[2] }]; #IO_L10P_T1_18 Sch=fmc_hb_p[14]
 set_property -dict { PACKAGE_PIN L13   IOSTANDARD LVCMOS25 } [get_ports { mux_0[0] }]; #IO_L3N_T0_DQS_18 Sch=fmc_hb_n[15]
 set_property -dict { PACKAGE_PIN L12   IOSTANDARD LVCMOS25 } [get_ports { mux_0[1] }]; #IO_L3P_T0_DQS_18 Sch=fmc_hb_p[15]
