@@ -562,7 +562,8 @@ proc create_root_design { parentCell } {
   connect_bd_net -net FSM_0_clk_B  [get_bd_pins FSM_0/clk_B] \
   [get_bd_pins addr_gen_0/clk_B]
   connect_bd_net -net FSM_0_clk_C  [get_bd_pins FSM_0/clk_C] \
-  [get_bd_pins addr_gen_0/clk_C]
+  [get_bd_pins addr_gen_0/clk_C] \
+  [get_bd_pins IP_1_0/CLK_A]
   connect_bd_net -net FSM_0_clk_D  [get_bd_pins FSM_0/clk_D] \
   [get_bd_pins addr_gen_0/clk_D]
   connect_bd_net -net FSM_0_dac_ldac  [get_bd_pins FSM_0/dac_ldac] \
@@ -623,8 +624,7 @@ proc create_root_design { parentCell } {
   connect_bd_net -net Net  [get_bd_ports eth_mdio] \
   [get_bd_pins UDP_0/eth_mdio]
   connect_bd_net -net Net1  [get_bd_pins FSM_0/clk_A] \
-  [get_bd_pins addr_gen_0/clk_A] \
-  [get_bd_pins IP_1_0/CLK_A]
+  [get_bd_pins addr_gen_0/clk_A]
   connect_bd_net -net UDP_0_addr  [get_bd_pins UDP_0/addr] \
   [get_bd_pins dist_mem_gen_0/a] \
   [get_bd_pins ila_0/probe21]
@@ -642,13 +642,13 @@ proc create_root_design { parentCell } {
   [get_bd_pins dist_mem_gen_0/we] \
   [get_bd_pins ila_0/probe22]
   connect_bd_net -net addr_gen_0_lut_addr_A1  [get_bd_pins addr_gen_0/lut_addr_A] \
-  [get_bd_pins IP_1_0/address] \
-  [get_bd_pins blk_mem_gen_0/addra] \
-  [get_bd_pins ila_0/probe12]
+  [get_bd_pins blk_mem_gen_0/addra]
   connect_bd_net -net addr_gen_0_lut_addr_B  [get_bd_pins addr_gen_0/lut_addr_B] \
   [get_bd_pins blk_mem_gen_1/addra]
   connect_bd_net -net addr_gen_0_lut_addr_C  [get_bd_pins addr_gen_0/lut_addr_C] \
-  [get_bd_pins blk_mem_gen_2/addra]
+  [get_bd_pins blk_mem_gen_2/addra] \
+  [get_bd_pins IP_1_0/address] \
+  [get_bd_pins ila_0/probe12]
   connect_bd_net -net addr_gen_0_lut_addr_D  [get_bd_pins addr_gen_0/lut_addr_D] \
   [get_bd_pins blk_mem_gen_3/addra]
   connect_bd_net -net axi_gpio_0_gpio2_io_o  [get_bd_pins axi_gpio_0/gpio2_io_o] \

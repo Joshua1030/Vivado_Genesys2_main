@@ -24,10 +24,13 @@ active.
 
 ## How it works
 
-On each `negedge CLK_A` the block evaluates
-`cycle_done = (address + phase_step[15:0] >= 0x10000)` — i.e. the channel-A
-accumulator is about to wrap one full sine period. When a cycle completes it always
-pulses `sync` (re-zeroing the DDS phase so every cycle is identical). It counts
+On each `negedge CLK_A` the block detects the end of one sine period directly from the
+DDS phase index: `cycle_done = (address[15] just fell 1→0)` — the channel-A accumulator
+(`address` = `addr_gen/lut_addr_A`) rolling over. This needs **no** `phase_step` value and
+samples only a single bit across the clock boundary, so it can't be silently disabled by a
+bad register value (the earlier `address + phase_step >= 0x10000` compare relied on
+`slv_reg0` being loaded, which is why it once failed to fire). When a cycle completes it
+always pulses `sync` (re-zeroing the DDS phase so every cycle is identical). It counts
 completed cycles per channel in `cycle_cnt`; after **N** cycles it switches the
 channel — pulsing `done_tick`, briefly dropping `enable` (the mux "switch guard"),
 and advancing `chanel_cnt` (wrapping 7→0 with `total_tick`).
@@ -56,7 +59,7 @@ switches every 8·N cycles.
 
 | Offset | Register | Field | Meaning |
 |:---:|:---:|:---:|---|
-| `0x00` | slv_reg0 | `[31:0]` | `phase_step` — DDS phase increment (frequency); low 16 bits used for the wrap test |
+| `0x00` | slv_reg0 | `[31:0]` | **unused / reserved** — cycle detection is now address-rollover based (see "How it works"). DDS frequency is set by `addr_gen`'s own `phase_step_A`, not this register. |
 | `0x04` | slv_reg1 | `[15:0]` | **cycles-per-channel N** — sine cycles to dwell on each channel before switching. **0 or 1 = switch every cycle** (original behavior). Range 1…65535. |
 | `0x08` | slv_reg2 | `[0]` | **nested_mode**: `0` = legacy (`dac_ch_sel = chanel_cnt`, DAC every N cycles); `1` = nested (`dac_ch_sel = dac_cnt`, DAC every 8·N cycles). Resets to 0. |
 

@@ -593,16 +593,19 @@
 	// Implement memory mapped register select and read logic generation
 	  assign S_AXI_RDATA = (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'h0) ? slv_reg0 : (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'h1) ? slv_reg1 : (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'h2) ? slv_reg2 : (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'h3) ? slv_reg3 : (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'h4) ? slv_reg4 : (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'h5) ? slv_reg5 : (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'h6) ? slv_reg6 : (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'h7) ? slv_reg7 : (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'h8) ? slv_reg8 : (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'h9) ? slv_reg9 : (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'hA) ? slv_reg10 : (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'hB) ? slv_reg11 : (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'hC) ? slv_reg12 : (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'hD) ? slv_reg13 : (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'hE) ? slv_reg14 : (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'hF) ? slv_reg15 : (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'h10) ? slv_reg16 : (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'h11) ? slv_reg17 : (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'h12) ? slv_reg18 : (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'h13) ? slv_reg19 : (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'h14) ? slv_reg20 : (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'h15) ? slv_reg21 : (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'h16) ? slv_reg22 : (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'h17) ? slv_reg23 : (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'h18) ? slv_reg24 : (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'h19) ? slv_reg25 : (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'h1A) ? slv_reg26 : (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'h1B) ? slv_reg27 : (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'h1C) ? slv_reg28 : (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'h1D) ? slv_reg29 : (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'h1E) ? slv_reg30 : (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'h1F) ? slv_reg31 : 0; 
 	// Add user logic here
-	  wire [31:0]phase_step;
-	  assign phase_step=slv_reg0;
+	  // slv_reg0 (相位步长) 曾用于预测回绕，现已弃用：直接检测 DDS 累加器回绕，见下方 cycle_done。
 
 	  // slv_reg1[15:0] = 每个通道停留的正弦周期数 N (cycles per channel)。
 	  // 0 或 1 => 每个周期都换挡（与原逻辑一致）。复位默认 0，未写寄存器即保持原行为。
 	  wire [15:0] n_eff = (slv_reg1[15:0] == 16'd0) ? 16'd1 : slv_reg1[15:0];
 	  reg  [15:0] cycle_cnt;   // 当前通道上已完成的正弦周期数
 
-	  // 单个正弦周期结束标志（DDS 通道A累加器即将回绕 0x10000）
-	  wire cycle_done = (({1'b0, address} + {1'b0, phase_step[15:0]}) >= 17'h10000);
+	  // 单个正弦周期结束标志：直接检测 DDS 相位地址(address=lut_addr_A)回绕。
+	  // address 每个正弦周期 0->0xFFFF 递增再回卷，最高位 address[15] 每周期由 1 跳回 0
+	  // 恰好一次 => 一个正弦周期结束。不依赖 slv_reg0/phase_step，只跨时钟采样单比特
+	  // address[15]，比原 16bit 比较更鲁棒。
+	  reg         addr_msb_d;                          // 上一拍 address[15]
+	  wire        cycle_done = addr_msb_d & (~address[15]);
 
   // slv_reg2[0] = nested 模式：0=legacy(DAC 每 N 周期换挡=chanel_cnt)，
   //                            1=nested(DAC 每 8N 周期换挡=dac_cnt，配合 ADC 每 N 周期扫描)。
@@ -614,6 +617,7 @@
             chanel_cnt <= 3'b000;
             cycle_cnt  <= 16'd0;
             dac_cnt    <= 3'b000;
+            addr_msb_d <= 1'b0;
             done_tick  <= 1'b0;
             total_tick <= 1'b0;
             sync<=1'b0;
@@ -626,7 +630,8 @@
             total_tick <= 1'b0;
             sync<=1'b0;
             enable<=1'b1;
-            // 判断当前正弦波地址是否到达终点 (FFFF)
+            addr_msb_d <= address[15];   // 每拍记录 address 最高位, 供回绕检测
+            // 检测 address 回绕（address[15] 由 1 跳回 0 = 一个正弦周期结束）
             if (cycle_done) begin
                 // sync 每个正弦周期都触发，保持各周期相位对齐（不随 N 改变）
                 sync<=1;
