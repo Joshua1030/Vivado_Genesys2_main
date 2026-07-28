@@ -26,6 +26,8 @@
     output sync,
     output enable,
     output [2:0]  dac_ch_sel,   // DAC 注入通道 (nested:每8N周期; legacy:=chanel_cnt)
+    output        o_cycle_done, // 调试: 回绕检测脉冲
+    output        o_addr_msb,   // 调试: 上一拍 address[15]
 		// User ports ends
 		// Do not modify the ports beyond this line
 
@@ -69,6 +71,8 @@
 	.sync(sync),
 	.enable(enable),
 	.dac_ch_sel(dac_ch_sel),
+	.o_cycle_done(o_cycle_done),
+	.o_addr_msb(o_addr_msb),
 		.S_AXI_ACLK(s00_axi_aclk),
 		.S_AXI_ARESETN(s00_axi_aresetn),
 		.S_AXI_AWADDR(s00_axi_awaddr),

@@ -441,7 +441,9 @@ proc create_root_design { parentCell } {
   set_property -dict [list \
     CONFIG.C_DATA_DEPTH {16384} \
     CONFIG.C_MONITOR_TYPE {Native} \
-    CONFIG.C_NUM_OF_PROBES {28} \
+    CONFIG.C_NUM_OF_PROBES {35} \
+    CONFIG.C_PROBE31_WIDTH {3} \
+    CONFIG.C_PROBE34_WIDTH {3} \
     CONFIG.C_PROBE11_WIDTH {4} \
     CONFIG.C_PROBE12_WIDTH {16} \
     CONFIG.C_PROBE13_WIDTH {16} \
@@ -563,7 +565,8 @@ proc create_root_design { parentCell } {
   [get_bd_pins addr_gen_0/clk_B]
   connect_bd_net -net FSM_0_clk_C  [get_bd_pins FSM_0/clk_C] \
   [get_bd_pins addr_gen_0/clk_C] \
-  [get_bd_pins IP_1_0/CLK_A]
+  [get_bd_pins IP_1_0/CLK_A] \
+  [get_bd_pins ila_0/probe33]
   connect_bd_net -net FSM_0_clk_D  [get_bd_pins FSM_0/clk_D] \
   [get_bd_pins addr_gen_0/clk_D]
   connect_bd_net -net FSM_0_dac_ldac  [get_bd_pins FSM_0/dac_ldac] \
@@ -580,7 +583,12 @@ proc create_root_design { parentCell } {
   [get_bd_pins ila_0/probe24]
   connect_bd_net -net IP_1_0_dac_ch_sel  [get_bd_pins IP_1_0/dac_ch_sel] \
   [get_bd_pins IP_Two_0/cha_cnt] \
-  [get_bd_pins ethernet_debug_0/dac_ch]
+  [get_bd_pins ethernet_debug_0/dac_ch] \
+  [get_bd_pins ila_0/probe31]
+  connect_bd_net -net IP_1_0_o_cycle_done  [get_bd_pins IP_1_0/o_cycle_done] \
+  [get_bd_pins ila_0/probe28]
+  connect_bd_net -net IP_1_0_o_addr_msb  [get_bd_pins IP_1_0/o_addr_msb] \
+  [get_bd_pins ila_0/probe29]
   connect_bd_net -net IP_1_0_done_tick  [get_bd_pins IP_1_0/done_tick] \
   [get_bd_pins IP_Two_0/done_tick] \
   [get_bd_pins IP_Three_0/done_tick] \
@@ -588,11 +596,14 @@ proc create_root_design { parentCell } {
   connect_bd_net -net IP_1_0_enable  [get_bd_pins IP_1_0/enable] \
   [get_bd_ports EIT_IN_EN_0]
   connect_bd_net -net IP_1_0_sync  [get_bd_pins IP_1_0/sync] \
-  [get_bd_pins addr_gen_0/dds_sync]
+  [get_bd_pins addr_gen_0/dds_sync] \
+  [get_bd_pins ila_0/probe30]
   connect_bd_net -net IP_1_0_total_tick  [get_bd_pins IP_1_0/total_tick] \
-  [get_bd_pins IP_Two_0/total_tick]
+  [get_bd_pins IP_Two_0/total_tick] \
+  [get_bd_pins ila_0/probe32]
   connect_bd_net -net IP_Three_0_adc_ch  [get_bd_pins IP_Three_0/adc_ch] \
-  [get_bd_pins ethernet_debug_0/adc_ch]
+  [get_bd_pins ethernet_debug_0/adc_ch] \
+  [get_bd_pins ila_0/probe34]
   connect_bd_net -net IP_Three_0_adc_start  [get_bd_pins IP_Three_0/adc_start] \
   [get_bd_pins ltc_driver_fsm_0/i_start]
   connect_bd_net -net IP_Three_0_enable  [get_bd_pins IP_Three_0/enable] \
@@ -666,11 +677,7 @@ proc create_root_design { parentCell } {
   [get_bd_pins clk_wiz_1/clk_in1_n]
   connect_bd_net -net clk_in1_p_0_1  [get_bd_ports sys_diff_clock_clk_p] \
   [get_bd_pins clk_wiz_1/clk_in1_p]
-  connect_bd_net -net clk_wiz_1_clk_10MHz  [get_bd_pins clk_wiz_1/clk_10MHz] \
-  [get_bd_pins IP_1_0/clk] \
-  [get_bd_pins IP_Three_0/clk] \
-  [get_bd_pins IP_Two_0/clk] \
-  [get_bd_pins addr_gen_0/clk]
+  # clk_10MHz output no longer used: IP_1/IP_Two/IP_Three/addr_gen clk moved to clk_100Mhz (below)
   connect_bd_net -net clk_wiz_1_clk_125MHz  [get_bd_pins clk_wiz_1/clk_125MHz] \
   [get_bd_pins UDP_0/clk_125MHz] \
   [get_bd_pins dist_mem_gen_0/clk]
@@ -691,6 +698,10 @@ proc create_root_design { parentCell } {
   [get_bd_pins addr_gen_0/s00_axi_aclk] \
   [get_bd_pins FSM_0/s00_axi_aclk] \
   [get_bd_pins FSM_0/clk] \
+  [get_bd_pins IP_1_0/clk] \
+  [get_bd_pins IP_Three_0/clk] \
+  [get_bd_pins IP_Two_0/clk] \
+  [get_bd_pins addr_gen_0/clk] \
   [get_bd_pins IP_1_0/s00_axi_aclk] \
   [get_bd_pins IP_Three_0/s00_axi_aclk] \
   [get_bd_pins IP_Two_0/s00_axi_aclk] \

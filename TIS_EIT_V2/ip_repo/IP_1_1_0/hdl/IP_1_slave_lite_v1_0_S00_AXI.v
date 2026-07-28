@@ -27,6 +27,9 @@
     output reg enable,
     // DAC 注入通道选择：nested 模式=每 8N 个正弦周期换挡(dac_cnt)；legacy=每 N 周期(chanel_cnt)
     output     [2:0]  dac_ch_sel,
+    // 调试输出（供 ILA 观测回绕检测链）
+    output            o_cycle_done,
+    output            o_addr_msb,
 		// User ports ends
 		// Do not modify the ports beyond this line
 
@@ -612,7 +615,10 @@
   wire        nested_mode = slv_reg2[0];
   reg  [2:0]  dac_cnt;   // DAC 注入通道计数：每 total_tick(=每 8N 周期) +1
 
-    always @(negedge CLK_A or negedge rst_n) begin
+    // 序列器时钟：改用 100MHz 系统时钟 clk（原为 FSM 派生的 CLK_A/clk_C —— 非全局时钟，
+    // 硬件上不可靠）。在 100MHz 下采样 address(=lut_addr_C) 检测回绕，与 addr_gen 同步；
+    // CLK_A 不再作为时钟使用。
+    always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             chanel_cnt <= 3'b000;
             cycle_cnt  <= 16'd0;
@@ -671,6 +677,8 @@
     // 下游 IP_Two 仍在 done_tick(每 N 周期)锁存该值；nested 下该值仅每 8N 变化，
     // 中间的重复锁存是幂等的，故注入 mux 实际每 8N 周期换挡。
     assign dac_ch_sel = nested_mode ? dac_cnt : chanel_cnt;
+    assign o_cycle_done = cycle_done;
+    assign o_addr_msb   = addr_msb_d;
 	// User logic ends
 
 	endmodule

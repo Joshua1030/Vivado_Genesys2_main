@@ -14,25 +14,25 @@
     <AddressSpace Name="ltc2500_bd_i_microblaze_0.ltc2500_bd_i_microblaze_0_local_memory_dlmb_bram_if_cntlr" Begin="0" End="16383">
       <AddressSpaceRange Name="ltc2500_bd_i_microblaze_0.ltc2500_bd_i_microblaze_0_local_memory_dlmb_bram_if_cntlr" Begin="0" End="16383" CoreMemory_Width="0" MemoryType="RAM_SP" MemoryConfiguration="">
         <BusBlock>
-          <BitLane MemType="RAMB36" Placement="X2Y33" Read_Width="0" SLR_INDEX="-1">
+          <BitLane MemType="RAMB36" Placement="X2Y26" Read_Width="0" SLR_INDEX="-1">
             <DataWidth MSB="7" LSB="0"/>
             <AddressRange Begin="0" End="4095"/>
             <BitLayout pattern=""/>
             <Parity ON="false" NumBits="0"/>
           </BitLane>
-          <BitLane MemType="RAMB36" Placement="X2Y34" Read_Width="0" SLR_INDEX="-1">
+          <BitLane MemType="RAMB36" Placement="X2Y28" Read_Width="0" SLR_INDEX="-1">
             <DataWidth MSB="15" LSB="8"/>
             <AddressRange Begin="0" End="4095"/>
             <BitLayout pattern=""/>
             <Parity ON="false" NumBits="0"/>
           </BitLane>
-          <BitLane MemType="RAMB36" Placement="X0Y35" Read_Width="0" SLR_INDEX="-1">
+          <BitLane MemType="RAMB36" Placement="X2Y27" Read_Width="0" SLR_INDEX="-1">
             <DataWidth MSB="23" LSB="16"/>
             <AddressRange Begin="0" End="4095"/>
             <BitLayout pattern=""/>
             <Parity ON="false" NumBits="0"/>
           </BitLane>
-          <BitLane MemType="RAMB36" Placement="X0Y36" Read_Width="0" SLR_INDEX="-1">
+          <BitLane MemType="RAMB36" Placement="X2Y29" Read_Width="0" SLR_INDEX="-1">
             <DataWidth MSB="31" LSB="24"/>
             <AddressRange Begin="0" End="4095"/>
             <BitLayout pattern=""/>
