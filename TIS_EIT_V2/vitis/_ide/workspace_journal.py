@@ -1,16 +1,16 @@
-# 2026-07-28T18:38:46.725228300
+# 2026-07-29T00:08:52.853587600
 import vitis
 
 client = vitis.create_client()
 client.set_workspace(path="vitis")
 
 platform = client.get_component(name="ltc2500_adc0_platform")
-status = platform.update_hw(hw_design = "$COMPONENT_LOCATION/../../ltc2500_bd_wrapper.xsa")
-
 status = platform.build()
 
 comp = client.get_component(name="ltc2500_read_v1")
 comp.build()
 
-vitis.dispose()
+status = platform.build()
+
+comp.build()
 

@@ -441,9 +441,7 @@ proc create_root_design { parentCell } {
   set_property -dict [list \
     CONFIG.C_DATA_DEPTH {16384} \
     CONFIG.C_MONITOR_TYPE {Native} \
-    CONFIG.C_NUM_OF_PROBES {35} \
-    CONFIG.C_PROBE31_WIDTH {3} \
-    CONFIG.C_PROBE34_WIDTH {3} \
+    CONFIG.C_NUM_OF_PROBES {36} \
     CONFIG.C_PROBE11_WIDTH {4} \
     CONFIG.C_PROBE12_WIDTH {16} \
     CONFIG.C_PROBE13_WIDTH {16} \
@@ -452,6 +450,8 @@ proc create_root_design { parentCell } {
     CONFIG.C_PROBE17_WIDTH {8} \
     CONFIG.C_PROBE18_WIDTH {2} \
     CONFIG.C_PROBE21_WIDTH {13} \
+    CONFIG.C_PROBE31_WIDTH {3} \
+    CONFIG.C_PROBE34_WIDTH {3} \
     CONFIG.C_PROBE3_WIDTH {8} \
     CONFIG.C_PROBE4_WIDTH {32} \
   ] $ila_0
@@ -537,14 +537,16 @@ proc create_root_design { parentCell } {
   # Create instance: addr_gen_0, and set properties
   set addr_gen_0 [ create_bd_cell -type ip -vlnv xilinx.com:user:addr_gen:1.0 addr_gen_0 ]
 
+  # Create instance: ethernet_debug_0, and set properties
+  set ethernet_debug_0 [ create_bd_cell -type ip -vlnv xilinx.com:user:ethernet_debug:1.0 ethernet_debug_0 ]
+
   # Create instance: xlconstant_1, and set properties
   set xlconstant_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 xlconstant_1 ]
 
   # Create instance: xlconstant_2, and set properties
+  # Constant 0 (NOT the default 1) — ties off addr_gen_0/dds_sync, see IP_1_0_sync below.
   set xlconstant_2 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 xlconstant_2 ]
-
-  # Create instance: ethernet_debug_0, and set properties
-  set ethernet_debug_0 [ create_bd_cell -type ip -vlnv xilinx.com:user:ethernet_debug:1.0 ethernet_debug_0 ]
+  set_property CONFIG.CONST_VAL {0} $xlconstant_2
 
   # Create interface connections
   connect_bd_intf_net -intf_net axi_smc_M00_AXI [get_bd_intf_pins axi_smc/M00_AXI] [get_bd_intf_pins UDP_0/S00_AXI]
@@ -585,18 +587,23 @@ proc create_root_design { parentCell } {
   [get_bd_pins IP_Two_0/cha_cnt] \
   [get_bd_pins ethernet_debug_0/dac_ch] \
   [get_bd_pins ila_0/probe31]
-  connect_bd_net -net IP_1_0_o_cycle_done  [get_bd_pins IP_1_0/o_cycle_done] \
-  [get_bd_pins ila_0/probe28]
-  connect_bd_net -net IP_1_0_o_addr_msb  [get_bd_pins IP_1_0/o_addr_msb] \
-  [get_bd_pins ila_0/probe29]
   connect_bd_net -net IP_1_0_done_tick  [get_bd_pins IP_1_0/done_tick] \
   [get_bd_pins IP_Two_0/done_tick] \
   [get_bd_pins IP_Three_0/done_tick] \
   [get_bd_pins ila_0/probe27]
   connect_bd_net -net IP_1_0_enable  [get_bd_pins IP_1_0/enable] \
   [get_bd_ports EIT_IN_EN_0]
+  connect_bd_net -net IP_1_0_o_addr_msb  [get_bd_pins IP_1_0/o_addr_msb] \
+  [get_bd_pins ila_0/probe29]
+  connect_bd_net -net IP_1_0_o_cycle_done  [get_bd_pins IP_1_0/o_cycle_done] \
+  [get_bd_pins ila_0/probe28]
+  # IP_1/sync marks channel-C sine wraps (50 kHz); kept as an ILA marker ONLY.
+  # It must not drive addr_gen/dds_sync: dds_sync zeroes lut_addr_A..D for one
+  # 100 MHz cycle, which glitched the A/B/D DAC waveforms (2000/2010/2000 Hz)
+  # once per channel-C period while aligning no phase at all — the accumulator
+  # resets it was meant to drive are commented out in addr_gen. dds_sync is now
+  # tied low by xlconstant_2 below.
   connect_bd_net -net IP_1_0_sync  [get_bd_pins IP_1_0/sync] \
-  [get_bd_pins addr_gen_0/dds_sync] \
   [get_bd_pins ila_0/probe30]
   connect_bd_net -net IP_1_0_total_tick  [get_bd_pins IP_1_0/total_tick] \
   [get_bd_pins IP_Two_0/total_tick] \
@@ -777,9 +784,7 @@ proc create_root_design { parentCell } {
   [get_bd_pins rst_clk_wiz_1_100M/mb_debug_sys_rst]
   connect_bd_net -net reset_0_1  [get_bd_ports btnc] \
   [get_bd_pins UDP_0/reset] \
-  [get_bd_pins IP_Three_0/rst_n] \
-  [get_bd_pins IP_1_0/rst_n] \
-  [get_bd_pins IP_Two_0/rst_n]
+  [get_bd_pins ila_0/probe35]
   connect_bd_net -net reset_1  [get_bd_ports reset] \
   [get_bd_pins rst_clk_wiz_1_100M/ext_reset_in] \
   [get_bd_pins clk_wiz_1/resetn]
@@ -804,6 +809,18 @@ proc create_root_design { parentCell } {
   [get_bd_pins IP_Three_0/sw_ch1]
   connect_bd_net -net sw2_1  [get_bd_ports sw2] \
   [get_bd_pins IP_Three_0/sw_ch2]
+  # Master reset for all user IPs, on slide switch SW3 (K19). ACTIVE LOW:
+  # SW3 = 1 -> run, SW3 = 0 -> hold every user IP in reset. The board does
+  # nothing with SW3 down. This replaced btnc, which is ACTIVE HIGH (idle 0) and
+  # therefore held IP_1/IP_Two/IP_Three in reset unless the button was pressed.
+  # btnc now only drives UDP_0/reset (active high) and ila_0/probe35.
+  connect_bd_net -net sw3_rst_n  [get_bd_ports sw3] \
+  [get_bd_pins IP_1_0/rst_n] \
+  [get_bd_pins IP_Two_0/rst_n] \
+  [get_bd_pins IP_Three_0/rst_n] \
+  [get_bd_pins addr_gen_0/rst_n] \
+  [get_bd_pins FSM_0/rst_n] \
+  [get_bd_pins ethernet_debug_0/rst_n]
   connect_bd_net -net xlconstant_0_dout  [get_bd_pins xlconstant_0/dout] \
   [get_bd_pins blk_mem_gen_0/ena] \
   [get_bd_pins blk_mem_gen_1/ena] \
@@ -811,11 +828,9 @@ proc create_root_design { parentCell } {
   [get_bd_pins blk_mem_gen_3/ena]
   connect_bd_net -net xlconstant_1_dout  [get_bd_pins xlconstant_1/dout] \
   [get_bd_pins addr_gen_0/Update_Tick] \
-  [get_bd_pins addr_gen_0/rst_n] \
-  [get_bd_pins FSM_0/rst_n] \
   [get_bd_pins FSM_0/update_tick]
   connect_bd_net -net xlconstant_2_dout  [get_bd_pins xlconstant_2/dout] \
-  [get_bd_pins ethernet_debug_0/rst_n]
+  [get_bd_pins addr_gen_0/dds_sync]
 
   # Create address segments
   assign_bd_address -offset 0x44A20000 -range 0x00010000 -target_address_space [get_bd_addr_spaces microblaze_0/Data] [get_bd_addr_segs FSM_0/S00_AXI/S00_AXI_reg] -force
@@ -832,96 +847,99 @@ proc create_root_design { parentCell } {
   # Perform GUI Layout
   regenerate_bd_layout -layout_string {
    "ActiveEmotionalView":"Default View",
-   "Default View_ScaleFactor":"1.0629",
-   "Default View_TopLeft":"1391,1097",
+   "Default View_ScaleFactor":"0.717935",
+   "Default View_TopLeft":"1102,4",
    "ExpandedHierarchyInLayout":"",
    "guistr":"# # String gsaved with Nlview 7.8.0 2024-04-26 e1825d835c VDI=44 GEI=38 GUI=JA:21.0
 #  -string -flagsOSRD
-preplace port port-id_reset -pg 1 -lvl 0 -x 0 -y 2180 -defaultsOSRD
-preplace port port-id_eth_rst_b -pg 1 -lvl 7 -x 2590 -y 80 -defaultsOSRD
-preplace port port-id_eth_mdc -pg 1 -lvl 7 -x 2590 -y 100 -defaultsOSRD
-preplace port port-id_eth_mdio -pg 1 -lvl 7 -x 2590 -y 120 -defaultsOSRD
-preplace port port-id_eth_txck -pg 1 -lvl 7 -x 2590 -y 140 -defaultsOSRD
-preplace port port-id_eth_txctl -pg 1 -lvl 7 -x 2590 -y 160 -defaultsOSRD
-preplace port port-id_o_mclk -pg 1 -lvl 7 -x 2590 -y 1870 -defaultsOSRD
-preplace port port-id_o_sync -pg 1 -lvl 7 -x 2590 -y 2080 -defaultsOSRD
-preplace port port-id_o_sdi -pg 1 -lvl 7 -x 2590 -y 2320 -defaultsOSRD
-preplace port port-id_i_drl -pg 1 -lvl 0 -x 0 -y 2040 -defaultsOSRD
-preplace port port-id_i_busy -pg 1 -lvl 0 -x 0 -y 2020 -defaultsOSRD
-preplace port port-id_eth_int_b -pg 1 -lvl 0 -x 0 -y 90 -defaultsOSRD
-preplace port port-id_eth_pme_b -pg 1 -lvl 0 -x 0 -y 110 -defaultsOSRD
-preplace port port-id_eth_rxck -pg 1 -lvl 0 -x 0 -y 130 -defaultsOSRD
-preplace port port-id_eth_rxctl -pg 1 -lvl 0 -x 0 -y 150 -defaultsOSRD
-preplace port port-id_btnc -pg 1 -lvl 0 -x 0 -y 1620 -defaultsOSRD
-preplace port port-id_i_sdob -pg 1 -lvl 0 -x 0 -y 2060 -defaultsOSRD
-preplace port port-id_o_rdlb -pg 1 -lvl 7 -x 2590 -y 1830 -defaultsOSRD
-preplace port port-id_o_sckb -pg 1 -lvl 7 -x 2590 -y 1850 -defaultsOSRD
-preplace port port-id_sys_diff_clock_clk_n -pg 1 -lvl 0 -x 0 -y 2140 -defaultsOSRD
-preplace port port-id_sys_diff_clock_clk_p -pg 1 -lvl 0 -x 0 -y 2160 -defaultsOSRD
-preplace port port-id_EIT_IN_EN_0 -pg 1 -lvl 7 -x 2590 -y 1200 -defaultsOSRD
-preplace port port-id_dac_sclk_0 -pg 1 -lvl 7 -x 2590 -y 850 -defaultsOSRD
-preplace port port-id_dac_sync_0 -pg 1 -lvl 7 -x 2590 -y 870 -defaultsOSRD
-preplace port port-id_dac_sdo_0 -pg 1 -lvl 7 -x 2590 -y 890 -defaultsOSRD
-preplace port port-id_dac_ldac_0 -pg 1 -lvl 7 -x 2590 -y 910 -defaultsOSRD
-preplace port port-id_gain_0 -pg 1 -lvl 7 -x 2590 -y 1950 -defaultsOSRD
-preplace port port-id_reset_0 -pg 1 -lvl 7 -x 2590 -y 1970 -defaultsOSRD
-preplace port port-id_sw0 -pg 1 -lvl 0 -x 0 -y 2480 -defaultsOSRD
-preplace port port-id_sw1 -pg 1 -lvl 0 -x 0 -y 2500 -defaultsOSRD
-preplace port port-id_sw2 -pg 1 -lvl 0 -x 0 -y 2520 -defaultsOSRD
-preplace port port-id_sw3 -pg 1 -lvl 0 -x 0 -y 20 -defaultsOSRD
-preplace port port-id_sw4 -pg 1 -lvl 0 -x 0 -y 40 -defaultsOSRD
-preplace port port-id_sw5 -pg 1 -lvl 0 -x 0 -y 60 -defaultsOSRD
-preplace port port-id_sw6 -pg 1 -lvl 0 -x 0 -y 190 -defaultsOSRD
-preplace port port-id_ja1 -pg 1 -lvl 7 -x 2590 -y 2470 -defaultsOSRD
-preplace port port-id_ja2 -pg 1 -lvl 7 -x 2590 -y 2490 -defaultsOSRD
-preplace port port-id_ja3 -pg 1 -lvl 7 -x 2590 -y 2510 -defaultsOSRD
-preplace port port-id_ja4 -pg 1 -lvl 7 -x 2590 -y 2530 -defaultsOSRD
-preplace port port-id_ja5 -pg 1 -lvl 7 -x 2590 -y 2550 -defaultsOSRD
-preplace port port-id_ja6 -pg 1 -lvl 7 -x 2590 -y 2570 -defaultsOSRD
-preplace port port-id_ja0 -pg 1 -lvl 7 -x 2590 -y 2420 -defaultsOSRD
-preplace portBus eth_txd -pg 1 -lvl 7 -x 2590 -y 180 -defaultsOSRD
-preplace portBus eth_rxd -pg 1 -lvl 0 -x 0 -y 170 -defaultsOSRD
-preplace portBus mux_0 -pg 1 -lvl 7 -x 2590 -y 2390 -defaultsOSRD
-preplace portBus mux_dac1 -pg 1 -lvl 7 -x 2590 -y 1890 -defaultsOSRD
-preplace portBus mux_dac2 -pg 1 -lvl 7 -x 2590 -y 1910 -defaultsOSRD
+preplace port port-id_reset -pg 1 -lvl 0 -x -10 -y 2180 -defaultsOSRD
+preplace port port-id_eth_rst_b -pg 1 -lvl 7 -x 2720 -y 80 -defaultsOSRD
+preplace port port-id_eth_mdc -pg 1 -lvl 7 -x 2720 -y 100 -defaultsOSRD
+preplace port port-id_eth_mdio -pg 1 -lvl 7 -x 2720 -y 120 -defaultsOSRD
+preplace port port-id_eth_txck -pg 1 -lvl 7 -x 2720 -y 140 -defaultsOSRD
+preplace port port-id_eth_txctl -pg 1 -lvl 7 -x 2720 -y 160 -defaultsOSRD
+preplace port port-id_o_mclk -pg 1 -lvl 7 -x 2720 -y 1870 -defaultsOSRD
+preplace port port-id_o_sync -pg 1 -lvl 7 -x 2720 -y 2080 -defaultsOSRD
+preplace port port-id_o_sdi -pg 1 -lvl 7 -x 2720 -y 2320 -defaultsOSRD
+preplace port port-id_i_drl -pg 1 -lvl 0 -x -10 -y 2040 -defaultsOSRD
+preplace port port-id_i_busy -pg 1 -lvl 0 -x -10 -y 2020 -defaultsOSRD
+preplace port port-id_eth_int_b -pg 1 -lvl 0 -x -10 -y 90 -defaultsOSRD
+preplace port port-id_eth_pme_b -pg 1 -lvl 0 -x -10 -y 110 -defaultsOSRD
+preplace port port-id_eth_rxck -pg 1 -lvl 0 -x -10 -y 130 -defaultsOSRD
+preplace port port-id_eth_rxctl -pg 1 -lvl 0 -x -10 -y 150 -defaultsOSRD
+preplace port port-id_btnc -pg 1 -lvl 0 -x -10 -y 1620 -defaultsOSRD
+preplace port port-id_i_sdob -pg 1 -lvl 0 -x -10 -y 2060 -defaultsOSRD
+preplace port port-id_o_rdlb -pg 1 -lvl 7 -x 2720 -y 1830 -defaultsOSRD
+preplace port port-id_o_sckb -pg 1 -lvl 7 -x 2720 -y 1850 -defaultsOSRD
+preplace port port-id_sys_diff_clock_clk_n -pg 1 -lvl 0 -x -10 -y 2140 -defaultsOSRD
+preplace port port-id_sys_diff_clock_clk_p -pg 1 -lvl 0 -x -10 -y 2160 -defaultsOSRD
+preplace port port-id_EIT_IN_EN_0 -pg 1 -lvl 7 -x 2720 -y 1200 -defaultsOSRD
+preplace port port-id_dac_sclk_0 -pg 1 -lvl 7 -x 2720 -y 850 -defaultsOSRD
+preplace port port-id_dac_sync_0 -pg 1 -lvl 7 -x 2720 -y 870 -defaultsOSRD
+preplace port port-id_dac_sdo_0 -pg 1 -lvl 7 -x 2720 -y 890 -defaultsOSRD
+preplace port port-id_dac_ldac_0 -pg 1 -lvl 7 -x 2720 -y 910 -defaultsOSRD
+preplace port port-id_gain_0 -pg 1 -lvl 7 -x 2720 -y 1950 -defaultsOSRD
+preplace port port-id_reset_0 -pg 1 -lvl 7 -x 2720 -y 1970 -defaultsOSRD
+preplace port port-id_sw0 -pg 1 -lvl 0 -x -10 -y 2480 -defaultsOSRD
+preplace port port-id_sw1 -pg 1 -lvl 0 -x -10 -y 2500 -defaultsOSRD
+preplace port port-id_sw2 -pg 1 -lvl 0 -x -10 -y 2520 -defaultsOSRD
+preplace port port-id_sw3 -pg 1 -lvl 0 -x -10 -y 1350 -defaultsOSRD
+preplace port port-id_sw4 -pg 1 -lvl 0 -x -10 -y 40 -defaultsOSRD
+preplace port port-id_sw5 -pg 1 -lvl 0 -x -10 -y 60 -defaultsOSRD
+preplace port port-id_sw6 -pg 1 -lvl 0 -x -10 -y 190 -defaultsOSRD
+preplace port port-id_ja1 -pg 1 -lvl 7 -x 2720 -y 2470 -defaultsOSRD
+preplace port port-id_ja2 -pg 1 -lvl 7 -x 2720 -y 2490 -defaultsOSRD
+preplace port port-id_ja3 -pg 1 -lvl 7 -x 2720 -y 2510 -defaultsOSRD
+preplace port port-id_ja4 -pg 1 -lvl 7 -x 2720 -y 2530 -defaultsOSRD
+preplace port port-id_ja5 -pg 1 -lvl 7 -x 2720 -y 2550 -defaultsOSRD
+preplace port port-id_ja6 -pg 1 -lvl 7 -x 2720 -y 2570 -defaultsOSRD
+preplace port port-id_ja0 -pg 1 -lvl 7 -x 2720 -y 2420 -defaultsOSRD
+preplace portBus eth_txd -pg 1 -lvl 7 -x 2720 -y 180 -defaultsOSRD
+preplace portBus eth_rxd -pg 1 -lvl 0 -x -10 -y 170 -defaultsOSRD
+preplace portBus mux_0 -pg 1 -lvl 7 -x 2720 -y 2390 -defaultsOSRD
+preplace portBus mux_dac1 -pg 1 -lvl 7 -x 2720 -y 1890 -defaultsOSRD
+preplace portBus mux_dac2 -pg 1 -lvl 7 -x 2720 -y 1910 -defaultsOSRD
 preplace inst microblaze_0 -pg 1 -lvl 3 -x 910 -y 2350 -defaultsOSRD
-preplace inst UDP_0 -pg 1 -lvl 5 -x 1900 -y 180 -defaultsOSRD
+preplace inst UDP_0 -pg 1 -lvl 5 -x 1960 -y 170 -defaultsOSRD
 preplace inst microblaze_0_local_memory -pg 1 -lvl 4 -x 1400 -y 2360 -defaultsOSRD
 preplace inst mdm_1 -pg 1 -lvl 2 -x 470 -y 2350 -defaultsOSRD
 preplace inst clk_wiz_1 -pg 1 -lvl 1 -x 140 -y 2150 -defaultsOSRD
 preplace inst rst_clk_wiz_1_100M -pg 1 -lvl 2 -x 470 -y 2180 -defaultsOSRD
 preplace inst axi_smc -pg 1 -lvl 4 -x 1400 -y 1490 -defaultsOSRD
 preplace inst dist_mem_gen_0 -pg 1 -lvl 4 -x 1400 -y 270 -defaultsOSRD
-preplace inst ila_0 -pg 1 -lvl 6 -x 2460 -y 1530 -defaultsOSRD
-preplace inst axi_gpio_0 -pg 1 -lvl 5 -x 1900 -y 2230 -defaultsOSRD
+preplace inst ila_0 -pg 1 -lvl 6 -x 2540 -y 1540 -defaultsOSRD
+preplace inst axi_gpio_0 -pg 1 -lvl 5 -x 1960 -y 2230 -defaultsOSRD
 preplace inst ltc_driver_fsm_0 -pg 1 -lvl 4 -x 1400 -y 2100 -defaultsOSRD
-preplace inst xlconstant_0 -pg 1 -lvl 5 -x 1900 -y 1150 -defaultsOSRD
-preplace inst blk_mem_gen_0 -pg 1 -lvl 6 -x 2460 -y 1100 -defaultsOSRD
-preplace inst blk_mem_gen_1 -pg 1 -lvl 6 -x 2460 -y 390 -defaultsOSRD
-preplace inst blk_mem_gen_2 -pg 1 -lvl 6 -x 2460 -y 570 -defaultsOSRD
-preplace inst blk_mem_gen_3 -pg 1 -lvl 6 -x 2460 -y 750 -defaultsOSRD
-preplace inst IP_1_0 -pg 1 -lvl 5 -x 1900 -y 1340 -defaultsOSRD
-preplace inst IP_Three_0 -pg 1 -lvl 5 -x 1900 -y 2500 -defaultsOSRD
-preplace inst IP_Two_0 -pg 1 -lvl 5 -x 1900 -y 1910 -defaultsOSRD
-preplace inst FSM_0 -pg 1 -lvl 5 -x 1900 -y 580 -defaultsOSRD
-preplace inst addr_gen_0 -pg 1 -lvl 5 -x 1900 -y 930 -defaultsOSRD
-preplace inst xlconstant_1 -pg 1 -lvl 4 -x 1400 -y 890 -defaultsOSRD
-preplace inst xlconstant_2 -pg 1 -lvl 4 -x 1400 -y 1320 -defaultsOSRD
-preplace inst ethernet_debug_0 -pg 1 -lvl 5 -x 1900 -y 1640 -defaultsOSRD
-preplace netloc FSM_0_clk_B 1 4 2 1740 420 2060
-preplace netloc FSM_0_clk_C 1 4 2 1710 400 2070
-preplace netloc FSM_0_clk_D 1 4 2 1700 730 2060
-preplace netloc FSM_0_dac_ldac 1 5 2 2160 910 NJ
-preplace netloc FSM_0_dac_sclk 1 5 2 2240 850 NJ
-preplace netloc FSM_0_dac_sdo 1 5 2 2050 890 NJ
-preplace netloc FSM_0_dac_sync 1 5 2 2210 870 NJ
-preplace netloc IP_1_0_dac_ch_sel 1 4 2 1750 1470 2060
-preplace netloc IP_1_0_done_tick 1 4 2 1720 1490 2150
-preplace netloc IP_1_0_enable 1 5 2 2140J 1000 2560J
-preplace netloc IP_1_0_sync 1 4 2 1750 770 2070
-preplace netloc IP_1_0_total_tick 1 4 2 1740 1220 2060
-preplace netloc IP_Three_0_adc_ch 1 4 2 1730 2140 2070
-preplace netloc IP_Three_0_adc_start 1 3 3 1230 760 NJ 760 2080
+preplace inst xlconstant_0 -pg 1 -lvl 5 -x 1960 -y 1140 -defaultsOSRD
+preplace inst blk_mem_gen_0 -pg 1 -lvl 6 -x 2540 -y 1040 -defaultsOSRD
+preplace inst blk_mem_gen_1 -pg 1 -lvl 6 -x 2540 -y 390 -defaultsOSRD
+preplace inst blk_mem_gen_2 -pg 1 -lvl 6 -x 2540 -y 570 -defaultsOSRD
+preplace inst blk_mem_gen_3 -pg 1 -lvl 6 -x 2540 -y 750 -defaultsOSRD
+preplace inst IP_1_0 -pg 1 -lvl 5 -x 1960 -y 1340 -defaultsOSRD
+preplace inst IP_Three_0 -pg 1 -lvl 5 -x 1960 -y 2500 -defaultsOSRD
+preplace inst IP_Two_0 -pg 1 -lvl 5 -x 1960 -y 1910 -defaultsOSRD
+preplace inst FSM_0 -pg 1 -lvl 5 -x 1960 -y 560 -defaultsOSRD
+preplace inst addr_gen_0 -pg 1 -lvl 5 -x 1960 -y 920 -defaultsOSRD
+preplace inst ethernet_debug_0 -pg 1 -lvl 5 -x 1960 -y 1640 -defaultsOSRD
+preplace inst xlconstant_1 -pg 1 -lvl 4 -x 1400 -y 510 -defaultsOSRD
+preplace inst xlconstant_2 -pg 1 -lvl 4 -x 1400 -y 610 -defaultsOSRD
+preplace netloc FSM_0_clk_B 1 4 2 1740 380 2140
+preplace netloc FSM_0_clk_C 1 4 2 1800 750 2110
+preplace netloc FSM_0_clk_D 1 4 2 1810 710 2130
+preplace netloc FSM_0_dac_ldac 1 5 2 2180 910 NJ
+preplace netloc FSM_0_dac_sclk 1 5 2 2370 850 NJ
+preplace netloc FSM_0_dac_sdo 1 5 2 2310 890 NJ
+preplace netloc FSM_0_dac_sync 1 5 2 2340 870 NJ
+preplace netloc IP_1_0_dac_ch_sel 1 4 2 1810 1780 2210
+preplace netloc IP_1_0_done_tick 1 4 2 1770 2120 2190
+preplace netloc IP_1_0_enable 1 5 2 2210J 940 2640J
+preplace netloc IP_1_0_o_addr_msb 1 5 1 2220 1410n
+preplace netloc IP_1_0_o_cycle_done 1 5 1 2230 1390n
+preplace netloc IP_1_0_sync 1 4 2 1750 1470 2240
+preplace netloc IP_1_0_total_tick 1 4 2 1800 2040 2160
+preplace netloc IP_Three_0_adc_ch 1 4 2 1780 2130 2430
+preplace netloc IP_Three_0_adc_start 1 3 3 1260 2670 NJ 2670 2110
+preplace netloc IP_Three_0_enable 1 5 2 2440 2420 NJ
 preplace netloc IP_Three_0_mux 1 5 2 NJ 2390 NJ
 preplace netloc IP_Three_0_o_ja1 1 5 2 NJ 2470 NJ
 preplace netloc IP_Three_0_o_ja2 1 5 2 NJ 2490 NJ
@@ -929,87 +947,86 @@ preplace netloc IP_Three_0_o_ja3 1 5 2 NJ 2510 NJ
 preplace netloc IP_Three_0_o_ja4 1 5 2 NJ 2530 NJ
 preplace netloc IP_Three_0_o_ja5 1 5 2 NJ 2550 NJ
 preplace netloc IP_Three_0_o_ja6 1 5 2 NJ 2570 NJ
-preplace netloc IP_Two_0_gain 1 5 2 NJ 1930 2570J
-preplace netloc IP_Two_0_mux1 1 5 2 2220 1890 NJ
-preplace netloc IP_Two_0_mux2 1 5 2 2060 1910 NJ
-preplace netloc IP_Two_0_reset 1 5 2 NJ 1950 2560J
-preplace netloc Net 1 5 2 NJ 120 NJ
-preplace netloc Net1 1 4 2 1720 740 2080
-preplace netloc UDP_0_addr 1 3 3 1260 370 NJ 370 2090
-preplace netloc UDP_0_eth_mdc 1 5 2 NJ 100 NJ
-preplace netloc UDP_0_eth_rst_b 1 5 2 NJ 80 NJ
-preplace netloc UDP_0_eth_txck 1 5 2 NJ 140 NJ
-preplace netloc UDP_0_eth_txd 1 5 2 NJ 180 NJ
-preplace netloc UDP_0_read_addr 1 3 3 1230 -10 NJ -10 2060
-preplace netloc UDP_0_write_en 1 3 3 1250 380 NJ 380 2290
-preplace netloc addr_gen_0_lut_addr_A1 1 4 2 1750 1460 2220
-preplace netloc addr_gen_0_lut_addr_B 1 5 1 2110 370n
-preplace netloc addr_gen_0_lut_addr_C 1 5 1 2120 550n
-preplace netloc addr_gen_0_lut_addr_D 1 5 1 2140 730n
-preplace netloc axi_gpio_0_gpio2_io_o 1 4 2 1750 2320 2050
-preplace netloc blk_mem_gen_0_douta 1 4 2 1690 1090 2200
-preplace netloc blk_mem_gen_1_douta 1 4 2 1720 410 NJ
-preplace netloc blk_mem_gen_2_douta 1 4 2 1750 430 2100J
-preplace netloc blk_mem_gen_3_douta 1 4 2 1750 750 2250
+preplace netloc IP_Two_0_gain 1 5 2 2180J 1990 2690J
+preplace netloc IP_Two_0_mux1 1 5 2 2410 1960 2640J
+preplace netloc IP_Two_0_mux2 1 5 2 2420 1970 2650J
+preplace netloc IP_Two_0_reset 1 5 2 2170J 1980 2700J
+preplace netloc Net 1 5 2 NJ 110 2640J
+preplace netloc Net1 1 4 2 1780 410 2110
+preplace netloc UDP_0_addr 1 3 3 1250 -30 NJ -30 2400
+preplace netloc UDP_0_eth_mdc 1 5 2 2440J 100 NJ
+preplace netloc UDP_0_eth_rst_b 1 5 2 NJ 70 2640J
+preplace netloc UDP_0_eth_txck 1 5 2 NJ 130 2640J
+preplace netloc UDP_0_eth_txd 1 5 2 NJ 170 2640J
+preplace netloc UDP_0_read_addr 1 3 3 1260 -20 NJ -20 2110
+preplace netloc UDP_0_write_en 1 3 3 1260 370 NJ 370 2150
+preplace netloc addr_gen_0_lut_addr_A1 1 5 1 2130 890n
+preplace netloc addr_gen_0_lut_addr_B 1 5 1 2160 370n
+preplace netloc addr_gen_0_lut_addr_C 1 4 2 1790 2050 2250
+preplace netloc addr_gen_0_lut_addr_D 1 5 1 2190 730n
+preplace netloc axi_gpio_0_gpio2_io_o 1 4 2 1750 2320 2110
+preplace netloc blk_mem_gen_0_douta 1 4 2 1800 720 2330
+preplace netloc blk_mem_gen_1_douta 1 4 2 1760 390 2430J
+preplace netloc blk_mem_gen_2_douta 1 4 2 1770 400 2420J
+preplace netloc blk_mem_gen_3_douta 1 4 2 1790 730 2130J
 preplace netloc clk_in1_n_0_1 1 0 1 NJ 2140
 preplace netloc clk_in1_p_0_1 1 0 1 NJ 2160
-preplace netloc clk_wiz_1_clk_10MHz 1 1 4 280 2060 NJ 2060 1170J 2440 1630
-preplace netloc clk_wiz_1_clk_125MHz 1 1 4 270J 1620 NJ 1620 1160 160 1680
-preplace netloc clk_wiz_1_clk_400MHz 1 1 5 290 2080 670 2230 1220 1640 1590 1210 2350
+preplace netloc clk_wiz_1_clk_125MHz 1 1 4 270J 1350 NJ 1350 1240 170 1730J
+preplace netloc clk_wiz_1_clk_400MHz 1 1 5 300 2080 670 2230 1250 1630 1640 740 2440
 preplace netloc clk_wiz_1_locked 1 1 1 260 2180n
-preplace netloc dist_mem_gen_0_dpo 1 4 1 1550 230n
-preplace netloc eth_int_b_0_1 1 0 5 NJ 90 NJ 90 NJ 90 NJ 90 NJ
-preplace netloc eth_pme_b 1 0 5 NJ 110 NJ 110 NJ 110 NJ 110 NJ
-preplace netloc eth_rxck_0_1 1 0 5 NJ 130 NJ 130 NJ 130 NJ 130 NJ
-preplace netloc eth_rxctl_0_1 1 0 5 NJ 150 NJ 150 NJ 150 NJ 150 NJ
-preplace netloc eth_rxd_0_1 1 0 5 NJ 170 NJ 170 NJ 170 NJ 170 NJ
-preplace netloc eth_txctl 1 5 2 NJ 160 NJ
-preplace netloc ethernet_debug_0_clk_trg 1 4 2 1680 1480 2140
-preplace netloc ethernet_debug_0_data_out 1 3 3 1240 1620 1580J 1500 2120
-preplace netloc ethernet_debug_0_dbg_current_state 1 5 1 2320 1670n
-preplace netloc ethernet_debug_0_dbg_rx_byte_cnt 1 5 1 2280 1630n
-preplace netloc ethernet_debug_0_dbg_tx_start_en 1 5 1 2300 1650n
-preplace netloc i_busy_1 1 0 6 NJ 2020 NJ 2020 NJ 2020 1180 2450 1690J 2120 2310
-preplace netloc i_drl_1 1 0 6 NJ 2040 NJ 2040 NJ 2040 1160 2460 1540J 2330 2360
-preplace netloc i_sdoa_1 1 0 6 NJ 2060 260J 2070 NJ 2070 1200 2270 1680J 2150 2340
-preplace netloc ltc_driver_eth_0_o_eth_data 1 4 2 1650 2040 2180
-preplace netloc ltc_driver_eth_0_o_eth_valid 1 4 2 1640 2060 2170
-preplace netloc ltc_driver_fsm_0_o_data_valid 1 4 2 1670J 2100 2190
-preplace netloc ltc_driver_fsm_0_o_debug_state 1 4 2 NJ 2110 2330
-preplace netloc ltc_driver_fsm_0_o_error 1 4 2 1540J 2310 2250
-preplace netloc ltc_driver_fsm_0_o_mclk 1 4 3 1700 1780 2350 1870 NJ
-preplace netloc ltc_driver_fsm_0_o_read_data 1 4 2 NJ 2130 2270
-preplace netloc ltc_driver_fsm_0_o_scka 1 4 3 NJ 2070 2230 1900 2570J
-preplace netloc ltc_driver_fsm_0_o_sdi 1 4 3 NJ 2050 NJ 2050 2570J
-preplace netloc ltc_driver_fsm_0_o_sync 1 4 3 1560J 2080 NJ 2080 NJ
-preplace netloc ltc_driver_fsm_1_o_rdlb 1 4 3 NJ 2090 2260 1880 2560J
+preplace netloc dist_mem_gen_0_dpo 1 4 1 1560 220n
+preplace netloc eth_int_b_0_1 1 0 5 10J 80 NJ 80 NJ 80 NJ 80 NJ
+preplace netloc eth_pme_b 1 0 5 10J 100 NJ 100 NJ 100 NJ 100 NJ
+preplace netloc eth_rxck_0_1 1 0 5 10J 120 NJ 120 NJ 120 NJ 120 NJ
+preplace netloc eth_rxctl_0_1 1 0 5 10J 140 NJ 140 NJ 140 NJ 140 NJ
+preplace netloc eth_rxd_0_1 1 0 5 NJ 170 NJ 170 NJ 170 1190J 160 NJ
+preplace netloc eth_txctl 1 5 2 NJ 150 2640J
+preplace netloc ethernet_debug_0_clk_trg 1 4 2 1730 1480 2140
+preplace netloc ethernet_debug_0_data_out 1 3 3 1250 1350 1700J 1490 2130
+preplace netloc ethernet_debug_0_dbg_current_state 1 5 1 2330 1600n
+preplace netloc ethernet_debug_0_dbg_rx_byte_cnt 1 5 1 2120 1560n
+preplace netloc ethernet_debug_0_dbg_tx_start_en 1 5 1 2300 1580n
+preplace netloc i_busy_1 1 0 6 NJ 2020 NJ 2020 NJ 2020 1210 2440 1710J 2150 2350
+preplace netloc i_drl_1 1 0 6 NJ 2040 NJ 2040 NJ 2040 1200 2450 1740J 2330 2380
+preplace netloc i_sdoa_1 1 0 6 NJ 2060 NJ 2060 NJ 2060 1220 2270 1540J 2310 2390
+preplace netloc ltc_driver_eth_0_o_eth_data 1 4 2 1700 2100 2260
+preplace netloc ltc_driver_eth_0_o_eth_valid 1 4 2 1650 760 2320
+preplace netloc ltc_driver_fsm_0_o_data_valid 1 4 2 1690J 1080 2130
+preplace netloc ltc_driver_fsm_0_o_debug_state 1 4 2 NJ 2110 2360
+preplace netloc ltc_driver_fsm_0_o_error 1 4 2 1550J 1200 N
+preplace netloc ltc_driver_fsm_0_o_mclk 1 4 3 1590 2140 2290 2000 2680J
+preplace netloc ltc_driver_fsm_0_o_read_data 1 4 2 1680J 1210 2270
+preplace netloc ltc_driver_fsm_0_o_scka 1 4 3 NJ 2070 2270 2010 2670J
+preplace netloc ltc_driver_fsm_0_o_sdi 1 4 3 1600J 2060 NJ 2060 2640J
+preplace netloc ltc_driver_fsm_0_o_sync 1 4 3 1610J 2080 NJ 2080 NJ
+preplace netloc ltc_driver_fsm_1_o_rdlb 1 4 3 NJ 2090 2280 2020 2660J
 preplace netloc mdm_1_debug_sys_rst 1 1 2 300 2280 640
-preplace netloc reset_0_1 1 0 5 NJ 1620 260J 1630 NJ 1630 NJ 1630 1660
-preplace netloc reset_1 1 0 2 20 2240 290
-preplace netloc rst_clk_wiz_1_100M_bus_struct_reset 1 2 2 660 2260 1150J
+preplace netloc reset_0_1 1 0 6 NJ 1620 NJ 1620 NJ 1620 NJ 1620 1600 1500 2200
+preplace netloc reset_1 1 0 2 20 2240 270
+preplace netloc rst_clk_wiz_1_100M_bus_struct_reset 1 2 2 660J 2240 1150J
 preplace netloc rst_clk_wiz_1_100M_mb_reset 1 2 1 650 2140n
-preplace netloc rst_clk_wiz_1_100M_peripheral_aresetn 1 2 3 N 2220 1210 1650 1620
+preplace netloc rst_clk_wiz_1_100M_peripheral_aresetn 1 2 3 NJ 2220 1240 1640 1670
 preplace netloc sw0_1 1 0 5 NJ 2480 NJ 2480 NJ 2480 NJ 2480 NJ
 preplace netloc sw1_1 1 0 5 NJ 2500 NJ 2500 NJ 2500 NJ 2500 NJ
 preplace netloc sw2_1 1 0 5 NJ 2520 NJ 2520 NJ 2520 NJ 2520 NJ
-preplace netloc xlconstant_0_dout 1 5 1 2130 430n
-preplace netloc xlconstant_1_dout 1 4 1 1670 530n
-preplace netloc xlconstant_2_dout 1 4 1 1640J 1320n
-preplace netloc IP_Three_0_enable 1 5 2 2360 2420 NJ
-preplace netloc axi_smc_M00_AXI 1 4 1 1540 50n
-preplace netloc axi_smc_M01_AXI 1 4 1 1610 1440n
-preplace netloc axi_smc_M02_AXI 1 4 1 1560 830n
-preplace netloc axi_smc_M03_AXI 1 4 1 1550 490n
-preplace netloc axi_smc_M04_AXI 1 4 1 1570 1280n
-preplace netloc axi_smc_M05_AXI 1 4 1 1550 1520n
-preplace netloc axi_smc_M06_AXI 1 4 1 1600 1540n
+preplace netloc xlconstant_0_dout 1 5 1 2170 430n
+preplace netloc xlconstant_1_dout 1 4 1 1690 510n
+preplace netloc xlconstant_2_dout 1 4 1 1700 610n
+preplace netloc sw3_rst_n 1 0 5 N 1350 260 1360 N 1360 N 1360 1720
+preplace netloc axi_smc_M00_AXI 1 4 1 1540 40n
+preplace netloc axi_smc_M01_AXI 1 4 1 1630 1440n
+preplace netloc axi_smc_M02_AXI 1 4 1 1620 820n
+preplace netloc axi_smc_M03_AXI 1 4 1 1610 470n
+preplace netloc axi_smc_M04_AXI 1 4 1 1560 1280n
+preplace netloc axi_smc_M05_AXI 1 4 1 1620 1520n
+preplace netloc axi_smc_M06_AXI 1 4 1 1660 1540n
 preplace netloc axi_smc_M07_AXI 1 4 1 N 1560
-preplace netloc microblaze_0_M_AXI_DP 1 3 1 1190 1470n
+preplace netloc microblaze_0_M_AXI_DP 1 3 1 1230 1470n
 preplace netloc microblaze_0_debug 1 2 1 N 2340
 preplace netloc microblaze_0_dlmb_1 1 3 1 N 2330
 preplace netloc microblaze_0_ilmb_1 1 3 1 N 2350
-levelinfo -pg 1 0 140 470 910 1400 1900 2460 2590
-pagesize -pg 1 -db -bbox -sgen -200 -20 2740 2670
+levelinfo -pg 1 -10 140 470 910 1400 1960 2540 2720
+pagesize -pg 1 -db -bbox -sgen -200 -60 2870 2680
 "
 }
 

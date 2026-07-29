@@ -60,7 +60,7 @@ To build a bitstream and export the hardware for Vitis:
 
 Outputs: `work/ltc2500_top/ltc2500_top.runs/impl_1/ltc2500_bd_wrapper.bit` and
 `work/ltc2500_bd_wrapper.xsa` (bitstream included). Tip: if you want collaborators
-to skip the hardware build, copy the XSA into `TIS_EIT_V1/` and commit it — the
+to skip the hardware build, copy the XSA into `TIS_EIT_V2/` and commit it — the
 repo `.gitignore` whitelists `*.xsa`.
 
 ## Program the board
@@ -85,6 +85,12 @@ either:
 
 Notes:
 
+- **SW3 must be UP (=1) or the board does nothing.** SW3 (K19) is the master
+  reset for every user IP and is **active low**: `SW3 = 1` → run, `SW3 = 0` →
+  hold `IP_1`, `IP_Two`, `IP_Three`, `addr_gen`, `FSM` and `ethernet_debug` in
+  reset. It replaced BTNC, which is **active high** (idle = 0) and therefore held
+  the user IPs in reset unless you were physically pressing the button. BTNC now
+  drives only `UDP_0/reset` (active high, correct) and ILA `probe35`.
 - JTAG configuration is **volatile** — the FPGA loses it on power-cycle. For a
   self-booting board, write the bitstream to the Genesys2 QSPI flash instead
   (`write_cfgmem` → Hardware Manager *Add Configuration Memory Device*, and set
@@ -311,7 +317,7 @@ Interface changes require re-packaging:
 
 1. **Tools → Create and Package New IP** → for a MicroBlaze-controlled block
    pick **Create a new AXI4 peripheral** (that's what the existing 8 IPs are).
-2. Set the *IP location* to `TIS_EIT_V1/ip_repo/<YourIP_1_0>` so it is committed
+2. Set the *IP location* to `TIS_EIT_V2/ip_repo/<YourIP_1_0>` so it is committed
    with the rest, choose **Edit IP** on the finish page, add your logic to the
    generated skeleton, then **Re-Package IP**.
 3. Keep **all** sources inside that folder — no `../` file references. (The
@@ -341,10 +347,19 @@ Report IP Status upgrades). If you edited `bd/ltc2500_bd.tcl` directly, there
 is nothing to export. To capture GUI changes, run in the project's Tcl console:
 
 ```tcl
-write_bd_tcl -force -include_layout E:/Vivado_Genesys2_main/TIS_EIT_V1/bd/ltc2500_bd.tcl
+write_bd_tcl -force -include_layout E:/Vivado_Genesys2_main/TIS_EIT_V2/bd/ltc2500_bd.tcl
 ```
 
-Then **before committing**, run `git diff TIS_EIT_V1/bd/ltc2500_bd.tcl` and
+> **Check the target path before you hit Enter.** This line used to read
+> `TIS_EIT_V1/...` (a copy-paste leftover from the V1→V2 fork), which silently
+> wrote the V2 design over the frozen V1 snapshot while leaving the file this
+> project actually sources — `TIS_EIT_V2/bd/ltc2500_bd.tcl`, per
+> `scripts/recreate_project.tcl` — untouched. The export *looks* successful and
+> `git diff` shows changes, just in the wrong project. If `git status` reports
+> `TIS_EIT_V1/` modified after an export, you hit this: copy the file to
+> `TIS_EIT_V2/bd/` and `git checkout -- TIS_EIT_V1/bd/ltc2500_bd.tcl`.
+
+Then **before committing**, run `git diff TIS_EIT_V2/bd/ltc2500_bd.tcl` and
 **re-apply the three hand-patches** listed under *Hand-patches applied* below —
 `write_bd_tcl` rewrites the file from scratch and drops them every time
 (clk_wiz output names/frequencies, the 200 MHz input `FREQ_HZ`/`PRIM_IN_FREQ`,
@@ -364,7 +379,7 @@ survives `work/` deletion.
 - Create `sim/tb_<name>.sv`, then either re-run the recreate script, or just
   run `scripts/sim.tcl` (it syncs new `sim/` files into the project
   automatically), or in an open project:
-  `add_files -fileset sim_1 <repo>/TIS_EIT_V1/sim/tb_<name>.sv`
+  `add_files -fileset sim_1 <repo>/TIS_EIT_V2/sim/tb_<name>.sv`
   (added in place — edits flow back to the repo file).
 - Set it as simulation top (right-click → **Set as Top**, or
   `set_property top tb_<name> [get_filesets sim_1]`) and run
@@ -482,11 +497,20 @@ local backup; ~1.1 GB of duplicated Vivado projects). Canonical sources used:
 > path on every export). Still check all three: `value_src` can flip back. The
 > `# NOTE (hand-patch)` comments in the script are dropped by every export too;
 > restore them so the next `git diff` keeps flagging this.
+>
+> Re-confirmed on the BTNC→SW3 re-export: patches 1 and 2 survived as values,
+> patch 3 reverted to `e:/Vivado_Genesys2_main/TIS_EIT_V2/coe/...` on all four
+> BRAMs, and every hand-written comment in the file was dropped. Note that the
+> `Coe_File` revert is *not* cosmetic even on this machine — it hard-codes a
+> drive letter, so a clean clone anywhere else silently builds four BRAMs full
+> of zeros instead of the sine table. Verify after recreating: the generated
+> `work/.../ltc2500_bd_blk_mem_gen_0_0.mif` must be 65536 lines running
+> 0x8000 → 0xFFFF → 0x8000 → 0x0000.
 
 ### Rules (the definitive checklist)
 
 1. `work/` is disposable output: never commit it, never edit files under it
-   (enforced by `TIS_EIT_V1/.gitignore`; the repo-root `.gitignore` filters
+   (enforced by `TIS_EIT_V2/.gitignore`; the repo-root `.gitignore` filters
    Vivado/Vitis junk repo-wide).
 2. `TIS_EIT_V0/` stays untracked — it is the pre-migration backup; don't add it
    to git and don't source files from it anymore.

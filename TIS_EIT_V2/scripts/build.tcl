@@ -2,7 +2,7 @@
 # build.tcl — synthesize, implement, write bitstream, export XSA
 #
 # Usage (after recreate_project.tcl has been run at least once):
-#   vivado -mode batch -source <repo>/TIS_EIT_V1/scripts/build.tcl
+#   vivado -mode batch -source <repo>/TIS_EIT_V2/scripts/build.tcl
 # or source it in the Vivado GUI Tcl console (with the project open or not).
 #
 # Outputs (all inside the gitignored work/ directory):
@@ -11,7 +11,7 @@
 # ------------------------------------------------------------------------------
 
 set script_dir [file dirname [file normalize [info script]]]
-set proj_root  [file dirname $script_dir]   ;# TIS_EIT_V1
+set proj_root  [file dirname $script_dir]   ;# TIS_EIT_V2
 set proj_name  ltc2500_top
 
 if { [catch {current_project}] } {
@@ -45,6 +45,6 @@ file copy -force $impl/ltc2500_bd_wrapper.ltx           $proj_root/ltc2500_bd_wr
 puts "------------------------------------------------------------------"
 puts " Bitstream: $proj_root/work/$proj_name/$proj_name.runs/impl_1/ltc2500_bd_wrapper.bit"
 puts " XSA:       $proj_root/work/ltc2500_bd_wrapper.xsa"
-puts " Tip: copy the XSA into TIS_EIT_V1/ and commit it if you want"
+puts " Tip: copy the XSA into TIS_EIT_V2/ and commit it if you want"
 puts "      clone-and-go Vitis without rebuilding hardware."
 puts "------------------------------------------------------------------"

@@ -22,14 +22,14 @@
  * =====================================================================*/
 /* ---- 时钟 / 更新率 ---- */
 #define F_CLK_HZ        100000000UL // clk_wiz clk_100Mhz -> FSM_0/clk
-#define FSM_UPD_PERIOD  1000UL      // FSM reg1: DAC 更新率 = F_CLK_HZ / 此值 (=100 kSPS)
+#define FSM_UPD_PERIOD  500UL      // FSM reg1: DAC 更新率 = F_CLK_HZ / 此值 (=200 kSPS)
 #define DAC_SCLK_DIV    2u          // FSM reg0: AD5686R SPI 分频, SCLK=100MHz/(2*N) (=25MHz)
                                     //   注意: 与 ADC ltc_driver_fsm 的 SCK_DIV 是两回事
 
 /* ---- DDS 输出频率 (Hz)。须 < F_CLK_HZ/FSM_UPD_PERIOD/2 (奈奎斯特, 此处 50kHz) ---- */
 #define FREQ_A_HZ   2000UL
 #define FREQ_B_HZ   2010UL
-#define FREQ_C_HZ   5000UL
+#define FREQ_C_HZ   50000UL
 #define FREQ_D_HZ   2000UL
 #define PHASE_OFF_A 0x0000u         // 相位偏移 A..D [15:0]
 #define PHASE_OFF_B 0x0000u
@@ -43,7 +43,7 @@
 #define GAIN_D  410u
 
 /* ---- IP_1 正弦周期序列器 ---- */
-#define CYCLES_PER_CHANNEL 1u   // 每感测通道停留的正弦周期数 N (0/1 = 每周期换挡)
+#define CYCLES_PER_CHANNEL 2u   // 每感测通道停留的正弦周期数 N (0/1 = 每周期换挡)
 #define SCAN_NESTED        1    // 1 = 周期节拍嵌套: ADC 每 N 周期换挡, DAC 每 8N 周期换挡
                                 //     (每注入通道扫过全部 8 个感测通道 -> 8x8 帧)
                                 // 0 = legacy: DAC 每 N 周期换挡; ADC 见 ADC_AUTO_NESTED

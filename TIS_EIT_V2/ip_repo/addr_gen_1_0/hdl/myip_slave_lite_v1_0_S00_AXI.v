@@ -18,7 +18,8 @@
         input  wire        clk,
          input  wire        rst_n,
          input  wire        Update_Tick,    // 触发累加的采样脉冲
-         input  wire        dds_sync,       // 4通道相位强制清零同步信号
+         // 已弃用：BD 中由 xlconstant_2 恒拉低。端口保留只是为了不必重新打包 IP。
+         input  wire        dds_sync,       // (deprecated) 4通道相位强制清零同步信号
          input  wire [31:0] phase_step_A,
          input  wire [31:0] phase_step_B,
          input  wire [31:0] phase_step_C,
@@ -512,19 +513,16 @@
     always@(negedge clk_D)begin
         acc_D <= acc_D +  phase_step_D;
        end
+    // dds_sync 分支已删除：它只把 lut_addr_* 清零一拍，并不复位累加器 acc_*（上方
+    // 复位代码是注释掉的），所以对相位毫无对齐作用；而 dds_sync 来自 IP_1/sync，
+    // 即 C 通道(50kHz)的正弦回绕脉冲，于是每 20us 就在 A/B/D 三路 DAC 波形上打出
+    // 一个采样点的毛刺。A/B 故意取 2000/2010Hz 产生拍频，真去复位 acc_* 反而会把
+    // 拍频破坏掉。dds_sync 现已在 BD 中被 xlconstant_2 拉低。
     always @(posedge clk) begin
-        if (dds_sync) begin
-            lut_addr_A <= 16'd0;
-            lut_addr_B <= 16'd0;
-            lut_addr_C <= 16'd0;
-            lut_addr_D <= 16'd0;
-        end
-        else begin
-            lut_addr_A <= acc_A[15:0]+phase_offset_A;
-            lut_addr_B <= acc_B[15:0]+phase_offset_B;
-            lut_addr_C <= acc_C[15:0]+phase_offset_C;
-            lut_addr_D <= acc_D[15:0]+phase_offset_D;
-        end
+        lut_addr_A <= acc_A[15:0]+phase_offset_A;
+        lut_addr_B <= acc_B[15:0]+phase_offset_B;
+        lut_addr_C <= acc_C[15:0]+phase_offset_C;
+        lut_addr_D <= acc_D[15:0]+phase_offset_D;
     end
 	// User logic ends
 

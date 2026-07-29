@@ -2,16 +2,16 @@
 # recreate_project.tcl — regenerate the ltc2500_top Vivado project from sources
 #
 # Usage (from anywhere):
-#   vivado -mode batch -source <repo>/TIS_EIT_V1/scripts/recreate_project.tcl
+#   vivado -mode batch -source <repo>/TIS_EIT_V2/scripts/recreate_project.tcl
 # or in the Vivado GUI Tcl console:
-#   source <repo>/TIS_EIT_V1/scripts/recreate_project.tcl
+#   source <repo>/TIS_EIT_V2/scripts/recreate_project.tcl
 #
-# Creates the project in TIS_EIT_V1/work/ltc2500_top (gitignored, disposable).
+# Creates the project in TIS_EIT_V2/work/ltc2500_top (gitignored, disposable).
 # Requires Vivado 2025.2.
 # ------------------------------------------------------------------------------
 
 set script_dir [file dirname [file normalize [info script]]]
-set proj_root  [file dirname $script_dir]   ;# TIS_EIT_V1
+set proj_root  [file dirname $script_dir]   ;# TIS_EIT_V2
 set proj_name  ltc2500_top
 set part_name  xc7k325tffg900-2             ;# Kintex-7 on Digilent Genesys2
 
