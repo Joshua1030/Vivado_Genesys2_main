@@ -1,0 +1,5 @@
+{
+  "env": {
+    "XILINX_LOCAL_USER_DATA": "false"
+  }
+}
