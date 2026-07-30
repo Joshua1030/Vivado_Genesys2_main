@@ -21,6 +21,7 @@
     input  wire [7:0]  o_eth_data,     // 输入的 8 位（1字节）数据
     input  wire [2:0]  dac_ch,         // 当前 DAC 注入通道 (0..7)，写入表头
     input  wire [2:0]  adc_ch,         // 当前 ADC 感测通道 (0..7)，写入表头
+    input  wire        mclk,           // LTC2500 MCLK 选通（ltc_driver_fsm/o_mclk）：采样瞬间
 
     output reg         clk_trg,        // 输出的延长时钟信号
     output reg  [7:0]  data_out,       // 伴随输出的 8 位（2位十六进制）数据
@@ -328,7 +329,30 @@ reg next_state;
     reg [31:0] rx_shift_reg;    // 32位接收移位拼接寄存器
     reg [31:0] data_latch;      // 用于发送期间稳定锁存的 32 位数据
     reg [7:0]  ch_latch;        // 锁存的表头通道字节 {0,DAC[2:0],0,ADC[2:0]}
+    reg [7:0]  ch_sampled;      // 采样瞬间(MCLK 拉高)的通道字节 —— 与本次样本对应
+    reg        mclk_d;          // MCLK 打拍，用于上升沿检测
     localparam [7:0] HDR_MARKER = 8'hA5;  // 每个样本表头的同步标记字节
+
+    // =================================================================
+    // 0. 采样瞬间锁存通道号
+    // MCLK 拉高的那一刻 LTC2500 才对模拟输入采样，此刻 mux 上的通道才是这一次
+    // 样本真正的通道。但 IP_Three 的 cha_cnt 在 MCLK 下降沿就 +1 了
+    // (myip_slave_lite_v1_0_S00_AXI.v)，而这一次的 32 位结果要 100 多个周期后
+    // 才通过 o_eth_data 送到这里 —— 那时 adc_ch 早已指向下一个通道。
+    // 所以必须在 MCLK 拉高时先把通道号存下来，等数据发送时再用。
+    // 取上升沿而不是整个高电平期间：高电平有 3 个周期，若 dac_ch 恰在这期间翻转，
+    // 按电平锁存会存到采样之后才生效的通道号。
+    // =================================================================
+    always @(posedge global_clk or negedge rst_n) begin
+        if (!rst_n) begin
+            mclk_d     <= 1'b0;
+            ch_sampled <= 8'd0;
+        end else begin
+            mclk_d <= mclk;
+            if (mclk && !mclk_d)
+                ch_sampled <= {1'b0, dac_ch, 1'b0, adc_ch};
+        end
+    end
 
     // =================================================================
     // 1. 输入 8 位数据流拼接与组包块
@@ -396,10 +420,12 @@ reg next_state;
                 STATE_IDLE: begin
                     clk_cnt     <= 7'd0;
                     byte_tx_cnt <= 3'd0;
-                    // 当检测到使能要往 TX 跳转时，在这一拍同时锁存数据与通道
+                    // 当检测到使能要往 TX 跳转时，在这一拍同时锁存数据与通道。
+                    // 通道取 ch_sampled（本次转换 MCLK 时刻的值），不是当前的
+                    // dac_ch/adc_ch —— 后者此时已是下一个通道，见上面第 0 节。
                     if (dbg_tx_start_en) begin
                         data_latch <= rx_shift_reg;
-                        ch_latch   <= {1'b0, dac_ch, 1'b0, adc_ch};
+                        ch_latch   <= ch_sampled;
                     end
                 end
 

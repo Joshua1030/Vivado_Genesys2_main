@@ -764,10 +764,17 @@ proc create_root_design { parentCell } {
   [get_bd_pins ila_0/probe11]
   connect_bd_net -net ltc_driver_fsm_0_o_error  [get_bd_pins ltc_driver_fsm_0/o_error] \
   [get_bd_pins ila_0/probe0]
+  # NOTE (hand-patch): ethernet_debug_0/mclk marks the sample instant.
+  # IP_Three's cha_cnt increments on this strobe's falling edge, so by the time
+  # a 32-bit result reaches ethernet_debug, adc_ch already points at the next
+  # channel. ethernet_debug latches the header channel byte on this strobe's
+  # RISING edge instead, and emits it with the matching data word.
+  # Regression test: sim/tb_eth_ch_tag.v
   connect_bd_net -net ltc_driver_fsm_0_o_mclk  [get_bd_pins ltc_driver_fsm_0/o_mclk] \
   [get_bd_ports o_mclk] \
   [get_bd_pins ila_0/probe5] \
-  [get_bd_pins IP_Three_0/master_clk]
+  [get_bd_pins IP_Three_0/master_clk] \
+  [get_bd_pins ethernet_debug_0/mclk]
   connect_bd_net -net ltc_driver_fsm_0_o_read_data  [get_bd_pins ltc_driver_fsm_0/o_read_data] \
   [get_bd_pins ila_0/probe4]
   connect_bd_net -net ltc_driver_fsm_0_o_scka  [get_bd_pins ltc_driver_fsm_0/o_sckb] \

@@ -1,0 +1,363 @@
+`timescale 1ns / 1ps
+// ============================================================================
+// tb_eth_ch_tag.v — self-checking testbench for the ethernet_debug sample
+//                   header channel tag (DAC/ADC channel <-> data pairing)
+//
+// THE BUG THIS GUARDS AGAINST
+//   ethernet_debug packs each ADC sample as
+//       0xA5 | {0,DAC[2:0],0,ADC[2:0]} | data[31:24..7:0]
+//   It used to sample dac_ch/adc_ch at the moment the 32-bit word had finished
+//   arriving. By then the channel counters had already moved on: IP_Three's
+//   cha_cnt increments on the FALLING edge of MCLK
+//   (myip_slave_lite_v1_0_S00_AXI.v), i.e. ~3 cycles into a conversion that
+//   takes 100+ cycles to reach ethernet_debug. Result: data N tagged with
+//   channel N+1.
+//   The fix latches the channel byte on the MCLK RISING edge (the instant the
+//   LTC2500 samples) and emits that with the matching data word.
+//
+// HOW THE CHECK WORKS
+//   The ADC stub returns a data word that carries its own ground truth:
+//       {8'hC5, ch_at_sample_instant, 8'h3C, 8'h96}
+//   where ch_at_sample_instant is reconstructed INDEPENDENTLY by this TB from
+//   o_mclk + dac_ch/adc_ch. Each decoded frame must then satisfy
+//       frame[1] (header channel) == frame[3] (channel carried in the data)
+//   Pairing data with the wrong channel breaks this regardless of which
+//   channel it is, so the test is not sensitive to counter start values.
+//
+// THREE PHASES (all exercise a different way the counters move):
+//   A  paced conversions, free-run sense scan  (cha_cnt advances on MCLK fall)
+//   B  back-to-back conversions               (worst-case ch_sampled->ch_latch
+//                                              handoff margin, ~3 cycles)
+//   C  cycle-paced sense scan                 (cha_cnt advances on done_tick,
+//                                              asynchronous to MCLK)
+//   dac_ch is driven throughout on a period deliberately non-commensurate with
+//   the conversion rate, so it also moves mid-conversion.
+//
+// Config registers are applied by hierarchical `force` (the sim equivalent of
+// the MCU having written them) — no AXI master needed. See sim/tb_scan_chain.v
+// for the same pattern.
+//
+// Run (standalone XSim, from TIS_EIT_V2/ — same flow as tb_scan_chain.v; NOT
+// scripts/sim.tcl, which sees the BD-wrapped IP names rather than these raw
+// module names):
+//   xvlog -sv ip_repo/ltc_driver_fsm_1_1/ip_repo/src/ltc_driver_fsm.sv \
+//             ip_repo/ltc_driver_fsm_1_1/ip_repo/src/cdc_sync_edge.sv
+//   xvlog ip_repo/IP_Three_1_0/hdl/myip.v ip_repo/IP_Three_1_0/hdl/myip_slave_lite_v1_0_S00_AXI.v \
+//         ip_repo/ethernet_debug_1_0/hdl/ethernet_debug.v \
+//         ip_repo/ethernet_debug_1_0/hdl/ethernet_debug_slave_lite_v1_0_S00_AXI.v \
+//         sim/tb_eth_ch_tag.v
+//   xelab -debug typical -timescale 1ns/1ps tb_eth_ch_tag -s tb_chtag_sim
+//   xsim tb_chtag_sim -runall
+// (-timescale is required: ltc_driver_fsm.sv/cdc_sync_edge.sv carry no
+//  `timescale of their own.)
+//
+// Expected: "TB RESULT: ALL CHECKS PASSED", mis-tagged frames = 0.
+// Negative control: revert ch_latch to `{1'b0,dac_ch,1'b0,adc_ch}` in
+// ethernet_debug_slave_lite_v1_0_S00_AXI.v and every frame mis-tags by one.
+// ============================================================================
+
+module tb_eth_ch_tag;
+
+    // ---------------- clock / reset ----------------
+    reg clk_100 = 1'b0;
+    reg aresetn = 1'b0;
+    always #5 clk_100 = ~clk_100;               // 100 MHz
+
+    // ---------------- DUT interconnect ----------------
+    wire        o_mclk, o_sync, o_pre, o_sdi, o_sckb, o_rdlb;
+    wire        i_busy, i_drl, i_sdob;
+    wire [31:0] o_read_data;
+    wire [7:0]  eth_data;
+    wire        eth_valid, o_data_valid, o_error;
+    wire [3:0]  o_debug_state;
+
+    wire [2:0]  adc_ch;
+    wire        adc_start;
+    reg  [2:0]  dac_ch    = 3'd0;
+    reg         done_tick = 1'b0;
+
+    wire        clk_trg;
+    wire [7:0]  data_out;
+
+    wire [31:0] payload_expected;
+
+    // ================= ADC sense mux (IP_Three, module myip) =================
+    myip #(.C_S00_AXI_DATA_WIDTH(32), .C_S00_AXI_ADDR_WIDTH(4)) u_ip3 (
+        .clk(clk_100), .rst_n(aresetn),
+        .master_clk(o_mclk), .sw_ch0(1'b0), .sw_ch1(1'b0), .sw_ch2(1'b0),
+        .done_tick(done_tick), .run(1'b1),
+        .mux(), .prev_master_clk(), .current_master_clk(), .enable(),
+        .o_ja1(), .o_ja2(), .o_ja3(), .o_ja4(), .o_ja5(), .o_ja6(),
+        .adc_ch(adc_ch), .adc_start(adc_start),
+        .s00_axi_aclk(clk_100), .s00_axi_aresetn(aresetn),
+        .s00_axi_awaddr(4'd0), .s00_axi_awprot(3'd0), .s00_axi_awvalid(1'b0), .s00_axi_awready(),
+        .s00_axi_wdata(32'd0), .s00_axi_wstrb(4'd0), .s00_axi_wvalid(1'b0), .s00_axi_wready(),
+        .s00_axi_bresp(), .s00_axi_bvalid(), .s00_axi_bready(1'b0),
+        .s00_axi_araddr(4'd0), .s00_axi_arprot(3'd0), .s00_axi_arvalid(1'b0), .s00_axi_arready(),
+        .s00_axi_rdata(), .s00_axi_rresp(), .s00_axi_rvalid(), .s00_axi_rready(1'b0)
+    );
+
+    // ================= LTC2500 driver FSM =================
+    ltc_driver_fsm #(.DATA_WIDTH(32), .CLK_FREQ(100_000_000)) u_fsm (
+        .i_clk(clk_100), .i_rst_n(aresetn), .i_start(adc_start),
+        .o_mclk(o_mclk), .o_sync(o_sync), .o_pre(o_pre),
+        .i_busy(i_busy), .i_drl(i_drl),
+        .o_sdi(o_sdi), .o_sckb(o_sckb), .o_rdlb(o_rdlb), .i_sdob(i_sdob),
+        .o_debug_state(o_debug_state),
+        .o_read_data(o_read_data),
+        .o_eth_data(eth_data), .o_eth_valid(eth_valid),
+        .o_data_valid(o_data_valid), .o_error(o_error)
+    );
+
+    // ================= ADC model (payload carries the ground truth) =========
+    ltc2500_stub u_adc (
+        .mclk(o_mclk), .payload_in(payload_expected),
+        .rdlb(o_rdlb), .sckb(o_sckb),
+        .busy(i_busy), .drl(i_drl), .sdob(i_sdob)
+    );
+
+    // ================= Packetiser under test =================
+    ethernet_debug #(.C_S00_AXI_DATA_WIDTH(32), .C_S00_AXI_ADDR_WIDTH(4)) u_eth (
+        .global_clk(clk_100), .rst_n(aresetn),
+        .o_eth_valid(eth_valid), .o_eth_data(eth_data),
+        .dac_ch(dac_ch), .adc_ch(adc_ch), .mclk(o_mclk),
+        .clk_trg(clk_trg), .data_out(data_out),
+        .dbg_rx_byte_cnt(), .dbg_tx_start_en(), .dbg_current_state(),
+        .s00_axi_aclk(clk_100), .s00_axi_aresetn(aresetn),
+        .s00_axi_awaddr(4'd0), .s00_axi_awprot(3'd0), .s00_axi_awvalid(1'b0), .s00_axi_awready(),
+        .s00_axi_wdata(32'd0), .s00_axi_wstrb(4'd0), .s00_axi_wvalid(1'b0), .s00_axi_wready(),
+        .s00_axi_bresp(), .s00_axi_bvalid(), .s00_axi_bready(1'b0),
+        .s00_axi_araddr(4'd0), .s00_axi_arprot(3'd0), .s00_axi_arvalid(1'b0), .s00_axi_arready(),
+        .s00_axi_rdata(), .s00_axi_rresp(), .s00_axi_rvalid(), .s00_axi_rready(1'b0)
+    );
+
+    // ---------------------------------------------------------------------
+    // Independent reconstruction of "the channel live at the sample instant".
+    // Same rule as the DUT (registered MCLK, rising-edge detect) but written
+    // here from the primary signals, not read out of the DUT.
+    // ---------------------------------------------------------------------
+    reg        mclk_q = 1'b0, mclk_qq = 1'b0;
+    reg [7:0]  ch_at_sample = 8'd0;
+    always @(posedge clk_100 or negedge aresetn) begin
+        if (!aresetn) begin
+            mclk_q <= 1'b0; mclk_qq <= 1'b0; ch_at_sample <= 8'd0;
+        end else begin
+            mclk_q  <= o_mclk;
+            mclk_qq <= mclk_q;
+            if (mclk_q && !mclk_qq)
+                ch_at_sample <= {1'b0, dac_ch, 1'b0, adc_ch};
+        end
+    end
+
+    // The stub latches this when BUSY falls, long after ch_at_sample settled.
+    assign payload_expected = {8'hC5, ch_at_sample, 8'h3C, 8'h96};
+
+    // ---------------------------------------------------------------------
+    // Frame decoder — clk_trg is the host-side byte strobe; data_out is stable
+    // while it is high. Sync on the 0xA5 marker (no other byte can be 0xA5:
+    // the channel byte maxes out at 0x77 and the payload bytes are C5/3C/96).
+    // ---------------------------------------------------------------------
+    localparam [7:0] HDR_MARKER = 8'hA5;
+
+    integer fidx    = 0;
+    integer frames  = 0;
+    integer errors  = 0;
+    integer bad_tag = 0;
+    reg [7:0] fr0, fr1, fr2, fr3, fr4, fr5;
+
+    always @(posedge clk_trg) begin
+        case (fidx)
+            0: if (data_out == HDR_MARKER) begin fr0 = data_out; fidx = 1; end
+            1: begin fr1 = data_out; fidx = 2; end
+            2: begin fr2 = data_out; fidx = 3; end
+            3: begin fr3 = data_out; fidx = 4; end
+            4: begin fr4 = data_out; fidx = 5; end
+            5: begin fr5 = data_out; fidx = 0; check_frame; end
+        endcase
+    end
+
+    task check_frame;
+        begin
+            frames = frames + 1;
+
+            // structural sanity: the 32-bit word survived the byte pipeline
+            if (fr2 !== 8'hC5 || fr4 !== 8'h3C || fr5 !== 8'h96) begin
+                errors = errors + 1;
+                $display("[%7t ns] [FAIL] frame %0d payload corrupt: %02h %02h %02h %02h",
+                         $time, frames, fr2, fr3, fr4, fr5);
+            end
+
+            // THE CHECK: header channel must match the channel the sample was
+            // actually taken on (carried inside the data word).
+            if (fr1 !== fr3) begin
+                errors  = errors + 1;
+                bad_tag = bad_tag + 1;
+                $display("[%7t ns] [FAIL] frame %0d MIS-TAGGED: header ch=0x%02h (DAC %0d/ADC %0d) but sample was taken on 0x%02h (DAC %0d/ADC %0d)",
+                         $time, frames, fr1, fr1[6:4], fr1[2:0],
+                                        fr3, fr3[6:4], fr3[2:0]);
+            end else if (frames <= 6 || (frames % 10) == 0) begin
+                $display("[%7t ns] [ok]   frame %0d  header ch=0x%02h (DAC %0d/ADC %0d)",
+                         $time, frames, fr1, fr1[6:4], fr1[2:0]);
+            end
+        end
+    endtask
+
+    // ---------------- DAC channel stimulus ----------------
+    // 3.33 us period: deliberately non-commensurate with the conversion rate so
+    // dac_ch also changes mid-conversion.
+    always begin
+        #3330;
+        @(posedge clk_100) dac_ch = dac_ch + 3'd1;
+    end
+
+    // ---------------- done_tick stimulus (phase C) ----------------
+    always begin
+        #2170;
+        @(posedge clk_100) done_tick = 1'b1;
+        repeat (4) @(posedge clk_100);
+        done_tick = 1'b0;
+    end
+
+    // ---------------- IP_Three config (MCU-equivalent, via force) ----------------
+    // Forced once to these module-level regs; changing a reg re-drives the force
+    // (forcing directly to a task argument would not update on later calls).
+    reg [31:0] cfg_mode   = 32'd0;   // slv_reg1: 0 = auto scan
+    reg [31:0] cfg_scheme = 32'd0;   // slv_reg2: scan scheme
+    reg [31:0] cfg_period = 32'd400; // slv_reg3: conversion period (0 = free-run)
+
+    initial begin
+        force u_ip3.myip_slave_lite_v1_0_S00_AXI_inst.slv_reg1 = cfg_mode;
+        force u_ip3.myip_slave_lite_v1_0_S00_AXI_inst.slv_reg2 = cfg_scheme;
+        force u_ip3.myip_slave_lite_v1_0_S00_AXI_inst.slv_reg3 = cfg_period;
+    end
+
+    // ---------------- phases ----------------
+    integer phase_start_frames;
+    integer phase_start_errors;
+
+    task run_phase;
+        input [255:0] name;
+        input [31:0]  scheme;      // IP_Three slv_reg2
+        input [31:0]  period;      // IP_Three slv_reg3 (0 = free-run)
+        input integer duration_ns;
+        input integer min_frames;
+        begin
+            phase_start_frames = frames;
+            phase_start_errors = errors;
+
+            cfg_scheme = scheme;
+            cfg_period = period;
+
+            $display("-----------------------------------------------------------");
+            $display("PHASE %0s : scheme=%0d period=%0d", name, scheme, period);
+            $display("-----------------------------------------------------------");
+
+            #(duration_ns);
+
+            $display("PHASE %0s : %0d frames, %0d error(s)", name,
+                     frames - phase_start_frames, errors - phase_start_errors);
+            if ((frames - phase_start_frames) < min_frames) begin
+                errors = errors + 1;
+                $display("[FAIL] PHASE %0s produced only %0d frames (need >= %0d) - stimulus/DUT stalled",
+                         name, frames - phase_start_frames, min_frames);
+            end
+        end
+    endtask
+
+    // ---------------- stimulus ----------------
+    initial begin
+        aresetn = 1'b0;
+        repeat (20) @(posedge clk_100);
+        aresetn = 1'b1;
+        repeat (10) @(posedge clk_100);
+
+        // A: paced conversions (4 us apart), sense scan advances on MCLK fall
+        run_phase("A-paced-freerun-scan", 32'd0, 32'd400, 100000, 15);
+
+        // B: back-to-back conversions - tightest ch_sampled -> ch_latch margin
+        run_phase("B-back-to-back",       32'd0, 32'd0,   100000, 15);
+
+        // C: cycle-paced sense scan - cha_cnt moves on done_tick, async to MCLK
+        run_phase("C-cycle-paced-scan",   32'd2, 32'd400, 100000, 15);
+
+        $display("===========================================================");
+        $display("total frames decoded : %0d", frames);
+        $display("mis-tagged frames    : %0d", bad_tag);
+        if (o_error) begin
+            errors = errors + 1;
+            $display("[FAIL] ltc_driver_fsm raised o_error (conversion timeout)");
+        end
+        if (frames == 0) begin
+            errors = errors + 1;
+            $display("[FAIL] no frames decoded at all");
+        end
+        if (errors == 0) $display("TB RESULT: ALL CHECKS PASSED");
+        else             $display("TB RESULT: %0d CHECK(S) FAILED", errors);
+        $display("===========================================================");
+        $finish;
+    end
+
+    initial begin
+        #400000;
+        $display("[FAIL] TIMEOUT - simulation did not finish");
+        $finish;
+    end
+
+endmodule
+
+
+// ============================================================================
+// Minimal LTC2500 model.
+//   * MCLK rising edge starts a conversion (the sample instant).
+//   * BUSY high for the conversion time, then DRL low to flag data ready.
+//   * Data shifts out MSB-first on SDOB: MSB presented when RDLB falls, then
+//     advanced on each SCKB falling edge (the FSM samples on the rising edge).
+// payload_in is latched when BUSY falls, so the TB has plenty of time to
+// settle the value it wants handed back.
+// ============================================================================
+module ltc2500_stub (
+    input  wire        mclk,
+    input  wire [31:0] payload_in,
+    input  wire        rdlb,
+    input  wire        sckb,
+    output reg         busy,
+    output reg         drl,
+    output reg         sdob
+);
+    // ltc_driver_fsm errors out if BUSY has not fallen within CYCLES_CONV
+    // (75 cycles @100MHz = 750 ns), so stay comfortably under that.
+    localparam integer CONV_NS = 500;
+
+    reg [31:0] payload;
+    reg [5:0]  bit_idx;
+
+    initial begin
+        busy    = 1'b0;
+        drl     = 1'b1;
+        sdob    = 1'b0;
+        payload = 32'd0;
+        bit_idx = 6'd31;
+    end
+
+    always @(posedge mclk) begin
+        busy = 1'b1;
+        drl  = 1'b1;
+        #CONV_NS;
+        busy    = 1'b0;
+        payload = payload_in;   // ground truth for this conversion
+        #10;
+        drl = 1'b0;             // data ready
+    end
+
+    always @(negedge rdlb) begin
+        bit_idx = 6'd31;
+        sdob    = payload[31];
+    end
+
+    always @(negedge sckb) begin
+        if (~rdlb && bit_idx > 0) begin
+            bit_idx = bit_idx - 6'd1;
+            sdob    = payload[bit_idx];
+        end
+    end
+endmodule

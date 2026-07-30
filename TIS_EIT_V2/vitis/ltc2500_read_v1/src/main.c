@@ -121,7 +121,7 @@ static void sequencer_config(void) {
 //   reg3[31:0] = ADC 采样周期 = F_CLK/采样率 (0 = 自由运行)
 static void adc_mux_config(void) {
     volatile u32 *p = (volatile u32*)IP3_BASE;
-    p[0] = 0u;                                        // enable (保留)
+    p[0] = 1u;                                        // enable (保留)
     p[1] = ADC_MODE_MANUAL;                           // 模式
     p[2] = SCAN_NESTED ? 2u : (u32)ADC_AUTO_NESTED;   // 扫描方式 (SCAN_NESTED -> 周期节拍 10)
     p[3] = (ADC_SAMPLE_RATE_HZ == 0) ? 0u             // 采样周期 (0 = 自由运行)
@@ -134,7 +134,7 @@ static void adc_mux_config(void) {
 // 自动/手动共用同一换挡表, 源/感 MUX 永不短接。
 static void source_mux_config(void) {
     volatile u32 *p = (volatile u32*)IP2_BASE;
-    p[0] = 0x0000u;          // EIT_IN_EN
+    p[0] = 0x0001u;          // EIT_IN_EN
     p[1] = 0x0001u;          // gain
     p[2] = 0x0001u;          // reset
     p[3] = MUX_MODE_MANUAL;  // MUX 模式
