@@ -29,7 +29,7 @@
 /* ---- DDS 输出频率 (Hz)。须 < F_CLK_HZ/FSM_UPD_PERIOD/2 (奈奎斯特, 此处 50kHz) ---- */
 #define FREQ_A_HZ   2000UL
 #define FREQ_B_HZ   2010UL
-#define FREQ_C_HZ   50000UL
+#define FREQ_C_HZ   5000UL
 #define FREQ_D_HZ   2000UL
 #define PHASE_OFF_A 0x0000u         // 相位偏移 A..D [15:0]
 #define PHASE_OFF_B 0x0000u
@@ -39,19 +39,19 @@
 /* ---- 各通道幅度增益, Q12 (4096 = x1.0)。410 ~= /10 衰减, 共模码 0x8000 不变 ---- */
 #define GAIN_A  410u
 #define GAIN_B  410u
-#define GAIN_C  41u
+#define GAIN_C  92u
 #define GAIN_D  410u
 
 /* ---- IP_1 正弦周期序列器 ---- */
-#define CYCLES_PER_CHANNEL 2u   // 每感测通道停留的正弦周期数 N (0/1 = 每周期换挡)
-#define SCAN_NESTED        1    // 1 = 周期节拍嵌套: ADC 每 N 周期换挡, DAC 每 8N 周期换挡
+#define CYCLES_PER_CHANNEL 5u   // 每感测通道停留的正弦周期数 N (0/1 = 每周期换挡)
+#define SCAN_NESTED        1   // 1 = 周期节拍嵌套: ADC 每 N 周期换挡, DAC 每 8N 周期换挡
                                 //     (每注入通道扫过全部 8 个感测通道 -> 8x8 帧)
                                 // 0 = legacy: DAC 每 N 周期换挡; ADC 见 ADC_AUTO_NESTED
 
 /* ---- IP_Three ADC MUX ---- */
 #define ADC_MODE_MANUAL    0   // 0=自动扫描, 1=手动(板载拨码开关 sw0/1/2)
 #define ADC_AUTO_NESTED    0   // legacy 用: 0=自由扫描, 1=嵌套8x8(每次转换,DAC换挡复位)
-#define ADC_SAMPLE_RATE_HZ 0   // 期望 ADC 采样率(Hz); 0 = 自由运行(最大速率, 受 FSM 环路限制)
+#define ADC_SAMPLE_RATE_HZ 500000u   // 期望 ADC 采样率(Hz); 0 = 自由运行(最大速率, 受 FSM 环路限制)
 
 /* ---- IP_Two DAC MUX ---- */
 #define MUX_MODE_MANUAL 0   // 0=自动扫描/默认, 1=手动停靠某通道
