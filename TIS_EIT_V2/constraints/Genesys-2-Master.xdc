@@ -200,6 +200,25 @@ set_property -dict { PACKAGE_PIN U23   IOSTANDARD LVCMOS25 } [get_ports { data_o
 #set_property -dict { PACKAGE_PIN E28   IOSTANDARD LVCMOS12 } [get_ports { fmc_clk1_m2c_p }]; #IO_L14P_T2_SRCC_16 Sch=fmc_clk1_m2c_p
 #set_property -dict { PACKAGE_PIN K25   IOSTANDARD LVCMOS12 } [get_ports { FMC_CLK_N[2] }]; #IO_L12N_T1_MRCC_AD5N_15 Sch=fmc_clk_n[2]
 #set_property -dict { PACKAGE_PIN L25   IOSTANDARD LVCMOS12 } [get_ports { FMC_CLK_P[2] }]; #IO_L12P_T1_MRCC_AD5P_15 Sch=fmc_clk_p[2]
+# =============================================================================
+# LTC2500-32 SPI (o_sckb / o_rdlb / i_sdob) —— 读注意
+#
+# 这几个脚【只有引脚和电平约束，没有 set_input_delay / set_output_delay】，
+# 也就是说 SDO 的回读路径根本不在时序分析范围内。Vivado 不会告诉你它挂了。
+#
+# ltc_driver_fsm 是在“驱动 SCK 上升沿的那个内部时钟沿”上采 i_sdob 的，采到
+# 的是上一个 SCK 上升沿推出来的位，所以整条回路
+#     FPGA Tco -> FMC 排线 -> LTC2500 t_dSDO -> 回程 -> 输入建立
+# 必须塞进【一个 SCK 周期】。估算这条路约 21~31 ns。
+#
+#     SCK_DIV=2 -> SCK 25MHz -> 预算 40ns  -> OK（仿真实测撑到 35ns）
+#     SCK_DIV=1 -> SCK 50MHz -> 预算 20ns  -> 挂：每一位晚采一位，
+#                                             差分符号位丢失（commit 9171e13）
+#
+# 所以 ltc_driver_fsm.sv 里的 SCK_DIV 必须 >= 2。要再提速就得先量这条回路的
+# 真实延时（或者改成延后 k 拍采样），不能直接改分频。
+# 回归测试：sim/tb_ltc_sdo_timing.v
+# =============================================================================
 set_property -dict { PACKAGE_PIN K29   IOSTANDARD LVCMOS25 } [get_ports { o_mclk }]; #IO_L13N_T2_MRCC_15 Sch=fmc_ha_n[00]
 set_property -dict { PACKAGE_PIN K28   IOSTANDARD LVCMOS25 } [get_ports { o_sync }]; #IO_L13P_T2_MRCC_15 Sch=fmc_ha_p[00]
 #set_property -dict { PACKAGE_PIN L28   IOSTANDARD LVCMOS12 } [get_ports { FMC_HA_N[01] }]; #IO_L14N_T2_SRCC_15 Sch=fmc_ha_n[01]

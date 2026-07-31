@@ -30,11 +30,33 @@ module ltc_driver_fsm #(
     output logic o_error
 );
 
-localparam int CYCLES_MCLKH = 3;  
-localparam int CYCLES_MCLKL = 2;  
+localparam int CYCLES_MCLKH = 3;
+localparam int CYCLES_MCLKL = 2;
+// STATE_QUIET 的长度：RDLB 拉低之后、第一次采 SDO 之前的等待。
+// RDLB 下降沿到第一次采样的间隔 = (CYCLES_QUIET-1) + SCK_DIV 个时钟。
+// MSB(OV 位) 是靠 RDLB 下降沿推出来的，不是靠 SCK，所以它单独吃这一段预算；
+// 后面每一位吃的是一个完整 SCK 周期(SCK_DIV*2 个时钟)。
+// 原来 CYCLES_QUIET 和 CYCLES_MCLKL 共用 =2 -> 间隔只有 3 个时钟(30ns)，
+// 比每一位的 40ns 预算还紧：仿真里回路延时 >=30ns 就只丢 OV(bit31)、
+// 差分位全对 —— 这很可能就是历来 OV 恒为 0 的原因之一。
+// 取 4 -> 间隔 5 个时钟(50ns) > 40ns，OV 不再是最紧的那一环。代价 2 个时钟。
+localparam int CYCLES_QUIET = 4;
 localparam int CYCLES_CONV  = 75; 
 localparam int CYCLES_ACQ   = 35; 
-localparam int SCK_DIV      = 1;  // SCLK = 100MHz/(2*SCK_DIV) = 50MHz (was 2 -> 25MHz);读出 32bit ~127->~64 clk
+// SCLK = 100MHz/(2*SCK_DIV)。SCK_DIV=2 -> 25MHz，读出 32bit 约 128 clk。
+// !!! 必须保持 >= 2，不要再改回 1 !!!
+// shift_reg 是在“驱动 SCK 上升沿的那一个内部时钟沿”上采 i_sdob 的（见下方
+// STATE_READ_DATA / sck_posedge），采到的是上一个 SCK 上升沿推出来的那一位。
+// 于是整个回路——FPGA Tco + FMC 排线 + LTC2500 t_dSDO + 回程 + 输入建立——
+// 必须塞进【一个 SCK 周期】：
+//     SCK_DIV=2 (25MHz) -> 预算 40ns，实测回路约 21~31ns，正常；
+//     SCK_DIV=1 (50MHz) -> 预算 20ns，回路超时，每一位都晚采一位：
+//                          bit30 变成 OV 位的副本，24 位差分的符号位丢失，
+//                          负数全部变成大正数。硬件实测，见 commit 9171e13。
+// i_sdob/o_sckb 在 constraints/Genesys-2-Master.xdc 里只有引脚和电平约束，
+// 没有 set_input_delay/set_output_delay —— 这条路径根本没被时序分析覆盖，
+// 改快了 Vivado 一句警告都不会给。
+localparam int SCK_DIV      = 2;
 
 typedef enum logic [3:0] { 
     STATE_IDLE,
@@ -277,7 +299,7 @@ always_comb begin
         STATE_QUIET: begin
             next_rdlb = 1'b0;
             delay_en  = 1'b1;
-            if (delay_cnt >= CYCLES_MCLKL - 1) begin
+            if (delay_cnt >= CYCLES_QUIET - 1) begin
                 next_state = STATE_READ_DATA;
                 delay_clr  = 1'b1;
             end

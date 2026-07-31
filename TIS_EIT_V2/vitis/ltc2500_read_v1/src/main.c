@@ -51,7 +51,17 @@
 /* ---- IP_Three ADC MUX ---- */
 #define ADC_MODE_MANUAL    0   // 0=自动扫描, 1=手动(板载拨码开关 sw0/1/2)
 #define ADC_AUTO_NESTED    0   // legacy 用: 0=自由扫描, 1=嵌套8x8(每次转换,DAC换挡复位)
-#define ADC_SAMPLE_RATE_HZ 500000u   // 期望 ADC 采样率(Hz); 0 = 自由运行(最大速率, 受 FSM 环路限制)
+// 期望 ADC 采样率(Hz); 0 = 自由运行(最大速率, 受 FSM 环路限制)。
+// 400 kHz -> slv_reg3 N = 100MHz/400kHz = 250 个时钟。
+//
+// 注意 N 有下限：IP_Three 的启动脉冲只有 3 拍宽而且是自由运行的
+// (myip_slave_lite_v1_0_S00_AXI.v:432-435)，FSM 只在 STATE_IDLE 看它。
+// 如果 FSM 一圈比 N 还长，就会整个漏掉一个脉冲去等下一个 ——
+// 采样率是【直接减半】，不是缓慢下降。
+// ltc_driver_fsm 在 SCK_DIV=2 下一圈 = 215 个时钟（sim/tb_ltc_sdo_timing.v 量的），
+// 所以 N 必须 >= 215；250 有 35 个时钟余量。
+// (SCK_DIV=1 时一圈是 150 个时钟，但那个配置读回来的数据是错的，别用。)
+#define ADC_SAMPLE_RATE_HZ 400000
 
 /* ---- IP_Two DAC MUX ---- */
 #define MUX_MODE_MANUAL 0   // 0=自动扫描/默认, 1=手动停靠某通道

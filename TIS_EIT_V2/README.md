@@ -613,6 +613,25 @@ hardware.
 
 ### Caveats (inherited design traits, not new bugs)
 
+- **`ltc_driver_fsm`'s `SCK_DIV` must stay ≥ 2 (SPI readout ≤ 25 MHz).** The FSM
+  samples `i_sdob` on the very clock edge that launches the SCK rising edge, so
+  it reads the bit shifted out by the *previous* rise — the whole round trip
+  (FPGA Tco + FMC cable + LTC2500 `t_dSDO` + return + input setup, est. 21–31 ns)
+  has to fit in **one SCK period**. 40 ns at 25 MHz is fine; 20 ns at 50 MHz is
+  not, and every bit is then captured one position late: `bit30` becomes a copy
+  of `OV` and the 24-bit differential loses its sign, so negative samples arrive
+  as large positives. This shipped in `9171e13` and cost 14 captures.
+  `i_sdob`/`o_sckb` have **no `set_input_delay`/`set_output_delay`** in
+  `constraints/Genesys-2-Master.xdc`, so Vivado does not time this path and will
+  not warn you. Regression test: `sim/tb_ltc_sdo_timing.v` (parameterised SDO
+  propagation delay; the ADC model in `ip_repo/.../src/adc_inst.sv` is
+  zero-delay, which is why this never showed up in simulation before).
+- **`IP_Three`'s ADC start pulse is only 3 clocks wide and free-running**
+  (`slv_reg3` = period N). The FSM only looks at `i_start` in `STATE_IDLE`, so if
+  its loop is longer than N it misses a pulse entirely and waits for the next —
+  the sample rate **halves** rather than degrading gradually. The loop is
+  215 clocks at `SCK_DIV=2` (150 at `SCK_DIV=1`), so keep N ≥ 215; `main.c`'s
+  `ADC_SAMPLE_RATE_HZ = 400000` gives N = 250.
 - `IP_1`/`IP_Two`/`addr_gen` clock logic on gated strobes (`negedge clk_A`,
   `negedge done_tick`) instead of a synchronous enable — fine at these rates but
   not CDC-clean; ILA/timing analysis around those paths deserves skepticism.
