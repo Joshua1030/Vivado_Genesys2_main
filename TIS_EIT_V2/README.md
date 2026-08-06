@@ -136,9 +136,10 @@ Notes:
 
 `vitis/` is this project's **Vitis Unified** workspace (2025.2, *component*-based —
 a **platform component** built from the XSA plus an **application component** — not
-the classic system-project / XSCT flow). It is currently **empty**: the previous
-MicroBlaze app sources were removed, so you create the platform and write your own
-application here. The workspace is disposable — nothing here is a source of truth.
+the classic system-project / XSCT flow). It holds the `ltc2500_read_v1`
+application (`vitis/ltc2500_read_v1/src/main.c` — configures every user IP over
+AXI-Lite and raises the ADC start line); the platform components are rebuilt from
+a fresh XSA and are disposable.
 
 **Prerequisite — an XSA.** Build one with `scripts/build.tcl` (produces
 `work/ltc2500_bd_wrapper.xsa`, bitstream included), or use a committed copy if one
@@ -184,7 +185,7 @@ Xil_Out32(XPAR_FSM_0_S00_AXI_BASEADDR + 0x04, 1000);  // update period = 1000 cl
 | `addr_gen:1.0` | `addr_gen_1_0` | Verilog | AXI-Lite; sweeps addresses into the 4 sine-LUT BRAMs (excitation waveform generator) |
 | `FSM:1.0` | `FSM_1_0` | Verilog | AXI-Lite; AD5686R quad-DAC SPI driver with programmable SCLK / update rate ([README](ip_repo/FSM_1_0/README.md)) |
 | `IP_1:1.0` | `IP_1_1_0` | Verilog | AXI-Lite; sine-period / electrode-cycle sequencer — watches DDS wraparound, emits `done_tick`/`total_tick`/`chanel_cnt`, `sync` + `EIT_IN_EN` gate |
-| `IP_Two:1.0` | `IP_Two_1_0` | Verilog | AXI-Lite; electrode/analog mux control (`mux_dac1`, `mux_dac2`) |
+| `IP_Two:1.0` | `IP_Two_1_0` | Verilog | AXI-Lite; electrode/analog mux control (`mux_dac1`, `mux_dac2`) + electrode discharge (`Electrode_Discharge`) ([README](ip_repo/IP_Two_1_0/README.md)) |
 | `IP_Three:1.0` | `IP_Three_1_0` | Verilog | AXI-Lite; electrode/analog mux control (`mux_0`) |
 | `ethernet_debug:1.0` | `ethernet_debug_1_0` | Verilog | AXI-Lite; Ethernet-visible debug/control registers |
 | `ltc_driver_fsm:1.1` | `ltc_driver_fsm_1_1` | SystemVerilog | LTC2500 ADC serial readout (`o_mclk/o_sync/o_sdi`, `i_busy/i_drl/i_sdob`, `o_sckb/o_rdlb`) with CDC synchronizers |
@@ -577,7 +578,10 @@ hardware.
 - **`IP_Two_1_0`** — injection mux rotation: on each `done_tick` it steps
   `mux_dac1`/`mux_dac2` through 8 hardcoded 3-bit code pairs (adjacent-pair
   current injection). Software bits: `EIT_IN_EN` (reg0), `gain` (reg1),
-  `reset` (reg2).
+  `reset` (reg2). It also drives **`Electrode_Discharge`** (FMC `HB10_N`, pin
+  J12, active low) with a manual mode (reg5/reg6) and an automatic mode that
+  discharges for one full injection cycle after every N of them (reg7) —
+  see [`ip_repo/IP_Two_1_0/README.md`](ip_repo/IP_Two_1_0/README.md).
 
 ### Acquisition
 
@@ -587,8 +591,13 @@ hardware.
   in over SPI (`o_sckb`/`i_sdob`), and streams it out as 4 bytes on
   `o_eth_data`/`o_eth_valid`. Started by software via `axi_gpio_0` channel 2 →
   `i_start` (so nothing runs until the MicroBlaze app raises it).
-- **`IP_Three_1_0`** — sense-side mux: 2-FF-synchronizes `o_mclk`, counts its
-  falling edges, and rotates `mux_0` through 8 codes; `enable` from slv_reg0.
+- **`IP_Three_1_0`** — sense-side mux: 2-FF-synchronizes `o_mclk` and rotates the
+  JA mux address (and legacy `mux_0`) through 8 codes; `enable` from slv_reg0.
+  Each scan scheme paces its own *target* channel, but the address lines only
+  ever move on the `o_mclk` falling edge — ~50 ns after the LTC2500 aperture,
+  inside the BUSY-high hold window, so the front end gets the full conversion
+  plus acquisition time to settle. See its
+  [README](ip_repo/IP_Three_1_0/README.md#when-the-mux-switches).
 
 ### Streaming
 

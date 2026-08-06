@@ -345,6 +345,7 @@ proc create_root_design { parentCell } {
   set mux_dac1 [ create_bd_port -dir O -from 2 -to 0 mux_dac1 ]
   set mux_dac2 [ create_bd_port -dir O -from 2 -to 0 mux_dac2 ]
   set EIT_IN_EN_0 [ create_bd_port -dir O EIT_IN_EN_0 ]
+  set Electrode_Discharge [ create_bd_port -dir O Electrode_Discharge ]
   set dac_sclk_0 [ create_bd_port -dir O dac_sclk_0 ]
   set dac_sync_0 [ create_bd_port -dir O dac_sync_0 ]
   set dac_sdo_0 [ create_bd_port -dir O dac_sdo_0 ]
@@ -629,6 +630,8 @@ proc create_root_design { parentCell } {
   [get_bd_ports ja5]
   connect_bd_net -net IP_Three_0_o_ja6  [get_bd_pins IP_Three_0/o_ja6] \
   [get_bd_ports ja6]
+  connect_bd_net -net IP_Two_0_Electrode_Discharge  [get_bd_pins IP_Two_0/Electrode_Discharge] \
+  [get_bd_ports Electrode_Discharge]
   connect_bd_net -net IP_Two_0_gain  [get_bd_pins IP_Two_0/gain] \
   [get_bd_ports gain_0]
   connect_bd_net -net IP_Two_0_mux1  [get_bd_pins IP_Two_0/mux1] \

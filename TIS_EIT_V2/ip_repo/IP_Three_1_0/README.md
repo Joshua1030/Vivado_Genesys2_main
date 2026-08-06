@@ -22,7 +22,7 @@ differential 8→1 sense muxes on the **JA PMOD**. Both muxes are always driven 
 
 | Signal | Dir | Wired to | Meaning |
 |---|---|---|---|
-| `master_clk` | in | `ltc_driver_fsm/o_mclk` | ADC conversion strobe; sense counter advances on its falling edge |
+| `master_clk` | in | `ltc_driver_fsm/o_mclk` | ADC conversion strobe; **the only instant at which the mux is allowed to move** — see [When the mux switches](#when-the-mux-switches) |
 | `sw_ch0/1/2` | in | board `sw0/sw1/sw2` | manual channel (0–7), used when `slv_reg1[0]=1` |
 | `done_tick` | in | `IP_1/done_tick` | DAC channel switch; resets the sense sweep in nested mode |
 | `run` | in | `axi_gpio_0/gpio2_io_o` | ADC run/enable (the old `i_start` GPIO); gates `adc_start` |
@@ -55,12 +55,48 @@ take the address in pin order **A0 / A2 / A1**:
   every ADC conversion (`o_mclk`), independent of the DAC. Fastest.
 - **Auto nested 8×8 legacy** (`slv_reg2[1:0]=01`): same per-conversion advance, but the sense
   counter **resets to 0 on each DAC channel switch** (`IP_1/done_tick`). Assumes the DAC
-  dwell (`IP_1/slv_reg1` cycles-per-channel) spans ≥8 ADC conversions.
+  dwell (`IP_1/slv_reg1` cycles-per-channel) spans ≥8 ADC conversions — if `done_tick` is
+  faster than the conversion rate the counter is pinned at 0 and never sweeps.
 - **Auto cycle-paced** (`slv_reg2[1:0]=10`): the sense counter advances **once per N sine
   cycles** (on each `IP_1/done_tick`), decoupled from the conversion rate. Paired with
   `IP_1/slv_reg2[0]=1` (DAC advances every 8·N cycles), this gives a true nested 8×8 frame:
   each injection channel is measured against all 8 sense channels for N cycles each. The
   ADC sample rate (`slv_reg3`) then sets how many samples are captured per sense channel.
+
+## When the mux switches
+
+The LTC2500-32 has two phases. **A rising edge on MCLK starts a conversion** — that edge
+*is* the aperture: the 32-bit charge-redistribution CDAC disconnects from IN+/IN− and holds.
+`BUSY` is high for the whole conversion (`tCONV ≈ 660 ns`). Only while `BUSY` is **low** is
+the CDAC reconnected to IN+/IN− and tracking the input (the acquisition phase,
+`tACQ = tCYC − tCONV − tBUSYLH = 327 ns` at 1 Msps).
+
+**⇒ the sense mux must only ever move while BUSY is high.** The whole mux transient then
+falls inside the hold window and the analog front end gets `tCONV + tACQ` to settle before
+the next aperture. **Switching on the BUSY falling edge is the worst possible choice** — it
+starts the transient exactly when the sampling capacitor reconnects, so the mux slew *and*
+the CDAC's own charge kickback would have to settle within `tACQ` alone.
+
+So `cha_cnt` — the value that actually drives the address lines — updates **only on
+`mclk_negedge`**, in every automatic scheme. `o_mclk` is high for just `CYCLES_MCLKH = 3`
+clocks and IP_Three re-registers it twice, so that lands ~50 ns after the aperture: late
+enough to cover board skew, far earlier than BUSY falling. At the design's actual loop rate
+(~215 clocks, `slv_reg3 = 250`) that leaves ~2.4 µs of settling.
+
+Each scheme feeds a separate **target** register `cha_next` at its own pace; `cha_cnt` copies
+`cha_next` at the next `mclk_negedge`. In cycle-paced mode that means `IP_1/done_tick` — which
+is asynchronous to the ADC — sets *which* channel is next but never *when* the mux moves, and
+because `cha_next` free-runs no advance is ever lost, so the scan stays aligned with the DAC
+frame. The mux follows at most one conversion period late.
+
+**Manual mode is deliberately exempt** and stays combinational: gating a slide switch through
+the conversion window would freeze the mux whenever the ADC is stopped (`run = 0`), which is
+exactly when someone is flipping switches on the bench. A human switch flip can spoil at most
+one conversion.
+
+Guarded by [`sim/tb_eth_ch_tag.v`](../../sim/tb_eth_ch_tag.v), which asserts on primary
+signals that `adc_ch` never changes while `i_busy` is low and never within 900 ns of an
+aperture, across all four scan schemes.
 
 ## Software
 

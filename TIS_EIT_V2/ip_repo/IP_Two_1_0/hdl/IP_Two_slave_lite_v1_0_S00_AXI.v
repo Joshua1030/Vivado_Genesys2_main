@@ -29,6 +29,7 @@
     output  EIT_IN_EN,
     output gain,
     output reset,
+    output Electrode_Discharge,       // 电极放电控制 (低电平有效: 0 = 正在放电)
 		// User ports ends
 		// Do not modify the ports beyond this line
 
@@ -669,7 +670,55 @@
             mux2 = mux2_sel;
         end
     end
-    
-   
-    
+
+    // ------------------------------------------------------------------
+    // Electrode_Discharge 电极放电控制 (引脚低电平有效: 0 = 正在放电)
+    //
+    //   slv_reg5[0]    : 放电模式  0 = 手动 (复位默认), 1 = 自动
+    //   slv_reg6[0]    : 手动放电  1 = 放电中 (引脚拉低)，仅 slv_reg5[0]=0 时有效
+    //   slv_reg7[15:0] : 自动模式下每 N 个注入周期放电一次，0 视作 1
+    //                    (沿用 IP_1 的 n_eff 约定：0 映射为默认值)
+    //
+    // 自动模式：数满 N 个 total_tick 后，再整整一个 total_tick 间隔保持放电
+    // (= 一个完整的注入周期)，随后恢复计数。放电窗口只影响本引脚，
+    // DAC / MUX / EIT_IN_EN 一概不动。
+    // total_tick 是 IP_1 在同一个 100MHz 域产生的单拍脉冲，无需跨时钟同步。
+    // 复位后为「手动 + 关闭」=> 引脚为高 => 不放电，默认安全。
+    // ------------------------------------------------------------------
+    wire        dis_auto_mode = slv_reg5[0];
+    wire        dis_manual_on = slv_reg6[0];
+    wire [15:0] dis_n_eff     = (slv_reg7[15:0] == 16'd0) ? 16'd1 : slv_reg7[15:0];
+
+    reg  [15:0] dis_cnt;      // 上次放电以来已完成的注入周期数
+    reg         dis_active;   // 1 = 正处于那一个注入周期的放电窗口内
+
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            dis_cnt    <= 16'd0;
+            dis_active <= 1'b0;
+        end
+        else if (!dis_auto_mode) begin
+            // 手动模式：自动状态机停在复位态，切回自动时从头计数
+            dis_cnt    <= 16'd0;
+            dis_active <= 1'b0;
+        end
+        else if (total_tick) begin
+            if (dis_active) begin
+                dis_active <= 1'b0;      // 放电窗口（一个完整注入周期）结束
+                dis_cnt    <= 16'd0;
+            end
+            else if (dis_cnt >= dis_n_eff - 16'd1) begin
+                dis_active <= 1'b1;      // 已满 N 个周期 -> 放电一个周期
+                dis_cnt    <= 16'd0;
+            end
+            else begin
+                dis_cnt <= dis_cnt + 16'd1;
+            end
+        end
+    end
+
+    // 模式选择后取反：寄存器里 1 = 放电，引脚上 0 = 放电
+    wire discharge_on = dis_auto_mode ? dis_active : dis_manual_on;
+    assign Electrode_Discharge = ~discharge_on;
+
 	endmodule

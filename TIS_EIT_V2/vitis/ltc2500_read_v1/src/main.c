@@ -67,6 +67,15 @@
 #define MUX_MODE_MANUAL 0   // 0=自动扫描/默认, 1=手动停靠某通道
 #define MUX_MANUAL_CHAN 0   // 手动模式下的通道号 0..7
 
+/* ---- IP_Two 电极放电 (Electrode_Discharge, FMC HB10_N / J12, 低电平有效) ---- */
+#define DISCHARGE_AUTO      0   // 0=手动(见 DISCHARGE_MANUAL_ON), 1=自动
+#define DISCHARGE_MANUAL_ON 0   // 手动模式: 1=放电中(引脚拉低), 0=关闭(引脚拉高)
+// 自动模式: 每 N 个注入周期(IP_1 的 total_tick)后, 整整放电一个完整注入周期。
+// 一个注入周期 = 一次 total_tick 间隔。SCAN_NESTED=1 时 = 8*CYCLES_PER_CHANNEL
+// 个正弦周期; 按当前配置(N=5, FREQ_A=2kHz) 即 40/2000 = 20ms。
+// 故 DISCHARGE_EVERY_N=4 => 每 100ms 放电 20ms。0 视作 1。
+#define DISCHARGE_EVERY_N   4u
+
 /* =====================================================================
  * Helpers
  * =====================================================================*/
@@ -141,14 +150,21 @@ static void adc_mux_config(void) {
 // IP_Two (源/感 MUX, 电流注入电极):
 //   reg0[0]=EIT_IN_EN  reg1[0]=gain  reg2[0]=reset
 //   reg3[0]=MUX 模式 (0=自动, 1=手动)  reg4[2:0]=手动通道 0..7
+//   reg5[0]=放电模式 (0=手动, 1=自动)  reg6[0]=手动放电 (1=放电, 引脚拉低)
+//   reg7[15:0]=自动模式下每 N 个注入周期放电一次 (0 视作 1)
 // 自动/手动共用同一换挡表, 源/感 MUX 永不短接。
 static void source_mux_config(void) {
     volatile u32 *p = (volatile u32*)IP2_BASE;
-    p[0] = 0x0001u;          // EIT_IN_EN
-    p[1] = 0x0001u;          // gain
-    p[2] = 0x0001u;          // reset
-    p[3] = MUX_MODE_MANUAL;  // MUX 模式
-    p[4] = MUX_MANUAL_CHAN;  // 手动通道
+    p[0] = 0x0001u;             // EIT_IN_EN
+    p[1] = 0x0001u;             // gain
+    p[2] = 0x0001u;             // reset
+    p[3] = MUX_MODE_MANUAL;     // MUX 模式
+    p[4] = MUX_MANUAL_CHAN;     // 手动通道
+    // 先写参数(reg6/reg7)再写模式(reg5): 复位默认 reg5=0(手动),
+    // 这样自动状态机启用时看到的 N 一定已经是最终值。
+    p[6] = DISCHARGE_MANUAL_ON; // 手动放电
+    p[7] = DISCHARGE_EVERY_N;   // 自动: 每 N 个注入周期放电一次
+    p[5] = DISCHARGE_AUTO;      // 放电模式 (最后写)
 }
 
 // GPIO: 将 START_CHANNEL 设为输出 (ADC run/使能脉冲源)

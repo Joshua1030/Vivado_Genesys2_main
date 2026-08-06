@@ -1,9 +1,11 @@
 `timescale 1ns / 1ps
 // ============================================================================
-// tb_eth_ch_tag.v — self-checking testbench for the ethernet_debug sample
-//                   header channel tag (DAC/ADC channel <-> data pairing)
+// tb_eth_ch_tag.v — self-checking testbench for (1) the ethernet_debug sample
+//                   header channel tag (DAC/ADC channel <-> data pairing) and
+//                   (2) WHEN IP_Three is allowed to move the sense mux
+//                       relative to the LTC2500 aperture
 //
-// THE BUG THIS GUARDS AGAINST
+// BUG #1: THE CHANNEL TAG
 //   ethernet_debug packs each ADC sample as
 //       0xA5 | {0,DAC[2:0],0,ADC[2:0]} | data[31:24..7:0]
 //   It used to sample dac_ch/adc_ch at the moment the 32-bit word had finished
@@ -24,12 +26,24 @@
 //   Pairing data with the wrong channel breaks this regardless of which
 //   channel it is, so the test is not sensitive to counter start values.
 //
-// THREE PHASES (all exercise a different way the counters move):
-//   A  paced conversions, free-run sense scan  (cha_cnt advances on MCLK fall)
+// BUG #2: THE MUX SWITCH WINDOW
+//   The LTC2500-32 samples on the MCLK RISING edge and holds for the whole
+//   conversion (BUSY high); only while BUSY is LOW does the sampling capacitor
+//   reconnect and track the input. So the sense mux must move only while BUSY
+//   is high — see the SENSE-MUX SWITCH-TIMING MONITOR below for the full
+//   argument and the two checks it makes.
+//   The cycle-paced scheme used to advance straight off IP_1/done_tick, which
+//   is asynchronous to the ADC, so the mux could move anywhere in the loop.
+//
+// FOUR PHASES (each exercises a different way the counters move):
+//   A  paced conversions, free-run sense scan  (advances on MCLK fall)
 //   B  back-to-back conversions               (worst-case ch_sampled->ch_latch
-//                                              handoff margin, ~3 cycles)
-//   C  cycle-paced sense scan                 (cha_cnt advances on done_tick,
+//                                              handoff margin, ~3 cycles, and
+//                                              the tightest settling window)
+//   C  cycle-paced sense scan                 (target advances on done_tick,
 //                                              asynchronous to MCLK)
+//   D  nested 8x8 legacy                      (per-conversion advance plus an
+//                                              async reset on done_tick)
 //   dac_ch is driven throughout on a period deliberately non-commensurate with
 //   the conversion rate, so it also moves mid-conversion.
 //
@@ -51,9 +65,14 @@
 // (-timescale is required: ltc_driver_fsm.sv/cdc_sync_edge.sv carry no
 //  `timescale of their own.)
 //
-// Expected: "TB RESULT: ALL CHECKS PASSED", mis-tagged frames = 0.
-// Negative control: revert ch_latch to `{1'b0,dac_ch,1'b0,adc_ch}` in
-// ethernet_debug_slave_lite_v1_0_S00_AXI.v and every frame mis-tags by one.
+// Expected: "TB RESULT: ALL CHECKS PASSED", mis-tagged frames = 0, mux moved in
+// acq phase = 0, mux settled too late = 0.
+// Negative controls:
+//   * revert ch_latch to `{1'b0,dac_ch,1'b0,adc_ch}` in
+//     ethernet_debug_slave_lite_v1_0_S00_AXI.v -> every frame mis-tags by one;
+//   * make the cycle-paced scheme drive cha_cnt straight off done_rise in
+//     myip_slave_lite_v1_0_S00_AXI.v -> phase C reports dozens of
+//     "sense mux changed ... while BUSY low".
 // ============================================================================
 
 module tb_eth_ch_tag;
@@ -133,18 +152,23 @@ module tb_eth_ch_tag;
 
     // ---------------------------------------------------------------------
     // Independent reconstruction of "the channel live at the sample instant".
-    // Same rule as the DUT (registered MCLK, rising-edge detect) but written
-    // here from the primary signals, not read out of the DUT.
+    // Same rule as the DUT (one registered copy of MCLK, rising-edge detect)
+    // but written here from the primary signals, not read out of the DUT.
+    //
+    // The detect depth must match the DUT's exactly. This used to use a 2-deep
+    // pipeline (mclk_q/mclk_qq) while ethernet_debug uses a 1-deep one, so this
+    // model latched the channel ONE CLOCK LATER than the DUT. Any dac_ch change
+    // landing in that 10 ns gap produced a spurious MIS-TAGGED failure at a rate
+    // of ~0.3% of frames — a flaky test, not a real defect.
     // ---------------------------------------------------------------------
-    reg        mclk_q = 1'b0, mclk_qq = 1'b0;
+    reg        mclk_q = 1'b0;
     reg [7:0]  ch_at_sample = 8'd0;
     always @(posedge clk_100 or negedge aresetn) begin
         if (!aresetn) begin
-            mclk_q <= 1'b0; mclk_qq <= 1'b0; ch_at_sample <= 8'd0;
+            mclk_q <= 1'b0; ch_at_sample <= 8'd0;
         end else begin
-            mclk_q  <= o_mclk;
-            mclk_qq <= mclk_q;
-            if (mclk_q && !mclk_qq)
+            mclk_q <= o_mclk;
+            if (o_mclk && !mclk_q)
                 ch_at_sample <= {1'b0, dac_ch, 1'b0, adc_ch};
         end
     end
@@ -202,19 +226,102 @@ module tb_eth_ch_tag;
         end
     endtask
 
+    // =====================================================================
+    // SENSE-MUX SWITCH-TIMING MONITOR
+    //
+    // LTC2500-32: a rising edge on MCLK starts a conversion and IS the aperture
+    // — the 32-bit charge-redistribution CDAC disconnects from IN+/IN- and
+    // holds. BUSY is high for the whole conversion (tCONV ~660 ns). Only while
+    // BUSY is LOW is the CDAC reconnected to IN+/IN- and tracking the input
+    // (the acquisition phase, tACQ = 327 ns @ 1 Msps).
+    //
+    //   => the sense mux may only change while BUSY is HIGH. The whole mux
+    //      transient then falls inside the hold window, and the analog front
+    //      end gets tCONV + tACQ to settle before the next aperture.
+    //   => switching on the BUSY FALLING edge is the worst possible choice:
+    //      the mux slew AND the CDAC's own charge kickback would have to settle
+    //      within tACQ alone.
+    //
+    // Two checks, both built from primary signals (o_mclk / i_busy / adc_ch),
+    // never from DUT internals:
+    //   1. adc_ch must not change while i_busy is low.
+    //   2. the gap from the last adc_ch change to the next MCLK rising edge
+    //      must be >= MIN_SETTLE_NS.
+    //
+    // Negative control: with the sense counter advancing straight off done_tick
+    // (the pre-fix cycle-paced path), phase C fails check 1 on ~7 of every 8
+    // channel changes, because BUSY is high for only ~500 ns of the 4 us loop.
+    // =====================================================================
+    localparam integer MIN_SETTLE_NS = 900;  // < the ~2 us loop, > tCONV + tACQ
+
+    integer mux_bad_window = 0;   // adc_ch moved during the acquisition phase
+    integer mux_bad_settle = 0;   // adc_ch moved too close to the next aperture
+    time    last_mux_change = 0;
+    time    min_settle      = 64'hFFFF_FFFF;
+    reg     mux_seen        = 1'b0;
+
+    integer mux_changes = 0;
+    always @(adc_ch) begin
+        if (aresetn === 1'b1) begin
+            last_mux_change = $time;
+            mux_seen        = 1'b1;
+            mux_changes     = mux_changes + 1;
+            if (i_busy !== 1'b1) begin
+                mux_bad_window = mux_bad_window + 1;
+                errors         = errors + 1;
+                $display("[%7t ns] [FAIL] sense mux changed to %0d while BUSY low (acquisition phase) - the sample cap is tracking the input",
+                         $time, adc_ch);
+            end
+        end
+    end
+
+    always @(posedge o_mclk) begin
+        if (aresetn === 1'b1 && mux_seen) begin
+            if (($time - last_mux_change) < min_settle)
+                min_settle = $time - last_mux_change;
+            if (($time - last_mux_change) < MIN_SETTLE_NS) begin
+                mux_bad_settle = mux_bad_settle + 1;
+                errors         = errors + 1;
+                $display("[%7t ns] [FAIL] sense mux settled only %0d ns before this aperture (need >= %0d ns)",
+                         $time, $time - last_mux_change, MIN_SETTLE_NS);
+            end
+        end
+    end
+
     // ---------------- DAC channel stimulus ----------------
     // 3.33 us period: deliberately non-commensurate with the conversion rate so
     // dac_ch also changes mid-conversion.
+    //
+    // Driven on the NEGEDGE, not the posedge. These are blocking assignments to
+    // signals that both the DUT and this TB's own reference model sample with
+    // `always @(posedge clk_100) ... <= ...`. Assigning them AT the posedge is a
+    // race: whichever always block Verilog happens to run after the assignment
+    // sees the new value in the same delta, the others see the old one. It bit
+    // done_tick below for real (see there); dac_ch had the same latent hazard
+    // between the DUT's ch_sampled latch and the TB's ch_at_sample model.
     always begin
         #3330;
-        @(posedge clk_100) dac_ch = dac_ch + 3'd1;
+        @(negedge clk_100) dac_ch = dac_ch + 3'd1;
     end
 
-    // ---------------- done_tick stimulus (phase C) ----------------
+    // ---------------- done_tick stimulus (phase C / D) ----------------
+    // WAS driven at `@(posedge clk_100)`, which made phase C silently inert:
+    // IP_Three registers prev_done_tick <= done_tick on the posedge and derives
+    // done_rise = done_tick & ~prev_done_tick combinationally. With done_tick
+    // rising in the same delta as that posedge, prev_done_tick latched the 1
+    // immediately, so done_rise was never high at ANY sampling edge — cha_cnt
+    // never advanced and the cycle-paced scheme was never exercised at all.
+    // Driving on the negedge gives done_rise a full clock of width.
+    //
+    // The period is per-phase. Nested-legacy resets the counter to 0 on every
+    // done_tick, so it only sweeps if done_tick is SLOWER than the conversion
+    // rate — which is that scheme's documented precondition ("the DAC dwell
+    // spans >= 8 ADC conversions"). Phase D therefore uses a long period.
+    integer cfg_done_period = 2170;
     always begin
-        #2170;
-        @(posedge clk_100) done_tick = 1'b1;
-        repeat (4) @(posedge clk_100);
+        #(cfg_done_period);
+        @(negedge clk_100) done_tick = 1'b1;
+        repeat (4) @(negedge clk_100);
         done_tick = 1'b0;
     end
 
@@ -234,16 +341,22 @@ module tb_eth_ch_tag;
     // ---------------- phases ----------------
     integer phase_start_frames;
     integer phase_start_errors;
+    integer phase_start_mux;
 
     task run_phase;
         input [255:0] name;
         input [31:0]  scheme;      // IP_Three slv_reg2
         input [31:0]  period;      // IP_Three slv_reg3 (0 = free-run)
+        input integer done_period; // TB done_tick period (ns)
         input integer duration_ns;
         input integer min_frames;
         begin
+            cfg_done_period = done_period;
             phase_start_frames = frames;
             phase_start_errors = errors;
+            phase_start_mux    = mux_changes;
+            min_settle         = 64'hFFFF_FFFF;
+            mux_seen           = 1'b0;
 
             cfg_scheme = scheme;
             cfg_period = period;
@@ -256,6 +369,13 @@ module tb_eth_ch_tag;
 
             $display("PHASE %0s : %0d frames, %0d error(s)", name,
                      frames - phase_start_frames, errors - phase_start_errors);
+            if (mux_seen)
+                $display("PHASE %0s : %0d sense-mux changes, min settling before an aperture = %0d ns (need >= %0d)",
+                         name, mux_changes - phase_start_mux, min_settle, MIN_SETTLE_NS);
+            else begin
+                errors = errors + 1;
+                $display("[FAIL] PHASE %0s : sense mux never changed - the scan is not being exercised", name);
+            end
             if ((frames - phase_start_frames) < min_frames) begin
                 errors = errors + 1;
                 $display("[FAIL] PHASE %0s produced only %0d frames (need >= %0d) - stimulus/DUT stalled",
@@ -272,17 +392,27 @@ module tb_eth_ch_tag;
         repeat (10) @(posedge clk_100);
 
         // A: paced conversions (4 us apart), sense scan advances on MCLK fall
-        run_phase("A-paced-freerun-scan", 32'd0, 32'd400, 100000, 15);
+        run_phase("A-paced-freerun-scan", 32'd0, 32'd400, 2170,  100000, 15);
 
         // B: back-to-back conversions - tightest ch_sampled -> ch_latch margin
-        run_phase("B-back-to-back",       32'd0, 32'd0,   100000, 15);
+        //    and the tightest mux settling window
+        run_phase("B-back-to-back",       32'd0, 32'd0,   2170,  100000, 15);
 
-        // C: cycle-paced sense scan - cha_cnt moves on done_tick, async to MCLK
-        run_phase("C-cycle-paced-scan",   32'd2, 32'd400, 100000, 15);
+        // C: cycle-paced sense scan - the target channel moves on done_tick,
+        //    asynchronous to MCLK; the mux itself must still only move in the
+        //    conversion window
+        run_phase("C-cycle-paced-scan",   32'd2, 32'd400, 2170,  100000, 15);
+
+        // D: nested 8x8 legacy - per-conversion advance plus an async reset to
+        //    channel 0 on done_tick. done_tick must be slower than the 4 us
+        //    conversion period or the counter is pinned at 0 and never sweeps.
+        run_phase("D-nested-legacy",      32'd1, 32'd400, 17000, 100000, 15);
 
         $display("===========================================================");
         $display("total frames decoded : %0d", frames);
         $display("mis-tagged frames    : %0d", bad_tag);
+        $display("mux moved in acq ph. : %0d", mux_bad_window);
+        $display("mux settled too late : %0d", mux_bad_settle);
         if (o_error) begin
             errors = errors + 1;
             $display("[FAIL] ltc_driver_fsm raised o_error (conversion timeout)");
@@ -298,7 +428,7 @@ module tb_eth_ch_tag;
     end
 
     initial begin
-        #400000;
+        #600000;
         $display("[FAIL] TIMEOUT - simulation did not finish");
         $finish;
     end

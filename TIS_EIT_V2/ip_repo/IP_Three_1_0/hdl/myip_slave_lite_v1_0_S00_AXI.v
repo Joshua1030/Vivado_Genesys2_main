@@ -360,25 +360,52 @@
     end
     wire done_rise = done_tick && (!prev_done_tick);
 
-    // 自动扫描计数器：
+    // 目标通道 cha_next：各扫描方式按各自的节拍推进，只表示“下一次转换应该测哪个
+    // 通道”，并不直接驱动 MUX。
     //   自由/legacy嵌套：每次 ADC 转换 +1；legacy嵌套额外在 done_tick 时复位为0。
     //   周期节拍(cycle-paced)：每个 done_tick(每 N 个正弦周期)感测通道 +1，
     //     3-bit 自然回绕对齐 DAC 帧(每 8 个 done_tick 一个 total_tick)。
-    reg [2:0] cha_cnt;
+    reg [2:0] cha_next;
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n)
-            cha_cnt <= 3'd0;
+            cha_next <= 3'd0;
         else if (scheme == SCH_CYCLE_PACED) begin
             if (done_rise)
-                cha_cnt <= cha_cnt + 1'b1;
+                cha_next <= cha_next + 1'b1;
         end
         else if (scheme == SCH_NESTED_LEGACY && done_tick)
-            cha_cnt <= 3'd0;
+            cha_next <= 3'd0;
         else if (mclk_negedge)
-            cha_cnt <= cha_cnt + 1'b1;
+            cha_next <= cha_next + 1'b1;
     end
 
-    // 通道选择：手动=拨码开关，自动=扫描计数器
+    // 实际驱动 MUX 的通道 cha_cnt：任何自动扫描方式下都【只】在 mclk_negedge 更新。
+    //
+    // LTC2500-32 在 MCLK 上升沿采样并立即开始转换(BUSY 拉高, tCONV≈660ns)，此时
+    // 32 位电荷再分配 CDAC 已与 IN+/IN- 断开、进入保持；只有 BUSY 为低的采集期
+    // (tACQ, 1Msps 下仅 327ns) 采样电容才重新接回输入并跟随。
+    //   => 换挡必须落在 BUSY 高电平期内：整个瞬变都在保持窗口里，模拟前端拥有
+    //      完整的 tCONV+tACQ 去建立(本设计一圈约 2.15us @ SCK_DIV=2，采样周期
+    //      250 clk 即 2.5us，余量约 2.4us)。
+    //   => 绝【不能】在 BUSY 下降沿换挡 —— 那正是采样电容重新接回输入的瞬间，
+    //      换挡压摆和 CDAC 自身的电荷反冲要挤在 tACQ 一个窗口里一起建立。
+    // o_mclk 高电平只有 CYCLES_MCLKH=3 个时钟，再经上面两级打拍，mclk_negedge
+    // 约在采样后 50ns —— 足以盖过板级 skew，又远早于 BUSY 下降。
+    //
+    // cycle-paced 的 done_tick 来自 IP_1，与 ADC 转换完全异步，过去直接推 cha_cnt
+    // 会让换挡落在转换周期的任意位置(最坏就在下一个 MCLK 上升沿前几纳秒)，
+    // 每个感测通道的第一个样本都可能采在没建立好的输入上。现在 done_tick 只推
+    // cha_next(因此扫描仍与 DAC 帧对齐、不会丢步)，MUX 最多晚一个转换周期跟上。
+    reg [2:0] cha_cnt;
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n)            cha_cnt <= 3'd0;
+        else if (mclk_negedge) cha_cnt <= cha_next;
+    end
+
+    // 通道选择：手动=拨码开关，自动=扫描计数器。
+    // 手动通道【故意】保持组合直通、不走上面的转换窗口：若也用 mclk_negedge 打拍，
+    // ADC 停机(run=0, 没有 MCLK)时 MUX 就会卡住不动 —— 而那正是有人在台上拨开关
+    // 的时候。人手拨一次最多毁掉一次转换，不值得为此牺牲可调试性。
     wire [2:0] sw_ch   = {sw_ch2, sw_ch1, sw_ch0};
     wire [2:0] channel = mode_manual ? sw_ch : cha_cnt;
     assign adc_ch = channel;

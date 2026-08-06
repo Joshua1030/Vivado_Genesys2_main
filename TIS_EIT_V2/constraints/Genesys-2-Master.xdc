@@ -287,7 +287,7 @@ set_property -dict { PACKAGE_PIN F12   IOSTANDARD LVCMOS25 } [get_ports { mux_0[
 #set_property -dict { PACKAGE_PIN K14   IOSTANDARD LVCMOS12 } [get_ports { FMC_HB_P[08] }]; #IO_L5P_T0_18 Sch=fmc_hb_p[08]
 #set_property -dict { PACKAGE_PIN B15   IOSTANDARD LVCMOS12 } [get_ports { FMC_HB_N[09] }]; #IO_L23N_T3_18 Sch=fmc_hb_n[09]
 #set_property -dict { PACKAGE_PIN C15   IOSTANDARD LVCMOS12 } [get_ports { FMC_HB_P[09] }]; #IO_L23P_T3_18 Sch=fmc_hb_p[09]
-#set_property -dict { PACKAGE_PIN J12   IOSTANDARD LVCMOS12 } [get_ports { FMC_HB_N[10] }]; #IO_L8N_T1_18 Sch=fmc_hb_n[10]
+set_property -dict { PACKAGE_PIN J12   IOSTANDARD LVCMOS25 } [get_ports { Electrode_Discharge }]; #IO_L8N_T1_18 Sch=fmc_hb_n[10]
 set_property -dict { PACKAGE_PIN J11   IOSTANDARD LVCMOS25 } [get_ports { mux_dac1[1] }]; #IO_L8P_T1_18 Sch=fmc_hb_p[10]
 set_property -dict { PACKAGE_PIN C11   IOSTANDARD LVCMOS25 } [get_ports { mux_dac1[2] }]; #IO_L18N_T2_18 Sch=fmc_hb_n[11]
 set_property -dict { PACKAGE_PIN D11   IOSTANDARD LVCMOS25 } [get_ports { mux_dac1[0] }]; #IO_L18P_T2_18 Sch=fmc_hb_p[11]

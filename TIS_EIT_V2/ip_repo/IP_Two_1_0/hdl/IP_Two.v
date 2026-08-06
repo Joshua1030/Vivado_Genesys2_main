@@ -29,6 +29,7 @@
     output  EIT_IN_EN,
     output gain,
     output reset,
+    output Electrode_Discharge,       // 电极放电控制 (低电平有效: 0 = 正在放电)
 		// User ports ends
 		// Do not modify the ports beyond this line
 
@@ -71,6 +72,7 @@
 	.EIT_IN_EN(EIT_IN_EN),
 	.gain (gain),
 	.reset (reset),
+	.Electrode_Discharge(Electrode_Discharge),
 		.S_AXI_ACLK(s00_axi_aclk),
 		.S_AXI_ARESETN(s00_axi_aresetn),
 		.S_AXI_AWADDR(s00_axi_awaddr),
