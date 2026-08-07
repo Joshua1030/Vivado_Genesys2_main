@@ -1,0 +1,17 @@
+{
+  "name": "ltc2500_read_v1",
+  "type": "HOST",
+  "platform": "ltc2500_adc0_platform",
+  "domain": "standalone_microblaze_0",
+  "cpuInstance": "microblaze_0",
+  "cpuType": "microblaze",
+  "os": "standalone",
+  "configuration": {
+    "componentType": "HOST",
+    "hostToolchainConfigurations": []
+  },
+  "domainRealName": "standalone_microblaze_0",
+  "useSysrootToolchain": false,
+  "applicationFlow": "EMBEDDED",
+  "templateFlow": "VITIS"
+}
