@@ -27,7 +27,7 @@
 					"plDevice": "Auto Detect",
 					"psDevice": "Auto Detect"
 				},
-				"bitstreamFile": "E:\\Vivado_Genesys2_main\\TIS_EIT_V2\\work\\ltc2500_top\\ltc2500_bd_wrapper.xsa",
+				"bitstreamFile": "E:\\Vivado_Genesys2_main\\TIS_EIT_V3\\ltc2500_bd_wrapper.xsa",
 				"downloadElf": [
 					{
 						"core": "microblaze_0",

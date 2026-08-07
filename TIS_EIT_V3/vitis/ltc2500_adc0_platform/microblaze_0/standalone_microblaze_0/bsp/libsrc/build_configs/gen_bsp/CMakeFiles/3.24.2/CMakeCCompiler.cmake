@@ -67,7 +67,7 @@ endif()
 
 
 
-set(CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES "E:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/include;E:/Xilinx/2025.2/gnu/microblaze/nt/x86_64-oesdk-mingw32/usr/lib/microblaze-xilinx-elf/gcc/microblaze-xilinx-elf/13.3.0/include;E:/Xilinx/2025.2/gnu/microblaze/nt/x86_64-oesdk-mingw32/usr/lib/microblaze-xilinx-elf/gcc/microblaze-xilinx-elf/13.3.0/include-fixed;E:/Xilinx/2025.2/Vitis/gnu/microblaze/nt/microblazeeb-xilinx-elf/usr/include")
+set(CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES "E:/Vivado_Genesys2_main/TIS_EIT_V3/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/include;E:/Xilinx/2025.2/gnu/microblaze/nt/x86_64-oesdk-mingw32/usr/lib/microblaze-xilinx-elf/gcc/microblaze-xilinx-elf/13.3.0/include;E:/Xilinx/2025.2/gnu/microblaze/nt/x86_64-oesdk-mingw32/usr/lib/microblaze-xilinx-elf/gcc/microblaze-xilinx-elf/13.3.0/include-fixed;E:/Xilinx/2025.2/Vitis/gnu/microblaze/nt/microblazeeb-xilinx-elf/usr/include")
 set(CMAKE_C_IMPLICIT_LINK_LIBRARIES "")
 set(CMAKE_C_IMPLICIT_LINK_DIRECTORIES "")
 set(CMAKE_C_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES "")

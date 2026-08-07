@@ -3,8 +3,16 @@
 * SPDX-License-Identifier: MIT
 ******************************************************************************/
 
-_STACK_SIZE = DEFINED(_STACK_SIZE) ? _STACK_SIZE : 0x400;
-_HEAP_SIZE = DEFINED(_HEAP_SIZE) ? _HEAP_SIZE : 0x800;
+/* Everything (code, data, heap, stack) shares the single 16 KB LMB BRAM below,
+ * so these two are a direct tax on how much code fits. Raised the stack from
+ * 0x400 with space freed by zeroing the heap -- 1 KB was thin for the xil_printf
+ * call depth. The heap is 0 because nothing allocates: no malloc/calloc/free in
+ * main.c or platform.c, and libxil.a / libxilstandalone.a have no undefined
+ * malloc/sbrk references. Restore it (0x800 was the default) if you ever
+ * introduce dynamic allocation -- the failure mode is a silent heap/stack
+ * collision, not a link error. */
+_STACK_SIZE = DEFINED(_STACK_SIZE) ? _STACK_SIZE : 0x800;
+_HEAP_SIZE = DEFINED(_HEAP_SIZE) ? _HEAP_SIZE : 0x0;
 
 MEMORY
 {

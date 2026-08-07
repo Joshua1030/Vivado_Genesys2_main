@@ -3,7 +3,7 @@ set(CMAKE_HOST_SYSTEM_NAME "Windows")
 set(CMAKE_HOST_SYSTEM_VERSION "10.0.26200")
 set(CMAKE_HOST_SYSTEM_PROCESSOR "AMD64")
 
-include("E:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/microblaze_toolchain.cmake")
+include("E:/Vivado_Genesys2_main/TIS_EIT_V3/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/microblaze_toolchain.cmake")
 
 set(CMAKE_SYSTEM "Generic")
 set(CMAKE_SYSTEM_NAME "Generic")

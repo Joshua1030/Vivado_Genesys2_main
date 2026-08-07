@@ -1,4 +1,4 @@
-# Install script for directory: E:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/libsrc/bram/src
+# Install script for directory: E:/Vivado_Genesys2_main/TIS_EIT_V3/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/libsrc/bram/src
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

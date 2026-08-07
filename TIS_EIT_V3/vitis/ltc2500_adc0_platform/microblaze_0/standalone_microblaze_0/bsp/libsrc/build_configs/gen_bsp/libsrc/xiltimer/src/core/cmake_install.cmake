@@ -1,4 +1,4 @@
-# Install script for directory: E:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/libsrc/xiltimer/src/core
+# Install script for directory: E:/Vivado_Genesys2_main/TIS_EIT_V3/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/libsrc/xiltimer/src/core
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -39,7 +39,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("E:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/libsrc/build_configs/gen_bsp/libsrc/xiltimer/src/core/default_timer/cmake_install.cmake")
+  include("E:/Vivado_Genesys2_main/TIS_EIT_V3/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/libsrc/build_configs/gen_bsp/libsrc/xiltimer/src/core/default_timer/cmake_install.cmake")
 
 endif()
 

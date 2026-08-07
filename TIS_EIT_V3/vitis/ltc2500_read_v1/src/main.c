@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include "platform.h"
 #include "xil_printf.h"
 #include "xil_io.h"
@@ -69,7 +68,7 @@
 #define TIS_DURATION_CY    MS_TO_CY(100UL)   /* TIS 猝发时长 = 2 个 20Hz 拍周期 */
 #define NERVE_DELAY_CY     50000u            /* TIS 开始后 0.5ms 触发神经模拟脉冲 */
 #define NERVE_WIDTH_CY     100000u           /* 神经模拟脉冲宽度 1ms */
-#define FRAME_COUNT        10u               /* 每次测量跑多少帧(8 个 DAC 注入对一轮) */
+#define FRAME_COUNT        2u               /* 每次测量跑多少帧(8 个 DAC 注入对一轮) */
 
 /* 扫描模式 —— 同时决定 IP_1 与 IP_Three 的配置, 二者【必须】成对设置:
  *   1 = 模式A「保持」    ADC 通道整个刺激期不变, DAC 每 8 次刺激换挡
@@ -118,9 +117,14 @@
 //   中间值最大约 2020*500*2^32 ~= 4.3e15, u64 装得下(上限 1.8e19)。
 //   注意: 这里的 2^32 曾经是 2^16(旧的 acc[15:0] 索引)。改动 addr_gen 后
 //   两处必须一起改, 否则所有频率会差 65536 倍。
-static inline u32 dds_phase_step(u32 f_out_hz) {
-    return (u32)(((u64)f_out_hz * FSM_UPD_PERIOD * 4294967296ULL + (F_CLK_HZ/2)) / F_CLK_HZ);
-}
+//   宏而【不是】static inline 函数 —— 这不是风格问题。-O0 下 GCC 不会内联/折叠
+//   函数调用, 于是这段 64 位运算把 libgcc 的 __udivdi3 (3928 字节) 和 __muldi3
+//   (636 字节) 一起链进来 —— 4.5KB, 占整个 .text 的 48%, 16KB 的 LMB 直接溢出。
+//   写成宏之后, 参数是字面量, 整个表达式是【整型常量表达式】, GCC 前端在编译期
+//   就折出常数, 与 -O 等级无关, 那两个 libgcc 例程根本不会被引用。
+//   注意: 哪天往这里传运行时变量, 这 4.5KB 就会原样回来。
+#define DDS_PHASE_STEP(f_out_hz) \
+    ((u32)(((u64)(f_out_hz) * FSM_UPD_PERIOD * 4294967296ULL + (F_CLK_HZ/2)) / F_CLK_HZ))
 
 XGpio Gpio;
 
@@ -131,10 +135,10 @@ XGpio Gpio;
 // addr_gen: reg0..3 = 相位步长 A..D, reg4..7 = 相位偏移 A..D[15:0]
 static void addr_gen_config(void) {
     volatile u32 *p = (volatile u32*)ADDRGEN_BASE;
-    p[0] = dds_phase_step(FREQ_A_HZ);
-    p[1] = dds_phase_step(FREQ_B_HZ);
-    p[2] = dds_phase_step(FREQ_C_HZ);
-    p[3] = dds_phase_step(FREQ_D_HZ);
+    p[0] = DDS_PHASE_STEP(FREQ_A_HZ);
+    p[1] = DDS_PHASE_STEP(FREQ_B_HZ);
+    p[2] = DDS_PHASE_STEP(FREQ_C_HZ);
+    p[3] = DDS_PHASE_STEP(FREQ_D_HZ);
     p[4] = PHASE_OFF_A;
     p[5] = PHASE_OFF_B;
     p[6] = PHASE_OFF_C;

@@ -231,6 +231,7 @@
                         xlnx,ip-name = "IP_1";
                         xlnx,edk-iptype = "PERIPHERAL";
                         reg = <0x44a30000 0x10000>;
+                        xlnx,debounce-cycles = <0x1e8480>;
                         xlnx,name = "IP_1_0";
                 };
 

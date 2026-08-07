@@ -1,4 +1,4 @@
-# Install script for directory: E:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp
+# Install script for directory: E:/Vivado_Genesys2_main/TIS_EIT_V3/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -39,17 +39,17 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("E:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/libsrc/build_configs/gen_bsp/libsrc/cmake_install.cmake")
+  include("E:/Vivado_Genesys2_main/TIS_EIT_V3/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/libsrc/build_configs/gen_bsp/libsrc/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("E:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/libsrc/build_configs/gen_bsp/libsrc/standalone/src/cmake_install.cmake")
+  include("E:/Vivado_Genesys2_main/TIS_EIT_V3/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/libsrc/build_configs/gen_bsp/libsrc/standalone/src/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("E:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/libsrc/build_configs/gen_bsp/libsrc/xiltimer/src/cmake_install.cmake")
+  include("E:/Vivado_Genesys2_main/TIS_EIT_V3/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/libsrc/build_configs/gen_bsp/libsrc/xiltimer/src/cmake_install.cmake")
 endif()
 
 if(CMAKE_INSTALL_COMPONENT)
@@ -60,5 +60,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "E:/Vivado_Genesys2_main/TIS_EIT_V2/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/libsrc/build_configs/gen_bsp/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "E:/Vivado_Genesys2_main/TIS_EIT_V3/vitis/ltc2500_adc0_platform/microblaze_0/standalone_microblaze_0/bsp/libsrc/build_configs/gen_bsp/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

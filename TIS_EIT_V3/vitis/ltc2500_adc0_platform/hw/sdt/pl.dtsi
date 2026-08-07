@@ -193,6 +193,7 @@
 			xlnx,ip-name = "IP_1";
 			xlnx,edk-iptype = "PERIPHERAL";
 			reg = <0x44a30000 0x10000>;
+			xlnx,debounce-cycles = <2000000>;
 			xlnx,name = "IP_1_0";
 		};
 		IP_Three_0: IP_Three@44a40000 {
